@@ -671,7 +671,7 @@ function GenerateCommandButton({ node, settings }: { node: NodeDetail, settings:
       scriptFile = "install.ps1";
     }
     let scriptUrl =
-      `https://raw.githubusercontent.com/komari-monitor/komari-agent/refs/heads/main/${scriptFile}`;
+      `https://raw.githubusercontent.com/zv201413/komari-agent_new/refs/heads/main/${scriptFile}`;
     if (enableGhproxy) {
       if (enableGhproxy && installOptions.ghproxy) {
         scriptUrl = scriptUrl.slice(8); // 去掉 https://
@@ -688,7 +688,7 @@ function GenerateCommandButton({ node, settings }: { node: NodeDetail, settings:
     let finalCommand = "";
     switch (selectedPlatform) {
       case "linux":
-        finalCommand = `wget -qO- ${scriptUrl} | sudo bash -s -- ` + args.join(" ");
+        finalCommand = `wget -qO- ${scriptUrl} | bash -s -- ` + args.join(" ");
         break;
       case "windows":
         finalCommand =
