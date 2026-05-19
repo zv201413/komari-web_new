@@ -68,3 +68,7 @@ coverage/
 *.sln
 *.sw?
 vite.config.dev.ts
+_Archive/
+manifest.yaml
+Project_Summary.md
+Archive_Log.md
