@@ -53,6 +53,7 @@ export type NodeBasicInfo = {
   updated_at: string;
   ipv4?: string; 
   ipv6?: string;
+  tcp_cc?: string;
 };
 
 interface NodeListContextType {
@@ -114,6 +115,7 @@ export const NodeListProvider: React.FC<{ children: React.ReactNode }> = ({
           updated_at: n.updated_at ?? "",
           ipv4: n.ipv4,
           ipv6: n.ipv6,
+          tcp_cc: n.tcp_cc ?? "",
         }));
         setNodeList(list);
       })

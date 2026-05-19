@@ -155,8 +155,7 @@ const Node = React.memo(({ basic, live, online }: NodeProps) => {
             </Flex>
           </Flex>
           <Flex className="md:flex-col flex-row md:gap-1 gap-4">
-            {/* CPU Usage */}
-            <UsageBar label={basic.cpu_cores > 0 ? `${t("nodeCard.cpu")} (${Number.isInteger(basic.cpu_cores) ? basic.cpu_cores : basic.cpu_cores.toFixed(1)}${t("nodeCard.cores", "核")})` : t("nodeCard.cpu")} value={liveData.cpu.usage} />
+            <UsageBar label={basic.cpu_cores > 0 ? `${t("nodeCard.cpu")} (${Number.isInteger(basic.cpu_cores) ? basic.cpu_cores : parseFloat(basic.cpu_cores.toFixed(2))}${t("nodeCard.cores", "核")})` : t("nodeCard.cpu")} value={liveData.cpu.usage} />
 
             {/* Memory Usage */}
             <UsageBar label={t("nodeCard.ram")} value={memoryUsagePercent} />
@@ -219,7 +218,7 @@ const Node = React.memo(({ basic, live, online }: NodeProps) => {
 
           <Flex justify="between" hidden={isMobile}>
             <Text size="2" color="gray" className="flex items-center">
-              {t("nodeCard.networkSpeed")}
+              {basic.tcp_cc ? `${t("nodeCard.networkSpeed")} (${basic.tcp_cc})` : t("nodeCard.networkSpeed")}
             </Text>
             <Text size="2">
               ↑ {uploadSpeed}/s ↓ {downloadSpeed}/s
@@ -227,7 +226,9 @@ const Node = React.memo(({ basic, live, online }: NodeProps) => {
           </Flex>
 
           <Flex justify="between" gap="2" hidden={!isMobile}>
-            <Text size="2">{t("nodeCard.networkSpeed")}</Text>
+            <Text size="2">
+              {basic.tcp_cc ? `${t("nodeCard.networkSpeed")} (${basic.tcp_cc})` : t("nodeCard.networkSpeed")}
+            </Text>
             <Text size="2">
               ↑ {uploadSpeed}/s ↓ {downloadSpeed}/s
             </Text>
