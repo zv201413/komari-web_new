@@ -360,6 +360,7 @@
     "chart": "Chart",
     "clickToViewPing": "Click to view ping chart",
     "cpu": "CPU",
+    "cores": "Core(s)",
     "disk": "Disk",
     "groupNodes": "{{group}} group: total {{total}} servers, {{online}} servers online",
     "kernelVersion": "Kernel Version",

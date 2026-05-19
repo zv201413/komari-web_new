@@ -360,6 +360,7 @@
     "chart": "图表",
     "clickToViewPing": "点击查看延迟图表",
     "cpu": "CPU",
+    "cores": "核",
     "disk": "磁盘",
     "groupNodes": "{{group}} 分组: 共 {{total}} 个服务器，{{online}} 个服务器在线",
     "kernelVersion": "内核版本",

@@ -360,6 +360,7 @@
     "chart": "チャート",
     "clickToViewPing": "クリックして遅延チャートを表示",
     "cpu": "CPU",
+    "cores": "コア",
     "disk": "ディスク",
     "groupNodes": "{{group}} グループ: 合計 {{total}} 台のサーバー、{{online}} 台がオンライン",
     "kernelVersion": "カーネルバージョン",

@@ -360,6 +360,7 @@
     "chart": "圖表",
     "clickToViewPing": "點擊查看延遲圖表",
     "cpu": "CPU",
+    "cores": "核",
     "disk": "磁碟",
     "groupNodes": "{{group}} 分組: 共 {{total}} 個伺服器，{{online}} 個伺服器在線",
     "kernelVersion": "內核版本",
