@@ -156,7 +156,7 @@ const Node = React.memo(({ basic, live, online }: NodeProps) => {
           </Flex>
           <Flex className="md:flex-col flex-row md:gap-1 gap-4">
             {/* CPU Usage */}
-            <UsageBar label={basic.cpu_cores > 0 ? `${t("nodeCard.cpu")} (${basic.cpu_cores}${t("nodeCard.cores", "核")})` : t("nodeCard.cpu")} value={liveData.cpu.usage} />
+            <UsageBar label={basic.cpu_cores > 0 ? `${t("nodeCard.cpu")} (${Number.isInteger(basic.cpu_cores) ? basic.cpu_cores : basic.cpu_cores.toFixed(1)}${t("nodeCard.cores", "核")})` : t("nodeCard.cpu")} value={liveData.cpu.usage} />
 
             {/* Memory Usage */}
             <UsageBar label={t("nodeCard.ram")} value={memoryUsagePercent} />
