@@ -239,19 +239,38 @@ export function getAllOSImages(): Record<string, string> {
 export function getOSName(osString: string): string {
   const config = findOSConfig(osString);
 
+  let name = "";
   // 如果匹配到具体的操作系统，返回其名称
   if (config !== defaultOSConfig) {
-    return config.name;
+    name = config.name;
+  } else {
+    // 如果没有匹配到，从输入字符串中提取名称
+    if (!osString) {
+      return "Unknown";
+    }
+
+    // 使用空格或斜杠分割，取第一个部分
+    const parts = osString.trim().split(/[\s/]/);
+    name = parts[0] || "Unknown";
   }
 
-  // 如果没有匹配到，从输入字符串中提取名称
-  if (!osString) {
-    return "Unknown";
+  // 提取括号内容（通常用于携带特殊的附加属性，例如 NAT 类型）
+  const match = osString.match(/\((.+)\)/);
+  if (match && (
+    match[1].includes("Cone") || 
+    match[1].includes("NAT") || 
+    match[1].includes("IP") || 
+    match[1].includes("屏蔽") || 
+    match[1].includes("锥") || 
+    match[1].includes("Blocked") || 
+    match[1].includes("Detecting") || 
+    match[1].includes("检测") || 
+    match[1].includes("未知")
+  )) {
+    name = `${name} (${match[1]})`;
   }
 
-  // 使用空格或斜杠分割，取第一个部分
-  const parts = osString.trim().split(/[\s/]/);
-  return parts[0] || "Unknown";
+  return name;
 }
 
 /**
