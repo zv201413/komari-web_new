@@ -162,9 +162,9 @@ const Node = React.memo(({ basic, live, online }: NodeProps) => {
               label={
                 <Flex gap="1" align="center" style={{ display: "inline-flex" }}>
                   <span>{t("nodeCard.ram")}</span>
-                  <span style={{ fontSize: "10px", opacity: 0.6, fontWeight: "normal" }}>
+                  <Text size="1" color="gray" style={{ fontWeight: "normal" }}>
                     ({formatBytes(liveData.ram.used)} / {formatBytes(basic.mem_total)})
-                  </span>
+                  </Text>
                 </Flex>
               }
               value={memoryUsagePercent}
@@ -175,9 +175,9 @@ const Node = React.memo(({ basic, live, online }: NodeProps) => {
               label={
                 <Flex gap="1" align="center" style={{ display: "inline-flex" }}>
                   <span>{t("nodeCard.disk")}</span>
-                  <span style={{ fontSize: "10px", opacity: 0.6, fontWeight: "normal" }}>
+                  <Text size="1" color="gray" style={{ fontWeight: "normal" }}>
                     ({formatBytes(liveData.disk.used)} / {formatBytes(basic.disk_total)})
-                  </span>
+                  </Text>
                 </Flex>
               }
               value={diskUsagePercent}
