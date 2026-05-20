@@ -147,9 +147,9 @@ const Node = React.memo(({ basic, live, online }: NodeProps) => {
               <img
                 src={getOSImage(basic.os)}
                 alt={basic.os}
-                className="w-5 h-5 mr-2"
+                className="w-4 h-4 mr-1.5"
               />
-              <Text size="2">
+              <Text size="1">
                 {getOSName(basic.os)} / {basic.arch}
               </Text>
             </Flex>
@@ -158,28 +158,30 @@ const Node = React.memo(({ basic, live, online }: NodeProps) => {
             <UsageBar label={basic.cpu_cores > 0 ? `${t("nodeCard.cpu")} (${Number.isInteger(basic.cpu_cores) ? basic.cpu_cores : parseFloat(basic.cpu_cores.toFixed(2))}${t("nodeCard.cores", "核")})` : t("nodeCard.cpu")} value={liveData.cpu.usage} />
 
             {/* Memory Usage */}
-            <UsageBar label={t("nodeCard.ram")} value={memoryUsagePercent} />
-            <Text
-              className="md:block hidden"
-              size="1"
-              color="gray"
-              style={{ marginTop: "-4px" }}
-            >
-              ({formatBytes(liveData.ram.used)} / {formatBytes(basic.mem_total)}
-              )
-            </Text>
+            <UsageBar
+              label={
+                <Flex gap="1" align="center" style={{ display: "inline-flex" }}>
+                  <span>{t("nodeCard.ram")}</span>
+                  <span style={{ fontSize: "10px", opacity: 0.6, fontWeight: "normal" }}>
+                    ({formatBytes(liveData.ram.used)} / {formatBytes(basic.mem_total)})
+                  </span>
+                </Flex>
+              }
+              value={memoryUsagePercent}
+            />
 
             {/* Disk Usage */}
-            <UsageBar label={t("nodeCard.disk")} value={diskUsagePercent} />
-            <Text
-              size="1"
-              className="md:block hidden"
-              color="gray"
-              style={{ marginTop: "-4px" }}
-            >
-              ({formatBytes(liveData.disk.used)} /{" "}
-              {formatBytes(basic.disk_total)})
-            </Text>
+            <UsageBar
+              label={
+                <Flex gap="1" align="center" style={{ display: "inline-flex" }}>
+                  <span>{t("nodeCard.disk")}</span>
+                  <span style={{ fontSize: "10px", opacity: 0.6, fontWeight: "normal" }}>
+                    ({formatBytes(liveData.disk.used)} / {formatBytes(basic.disk_total)})
+                  </span>
+                </Flex>
+              }
+              value={diskUsagePercent}
+            />
           </Flex>
           {basic.traffic_limit > 0 ? (
             <Flex justify="between" hidden={isMobile} direction="column">

@@ -267,7 +267,25 @@ export function getOSName(osString: string): string {
     match[1].includes("检测") || 
     match[1].includes("未知")
   )) {
-    name = `${name} (${match[1]})`;
+    let nat = match[1];
+    if (nat.includes("全锥")) {
+      nat = "全锥型";
+    } else if (nat.includes("地址限制")) {
+      nat = "地址限制";
+    } else if (nat.includes("端口限制")) {
+      nat = "端口限制";
+    } else if (nat.includes("对称")) {
+      nat = "对称型";
+    } else if (nat.includes("公网")) {
+      nat = "公网 IP";
+    } else if (nat.includes("屏蔽") || nat.includes("Blocked")) {
+      nat = "UDP 屏蔽";
+    } else if (nat.includes("检测中")) {
+      nat = "检测中";
+    } else if (nat.includes("未知")) {
+      nat = "未知";
+    }
+    name = `${name} (${nat})`;
   }
 
   return name;

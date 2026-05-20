@@ -3,7 +3,7 @@ import React from "react";
 
 interface UsageBarProps {
   value: number; // Utilization percentage (0–100)
-  label: string; // Label for the bar (e.g., "CPU", "Memory", "Disk")
+  label: React.ReactNode; // Label for the bar (e.g., "CPU", "Memory", "Disk")
   compact?: boolean; // Whether to show in compact mode (for tables)
   max?: number; // Maximum value for the bar (e.g., total RAM, total disk space)
 }
