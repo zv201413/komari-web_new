@@ -9,8 +9,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Header } from "@/components/sections/Header";
 import { useAppConfig } from "@/config";
 import { DynamicContent } from "@/components/DynamicContent";
-import { useThemeManager, useTheme } from "@/hooks/useTheme";
-import { ThemeProvider } from "@/contexts/ThemeContext";
+import { useTheme } from "@/hooks/useTheme";
 import { NodeDataProvider } from "@/contexts/NodeDataContext";
 import { LiveDataProvider } from "@/contexts/LiveDataContext";
 import Footer from "@/components/sections/Footer";
@@ -331,15 +330,12 @@ const AppProviders = ({
 };
 
 const IndexLayout = () => {
-  const themeManager = useThemeManager();
   const { siteStatus } = useAppConfig();
 
   return (
-    <ThemeProvider value={themeManager}>
-      <AppProviders siteStatus={siteStatus}>
-        <AppContent />
-      </AppProviders>
-    </ThemeProvider>
+    <AppProviders siteStatus={siteStatus}>
+      <AppContent />
+    </AppProviders>
   );
 };
 

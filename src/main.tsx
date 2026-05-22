@@ -16,6 +16,10 @@ import { PWAUpdatePrompt } from "./components/PWAUpdatePrompt";
 import { OfflineIndicator } from "./components/OfflineIndicator";
 import { RPC2Provider } from "./contexts/RPC2Context";
 import { ConfigProvider } from "./config";
+import { ThemeProvider } from "./contexts/ThemeContext";
+import { useThemeManager } from "./hooks/useTheme";
+import { Theme } from "@radix-ui/themes";
+import { Toaster } from "./components/ui/sonner";
 
 const App = () => {
   React.useEffect(() => {
@@ -33,16 +37,27 @@ const App = () => {
     }
   }, []);
 
+  const themeManager = useThemeManager();
   const routing = useRoutes(routes);
   return (
     <Suspense fallback={<Loading />}>
       <RPC2Provider>
         <PublicInfoProvider>
           <ConfigProvider>
-            <OfflineIndicator />
-            {routing}
-            <PWAInstallPrompt />
-            <PWAUpdatePrompt />
+            <ThemeProvider value={themeManager}>
+              <Theme
+                appearance={themeManager.appearance}
+                accentColor={themeManager.color}
+                scaling="110%"
+                style={{ backgroundColor: "transparent" }}
+              >
+                <OfflineIndicator />
+                <Toaster />
+                {routing}
+                <PWAInstallPrompt />
+                <PWAUpdatePrompt />
+              </Theme>
+            </ThemeProvider>
           </ConfigProvider>
         </PublicInfoProvider>
       </RPC2Provider>
