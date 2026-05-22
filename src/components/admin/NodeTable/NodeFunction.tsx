@@ -15,6 +15,7 @@ import {
   SegmentedControl,
   TextArea,
   TextField,
+  Switch,
 } from "@radix-ui/themes";
 import { toast } from "sonner";
 
@@ -114,11 +115,28 @@ export function ActionsCell({ row }: { row: Row<z.infer<typeof schema>> }) {
 
   const copyToClipboard = async (text: string) => {
     try {
-      await navigator.clipboard.writeText(text);
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "absolute";
+        textArea.style.left = "-999999px";
+        document.body.prepend(textArea);
+        textArea.select();
+        try {
+          document.execCommand("copy");
+        } catch (error) {
+          console.error(error);
+        } finally {
+          textArea.remove();
+        }
+      }
       toast.success(t("copy_success", "已复制到剪贴板"));
-      setOpen(false);
     } catch (err) {
       console.error("Failed to copy text: ", err);
+    } finally {
+      setOpen(false);
     }
   };
 
@@ -217,8 +235,8 @@ export function ActionsCell({ row }: { row: Row<z.infer<typeof schema>> }) {
                     {t("admin.nodeTable.ignoreUnsafeCert", "忽略不安全证书")}
                   </label>
                 </Flex>
-                <Flex gap="2">
-                  <Checkbox
+                <Flex gap="2" align="center">
+                  <Switch
                     checked={installOptions.checkNatType}
                     onCheckedChange={(checked) => {
                       setInstallOptions((prev) => ({
@@ -302,13 +320,15 @@ export function ActionsCell({ row }: { row: Row<z.infer<typeof schema>> }) {
               </div>
             </Flex>
             <Flex justify="center">
-              <Button
-                style={{ width: "100%" }}
-                onClick={() => copyToClipboard(generateCommand())}
-              >
-                <Copy size={16} />
-                {t("copy")}
-              </Button>
+              <Dialog.Close>
+                <Button
+                  style={{ width: "100%" }}
+                  onClick={() => copyToClipboard(generateCommand())}
+                >
+                  <Copy size={16} />
+                  {t("copy")}
+                </Button>
+              </Dialog.Close>
             </Flex>
           </div>
         </Dialog.Content>
