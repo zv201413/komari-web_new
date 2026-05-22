@@ -745,7 +745,7 @@ const LoadChart = ({ data = [] }: LoadChartProps) => {
         {/* GPU Charts - Each GPU gets its own chart */}
         {live_data?.gpu &&
           live_data.gpu.count > 0 &&
-          live_data.gpu.detailed_info?.map((gpu, index) => (
+          live_data.gpu.detailed_info?.map((gpu: any, index: number) => (
             <Card key={`gpu-${index}`} className={cn}>
               <Flex direction="column" gap="2" className="mb-2">
                 <div className="flex items-center justify-between">

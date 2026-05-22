@@ -3,12 +3,13 @@ import "./Loading.css"
 type LoadingProps = {
   text?: string;
   children?: React.ReactNode;
-  size?: number
+  size?: number;
+  className?: string;
 };
 
-const Loading = ({ text, children, size }: LoadingProps) => {
+const Loading = ({ text, children, size, className }: LoadingProps) => {
   return (
-    <div className="flex items-center justify-center flex-col">
+    <div className={`flex items-center justify-center flex-col ${className || ""}`}>
       <div
         className="showbox"
         style={{

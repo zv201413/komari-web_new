@@ -46,11 +46,11 @@ export function liveDataToRecords(
     cpu: data.cpu.usage ?? 0,
     gpu: 0,
     gpu_usage: data.gpu?.average_usage ?? 0,
-    gpu_memory: data.gpu ?
-      data.gpu.detailed_info?.reduce((acc, gpu) =>
-        acc + (gpu.memory_used / gpu.memory_total) * 100, 0) / data.gpu.count || 0
+    gpu_memory: (data.gpu && data.gpu.detailed_info) ?
+      (data.gpu.detailed_info.reduce((acc: number, gpu: any) =>
+        acc + (gpu.memory_used / gpu.memory_total) * 100, 0) / data.gpu.count) || 0
       : 0,
-    gpu_detailed: data.gpu?.detailed_info?.reduce((acc, gpu, index) => {
+    gpu_detailed: data.gpu?.detailed_info?.reduce((acc: any, gpu: any, index: number) => {
       acc[index] = {
         usage: gpu.utilization ?? null,
         memory: (gpu.memory_used / gpu.memory_total) * 100,

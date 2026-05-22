@@ -1,16 +1,19 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import type { LiveDataResponse } from "../types/LiveData";
 import { useRPC2Call } from "./RPC2Context";
+import type { RpcNodeStatusMap } from "../types/rpc";
 
-// 创建Context
-interface LiveDataContextType {
+// 创建Context - 同时提供嵌套和扁平两种数据格式
+export interface LiveDataContextType {
   live_data: LiveDataResponse | null;
+  liveData: RpcNodeStatusMap | null;
   showCallout: boolean;
   onRefresh: (callback: (data: LiveDataResponse) => void) => () => void;
 }
 
 const LiveDataContext = createContext<LiveDataContextType>({
   live_data: null,
+  liveData: null,
   showCallout: true,
   onRefresh: () => () => {},
 });
@@ -20,6 +23,7 @@ export const LiveDataProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [live_data, setLiveData] = useState<LiveDataResponse | null>(null);
+  const [liveData, setFlatLiveData] = useState<RpcNodeStatusMap | null>(null);
   const [showCallout, setShowCallout] = useState(false);
   const [refreshCallbacks] = useState<Set<(data: LiveDataResponse) => void>>(
     new Set(),
@@ -54,7 +58,40 @@ export const LiveDataProvider: React.FC<{ children: React.ReactNode }> = ({
         const result: Record<string, any> = await call(
           "common:getNodesLatestStatus",
         );
-        // 将返回转换为 LiveDataResponse 结构
+
+        // ── 构建扁平 RpcNodeStatusMap（PurCarte 前台组件使用）──
+        const flatMap: RpcNodeStatusMap = {};
+        for (const [uuid, rec] of Object.entries(result)) {
+          const v = rec as any;
+          flatMap[uuid] = {
+            client: v.client ?? uuid,
+            time: v.time ?? "",
+            cpu: typeof v.cpu === "number" ? v.cpu : 0,
+            gpu: v.gpu ?? 0,
+            ram: v.ram ?? 0,
+            ram_total: v.ram_total ?? 0,
+            swap: v.swap ?? 0,
+            swap_total: v.swap_total ?? 0,
+            load: v.load ?? 0,
+            load5: v.load5 ?? 0,
+            load15: v.load15 ?? 0,
+            temp: v.temp ?? 0,
+            disk: v.disk ?? 0,
+            disk_total: v.disk_total ?? 0,
+            net_in: v.net_in ?? 0,
+            net_out: v.net_out ?? 0,
+            net_total_up: v.net_total_out ?? v.net_total_up ?? 0,
+            net_total_down: v.net_total_in ?? v.net_total_down ?? 0,
+            process: v.process ?? 0,
+            connections: v.connections ?? 0,
+            connections_udp: v.connections_udp ?? 0,
+            online: v.online ?? false,
+            uptime: v.uptime ?? 0,
+          };
+        }
+        setFlatLiveData(flatMap);
+
+        // ── 构建嵌套 LiveDataResponse（后台管理组件使用）──
         const online = Object.values(result)
           .filter((v: any) => v?.online)
           .map((v: any) => v.client as string);
@@ -123,7 +160,7 @@ export const LiveDataProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [call]);
 
   return (
-    <LiveDataContext.Provider value={{ live_data, showCallout, onRefresh }}>
+    <LiveDataContext.Provider value={{ live_data, liveData, showCallout, onRefresh }}>
       {children}
     </LiveDataContext.Provider>
   );

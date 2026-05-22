@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react';
-import type { Appearance } from '../contexts/ThemeContext';
 
 /**
  * Custom hook to convert "system" appearance to actual "light" or "dark" for Radix UI
  * @param appearance - The appearance setting from context ("light", "dark", or "system")
  * @returns The resolved appearance for Radix UI ("light" or "dark")
  */
-export const useSystemTheme = (appearance: Appearance): "light" | "dark" => {
+export const useSystemTheme = (appearance: "light" | "dark" | "system" | string): "light" | "dark" => {
   const [systemTheme, setSystemTheme] = useState<"light" | "dark">(() => {
     // Initial system theme detection
     if (typeof window !== 'undefined' && window.matchMedia) {
