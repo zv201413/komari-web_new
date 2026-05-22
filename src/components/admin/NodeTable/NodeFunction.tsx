@@ -28,6 +28,7 @@ type InstallOptions = {
   disableWebSsh: boolean;
   disableAutoUpdate: boolean;
   ignoreUnsafeCert: boolean;
+  checkNatType: boolean;
   ghproxy: string;
   dir: string;
   serviceName: string;
@@ -44,10 +45,12 @@ export function ActionsCell({ row }: { row: Row<z.infer<typeof schema>> }) {
     disableWebSsh: false,
     disableAutoUpdate: false,
     ignoreUnsafeCert: false,
+    checkNatType: false,
     ghproxy: "",
     dir: "",
     serviceName: "",
   });
+  const [open, setOpen] = React.useState(false);
 
   const generateCommand = () => {
     const host = window.location.origin;
@@ -62,6 +65,9 @@ export function ActionsCell({ row }: { row: Row<z.infer<typeof schema>> }) {
     }
     if (installOptions.ignoreUnsafeCert) {
       args.push("--ignore-unsafe-cert");
+    }
+    if (installOptions.checkNatType) {
+      args.push("--check-nat-type");
     }
     if (installOptions.ghproxy) {
       if (!installOptions.ghproxy.startsWith("http")) {
@@ -110,6 +116,7 @@ export function ActionsCell({ row }: { row: Row<z.infer<typeof schema>> }) {
     try {
       await navigator.clipboard.writeText(text);
       toast.success(t("copy_success", "已复制到剪贴板"));
+      setOpen(false);
     } catch (err) {
       console.error("Failed to copy text: ", err);
     }
@@ -117,7 +124,7 @@ export function ActionsCell({ row }: { row: Row<z.infer<typeof schema>> }) {
 
   return (
     <div className="flex gap-3 justify-center">
-      <Dialog.Root>
+      <Dialog.Root open={open} onOpenChange={setOpen}>
         <Dialog.Trigger>
           <IconButton variant="ghost">
             <Download className="p-1" />
@@ -208,6 +215,28 @@ export function ActionsCell({ row }: { row: Row<z.infer<typeof schema>> }) {
                     }}
                   >
                     {t("admin.nodeTable.ignoreUnsafeCert", "忽略不安全证书")}
+                  </label>
+                </Flex>
+                <Flex gap="2">
+                  <Checkbox
+                    checked={installOptions.checkNatType}
+                    onCheckedChange={(checked) => {
+                      setInstallOptions((prev) => ({
+                        ...prev,
+                        checkNatType: Boolean(checked),
+                      }));
+                    }}
+                  />
+                  <label
+                    className="text-sm font-normal"
+                    onClick={() => {
+                      setInstallOptions((prev) => ({
+                        ...prev,
+                        checkNatType: !prev.checkNatType,
+                      }));
+                    }}
+                  >
+                    {t("admin.nodeTable.checkNatType", "检查 NAT 类型")}
                   </label>
                 </Flex>
               </div>
