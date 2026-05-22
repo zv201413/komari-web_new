@@ -100,7 +100,25 @@ export function DynamicContent({ children }: { children: ReactNode }) {
   return (
     <>
       <style>{dynamicStyles}</style>
-      <div className="fade-in">{children}</div>
+      <div
+        id="background-container"
+        className="fixed top-0 left-0 w-full h-full -z-10 overflow-hidden pointer-events-none"
+      >
+        <div
+          id="image-background"
+          className="absolute top-0 left-0 w-full h-full bg-cover bg-no-repeat z-10"
+        />
+        <video
+          id="video-background"
+          className="absolute top-0 left-0 w-full h-full object-cover z-20"
+          style={{ display: "none" }}
+          autoPlay
+          loop
+          muted
+          playsInline
+        />
+      </div>
+      <div className="fade-in relative z-30">{children}</div>
     </>
   );
 }
