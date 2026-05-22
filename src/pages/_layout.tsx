@@ -12,6 +12,7 @@ import { DynamicContent } from "@/components/DynamicContent";
 import { useTheme } from "@/hooks/useTheme";
 import { NodeDataProvider } from "@/contexts/NodeDataContext";
 import { LiveDataProvider } from "@/contexts/LiveDataContext";
+import { NodeListProvider } from "@/contexts/NodeListContext";
 import Footer from "@/components/sections/Footer";
 import Loading from "../components/loading";
 import type { StatsBarProps } from "../components/sections/StatsBar";
@@ -323,9 +324,11 @@ const AppProviders = ({
     return <>{children}</>;
   }
   return (
-    <NodeDataProvider>
-      <LiveDataProvider>{children}</LiveDataProvider>
-    </NodeDataProvider>
+    <NodeListProvider>
+      <NodeDataProvider>
+        <LiveDataProvider>{children}</LiveDataProvider>
+      </NodeDataProvider>
+    </NodeListProvider>
   );
 };
 
