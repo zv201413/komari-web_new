@@ -178,39 +178,6 @@ export const useNodeCommons = (node: NodeData & { stats?: any }) => {
       : null;
 
   let daysLeftTag = null;
-  if (daysLeft !== null) {
-    const daysLeftText = t("node.daysLeft", { daysLeft: daysLeft });
-    if (daysLeft < 0) {
-      daysLeftTag = node.require_sign_in ? `🟣 签到截止: ${t("node.expired")} (已逾期 ${Math.abs(daysLeft)} 天)<red>` : `${t("node.expired")}<red>`;
-    } else if (node.require_sign_in) {
-      // 签到模式
-      const targetDate = node.sign_in_target_date || node.expired_at;
-      const targetDateStr = targetDate && new Date(targetDate).getTime() > 0 
-          ? new Date(targetDate).toLocaleDateString(undefined, { year: "numeric", month: "2-digit", day: "2-digit" }) 
-          : t("node.notSet");
-      const signInText = `🟣 签到截止: ${targetDateStr} (还剩 ${daysLeft} 天)`;
-      if (daysLeft <= 3) {
-        daysLeftTag = `${signInText}<red>`;
-      } else if (daysLeft <= 7) {
-        daysLeftTag = `${signInText}<orange>`;
-      } else if (daysLeft < 36500) {
-        daysLeftTag = `${signInText}<violet>`;
-      } else {
-        daysLeftTag = `🟣 签到截止: ${t("node.longTerm")}<violet>`;
-      }
-    } else {
-      // 普通模式
-      if (daysLeft <= 7) {
-        daysLeftTag = `${daysLeftText}<red>`;
-      } else if (daysLeft <= 15) {
-        daysLeftTag = `${daysLeftText}<orange>`;
-      } else if (daysLeft < 36500) {
-        daysLeftTag = `${daysLeftText}<green>`;
-      } else {
-        daysLeftTag = `${t("node.longTerm")}<green>`;
-      }
-    }
-  }
 
   const expired_at =
     daysLeft !== null && daysLeft > 36500
@@ -271,29 +238,53 @@ export const useNodeCommons = (node: NodeData & { stats?: any }) => {
   let expired_at_value = expiredAtStr;
   let expired_at_color = "";
 
-  if (daysLeft !== null) {
+  if (daysLeft !== null || (node.require_sign_in && targetDate && new Date(targetDate).getTime() > 0)) {
+    const effectiveDaysLeft = daysLeft !== null ? daysLeft : Math.ceil((new Date(targetDate as string).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+
     if (node.require_sign_in) {
-      if (daysLeft < 0) {
+      const suffix = daysLeft === null ? `(${effectiveDaysLeft} 天后)` : `(还剩 ${effectiveDaysLeft} 天)`;
+      if (effectiveDaysLeft < 0) {
         expired_at_color = "text-red-500";
-        expired_at_value = `${expiredAtStr} (已逾期 ${Math.abs(daysLeft)} 天)`;
-      } else if (daysLeft <= 3) {
+        expired_at_value = `${expiredAtStr} (已逾期 ${Math.abs(effectiveDaysLeft)} 天)`;
+        daysLeftTag = `🟣 签到截止: ${t("node.expired")} (已逾期 ${Math.abs(effectiveDaysLeft)} 天)<red>`;
+      } else if (effectiveDaysLeft <= 3) {
         expired_at_color = "text-red-500";
-        expired_at_value = `${expiredAtStr} (还剩 ${daysLeft} 天)`;
-      } else if (daysLeft <= 7) {
+        expired_at_value = `${expiredAtStr} ${suffix}`;
+        daysLeftTag = `🟣 签到截止: ${expiredAtStr} ${suffix}<red>`;
+      } else if (effectiveDaysLeft <= 7) {
         expired_at_color = "text-orange-500";
-        expired_at_value = `${expiredAtStr} (还剩 ${daysLeft} 天)`;
+        expired_at_value = `${expiredAtStr} ${suffix}`;
+        daysLeftTag = `🟣 签到截止: ${expiredAtStr} ${suffix}<orange>`;
+      } else if (effectiveDaysLeft < 36500) {
+        expired_at_color = "text-violet-500";
+        expired_at_value = `${expiredAtStr} ${suffix}`;
+        daysLeftTag = `🟣 签到截止: ${expiredAtStr} ${suffix}<violet>`;
       } else {
         expired_at_color = "text-violet-500";
-        expired_at_value = `${expiredAtStr} (还剩 ${daysLeft} 天)`;
+        expired_at_value = `${expiredAtStr} ${suffix}`;
+        daysLeftTag = `🟣 签到截止: ${t("node.longTerm")}<violet>`;
       }
     } else {
-      if (daysLeft < 0) expired_at_color = "text-red-500";
-      else if (daysLeft <= 7) expired_at_color = "text-red-500";
-      else if (daysLeft <= 15) expired_at_color = "text-orange-500";
-      else if (daysLeft < 36500) expired_at_color = "text-green-500";
+      const daysLeftText = t("node.daysLeft", { daysLeft: effectiveDaysLeft });
+      if (effectiveDaysLeft < 0) {
+        expired_at_color = "text-red-500";
+        daysLeftTag = `${t("node.expired")}<red>`;
+      } else if (effectiveDaysLeft <= 7) {
+        expired_at_color = "text-red-500";
+        daysLeftTag = `${daysLeftText}<red>`;
+      } else if (effectiveDaysLeft <= 15) {
+        expired_at_color = "text-orange-500";
+        daysLeftTag = `${daysLeftText}<orange>`;
+      } else if (effectiveDaysLeft < 36500) {
+        expired_at_color = "text-green-500";
+        daysLeftTag = `${daysLeftText}<green>`;
+      } else {
+        daysLeftTag = `${t("node.longTerm")}<green>`;
+      }
     }
   } else if (node.require_sign_in) {
     expired_at_color = "text-violet-500";
+    daysLeftTag = `🟣 签到截止: ${t("node.notSet")}<violet>`;
   }
 
   return {
