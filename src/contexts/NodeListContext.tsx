@@ -54,6 +54,7 @@ export type NodeBasicInfo = {
   ipv4?: string; 
   ipv6?: string;
   tcp_cc?: string;
+  sign_in_target_date?: string | null;
 };
 
 interface NodeListContextType {

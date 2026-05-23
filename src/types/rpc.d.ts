@@ -24,6 +24,7 @@ export interface RpcClient {
   sign_in_alert_days_before: number;
   sign_in_alert_interval_hours: number;
   last_sign_in_alert_at: string;
+  sign_in_target_date: string | null;
   group: string;
   tags: string;
   public_remark: string;

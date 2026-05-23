@@ -181,15 +181,34 @@ export const useNodeCommons = (node: NodeData & { stats?: any }) => {
   if (daysLeft !== null) {
     const daysLeftText = t("node.daysLeft", { daysLeft: daysLeft });
     if (daysLeft < 0) {
-      daysLeftTag = `${t("node.expired")}<red>`;
-    } else if (daysLeft <= 7) {
-      daysLeftTag = `${daysLeftText}<red>`;
-    } else if (daysLeft <= 15) {
-      daysLeftTag = `${daysLeftText}<orange>`;
-    } else if (daysLeft < 36500) {
-      daysLeftTag = `${daysLeftText}<green>`;
+      daysLeftTag = node.require_sign_in ? `🟣 签到截止: ${t("node.expired")} (已逾期 ${Math.abs(daysLeft)} 天)<red>` : `${t("node.expired")}<red>`;
+    } else if (node.require_sign_in) {
+      // 签到模式
+      const targetDate = node.sign_in_target_date || node.expired_at;
+      const targetDateStr = targetDate && new Date(targetDate).getTime() > 0 
+          ? new Date(targetDate).toLocaleDateString(undefined, { year: "numeric", month: "2-digit", day: "2-digit" }) 
+          : t("node.notSet");
+      const signInText = `🟣 签到截止: ${targetDateStr} (还剩 ${daysLeft} 天)`;
+      if (daysLeft <= 3) {
+        daysLeftTag = `${signInText}<red>`;
+      } else if (daysLeft <= 7) {
+        daysLeftTag = `${signInText}<orange>`;
+      } else if (daysLeft < 36500) {
+        daysLeftTag = `${signInText}<violet>`;
+      } else {
+        daysLeftTag = `🟣 签到截止: ${t("node.longTerm")}<violet>`;
+      }
     } else {
-      daysLeftTag = `${t("node.longTerm")}<green>`;
+      // 普通模式
+      if (daysLeft <= 7) {
+        daysLeftTag = `${daysLeftText}<red>`;
+      } else if (daysLeft <= 15) {
+        daysLeftTag = `${daysLeftText}<orange>`;
+      } else if (daysLeft < 36500) {
+        daysLeftTag = `${daysLeftText}<green>`;
+      } else {
+        daysLeftTag = `${t("node.longTerm")}<green>`;
+      }
     }
   }
 

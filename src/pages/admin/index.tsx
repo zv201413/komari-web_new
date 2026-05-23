@@ -1838,6 +1838,12 @@ function BillingButton({ node }: { node: NodeDetail }) {
   );
 
   const [requireSignIn, setRequireSignIn] = useState<boolean>(node.require_sign_in || false);
+  const [signInMode, setSignInMode] = useState<"interval" | "target">(
+    node.sign_in_target_date && node.sign_in_target_date !== "" ? "target" : "interval"
+  );
+  const [signInTargetDate, setSignInTargetDate] = useState<string>(
+    node.sign_in_target_date ? new Date(node.sign_in_target_date).toISOString().slice(0, 10) : ""
+  );
   const [signInIntervalDays, setSignInIntervalDays] = useState<string>(node.sign_in_interval_days?.toString() || "30");
   const [signInAlertDaysBefore, setSignInAlertDaysBefore] = useState<string>(node.sign_in_alert_days_before?.toString() || "3");
   const [signInAlertIntervalHours, setSignInAlertIntervalHours] = useState<string>(node.sign_in_alert_interval_hours?.toString() || "12");
@@ -1873,6 +1879,7 @@ function BillingButton({ node }: { node: NodeDetail }) {
           sign_in_interval_days: parseInt(signInIntervalDays) || 30,
           sign_in_alert_days_before: parseInt(signInAlertDaysBefore) || 3,
           sign_in_alert_interval_hours: parseInt(signInAlertIntervalHours) || 12,
+          sign_in_target_date: signInMode === "target" && signInTargetDate ? new Date(signInTargetDate).toISOString() : null,
         }),
         headers: {
           "Content-Type": "application/json",
@@ -1986,18 +1993,40 @@ function BillingButton({ node }: { node: NodeDetail }) {
               />
               {requireSignIn && (
                 <div className="flex flex-col gap-2 mt-4 pl-2 border-l-2 border-violet-500">
-                  <label className="font-bold">{t("admin.nodeTable.signInInterval", "签到周期")}</label>
-                  <SelectOrInput
-                    options={[
-                      { label: "7 " + t("common.day", "天"), value: "7" },
-                      { label: "14 " + t("common.day", "天"), value: "14" },
-                      { label: "30 " + t("common.day", "天"), value: "30" },
-                    ]}
-                    type="number"
-                    name="signInIntervalDays"
-                    value={signInIntervalDays}
-                    onChange={setSignInIntervalDays}
-                  />
+                  <label className="font-bold">{t("admin.nodeTable.signInMode", "签到模式")}</label>
+                  <SegmentedControl.Root
+                    value={signInMode}
+                    onValueChange={(val: any) => setSignInMode(val)}
+                  >
+                    <SegmentedControl.Item value="interval">{t("admin.nodeTable.signInModeInterval", "按天数顺延")}</SegmentedControl.Item>
+                    <SegmentedControl.Item value="target">{t("admin.nodeTable.signInModeTarget", "签到至指定日期")}</SegmentedControl.Item>
+                  </SegmentedControl.Root>
+
+                  {signInMode === "interval" ? (
+                    <>
+                      <label className="font-bold mt-2">{t("admin.nodeTable.signInInterval", "顺延天数")}</label>
+                      <SelectOrInput
+                        options={[
+                          { label: "7 " + t("common.day", "天"), value: "7" },
+                          { label: "14 " + t("common.day", "天"), value: "14" },
+                          { label: "30 " + t("common.day", "天"), value: "30" },
+                        ]}
+                        type="number"
+                        name="signInIntervalDays"
+                        value={signInIntervalDays}
+                        onChange={setSignInIntervalDays}
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <label className="font-bold mt-2">{t("admin.nodeTable.signInTargetDate", "目标日期")}</label>
+                      <TextField.Root
+                        type="date"
+                        value={signInTargetDate}
+                        onChange={(e) => setSignInTargetDate(e.target.value)}
+                      />
+                    </>
+                  )}
 
                   <label className="font-bold">{t("admin.nodeTable.signInAlertDays", "提前提醒天数")}</label>
                   <TextField.Root
@@ -2015,10 +2044,12 @@ function BillingButton({ node }: { node: NodeDetail }) {
                     onChange={(e) => setSignInAlertIntervalHours(e.target.value)}
                   />
 
-                  {expiredAt && expiredAt !== "0001-01-01" && (
+                  {((signInMode === "interval" && expiredAt && expiredAt !== "0001-01-01") || (signInMode === "target" && signInTargetDate)) && (
                     <div className="text-sm text-gray-500 mt-2">
                       {t("admin.nodeTable.signInPreview", "首次提醒将于 {{date}} 发出，此后每 {{hours}} 小时提醒一次", {
-                        date: new Date(new Date(expiredAt).getTime() - parseInt(signInAlertDaysBefore || "3") * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
+                        date: signInMode === "target" 
+                          ? new Date(new Date(signInTargetDate).getTime() - parseInt(signInAlertDaysBefore || "3") * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
+                          : new Date(new Date(expiredAt).getTime() - parseInt(signInAlertDaysBefore || "3") * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
                         hours: signInAlertIntervalHours || "12"
                       })}
                     </div>
