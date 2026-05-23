@@ -11,6 +11,7 @@ import {
   Checkbox,
   Text,
   Dialog,
+  AlertDialog,
   IconButton,
   TextArea,
   SegmentedControl,
@@ -24,6 +25,7 @@ import {
   Plus,
   Terminal,
   Trash2Icon,
+  ClipboardCheck,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import {
@@ -497,6 +499,7 @@ const ActionButtons = ({ node, settings }: { node: NodeDetail, settings: any }) 
       </IconButton>
       <EditButton node={node} />
       <BillingButton node={node} />
+      {node.require_sign_in && <SignInButton node={node} />}
       <DeleteButton node={node} />
     </div>
   );
@@ -549,6 +552,72 @@ function DeleteButton({ node }: { node: NodeDetail }) {
     </Dialog.Root>
   );
 }
+
+function SignInButton({ node }: { node: NodeDetail }) {
+  const { t } = useTranslation();
+  const { refresh } = useNodeDetails();
+  const [open, setOpen] = React.useState(false);
+  const [signingIn, setSigningIn] = React.useState(false);
+
+  const handleSignIn = async () => {
+    try {
+      setSigningIn(true);
+      await fetch(`/api/admin/client/${node.uuid}/sign-in`, {
+        method: "POST",
+      });
+      toast.success(t("admin.nodeTable.signInSuccess", "签到成功"));
+      setOpen(false);
+      refresh();
+    } catch (error) {
+      toast.error("Sign-in failed");
+    } finally {
+      setSigningIn(false);
+    }
+  };
+
+  const nextDate = new Date();
+  nextDate.setDate(nextDate.getDate() + (node.sign_in_interval_days || 30));
+
+  return (
+    <AlertDialog.Root open={open} onOpenChange={setOpen}>
+      <AlertDialog.Trigger>
+        <IconButton
+          variant="ghost"
+          color="violet"
+          title={t("admin.nodeTable.signInBadge", "签到")}
+        >
+          <ClipboardCheck size="18" />
+        </IconButton>
+      </AlertDialog.Trigger>
+      <AlertDialog.Content maxWidth="450px">
+        <AlertDialog.Title>{t("admin.nodeTable.signInBadge", "签到")}</AlertDialog.Title>
+        <AlertDialog.Description size="2">
+          {t("admin.nodeTable.signInConfirm", "确认签到？下次截止时间将更新为 {{date}}", {
+            date: nextDate.toISOString().slice(0, 10)
+          })}
+        </AlertDialog.Description>
+        <Flex gap="3" mt="4" justify="end">
+          <AlertDialog.Cancel>
+            <Button variant="soft" color="gray">
+              {t("cancel")}
+            </Button>
+          </AlertDialog.Cancel>
+          <AlertDialog.Action>
+            <Button
+              variant="solid"
+              color="violet"
+              onClick={handleSignIn}
+              loading={signingIn}
+            >
+              {t("confirm")}
+            </Button>
+          </AlertDialog.Action>
+        </Flex>
+      </AlertDialog.Content>
+    </AlertDialog.Root>
+  );
+}
+
 type InstallOptions = {
   disableWebSsh: boolean;
   disableAutoUpdate: boolean;
@@ -1762,6 +1831,16 @@ function BillingButton({ node }: { node: NodeDetail }) {
     node.auto_renewal || false
   );
   const [currency, setCurrency] = React.useState<string>(node.currency || "$");
+  const [expiredAt, setExpiredAt] = React.useState<string>(
+    node.expired_at
+      ? new Date(node.expired_at).toISOString().slice(0, 10)
+      : "0001-01-01"
+  );
+
+  const [requireSignIn, setRequireSignIn] = useState<boolean>(node.require_sign_in || false);
+  const [signInIntervalDays, setSignInIntervalDays] = useState<string>(node.sign_in_interval_days?.toString() || "30");
+  const [signInAlertDaysBefore, setSignInAlertDaysBefore] = useState<string>(node.sign_in_alert_days_before?.toString() || "3");
+  const [signInAlertIntervalHours, setSignInAlertIntervalHours] = useState<string>(node.sign_in_alert_interval_hours?.toString() || "12");
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -1790,6 +1869,10 @@ function BillingButton({ node }: { node: NodeDetail }) {
           expired_at: expiredAtValue,
           currency: currencyValue,
           auto_renewal: autoRenewal,
+          require_sign_in: requireSignIn,
+          sign_in_interval_days: parseInt(signInIntervalDays) || 30,
+          sign_in_alert_days_before: parseInt(signInAlertDaysBefore) || 3,
+          sign_in_alert_interval_hours: parseInt(signInAlertIntervalHours) || 12,
         }),
         headers: {
           "Content-Type": "application/json",
@@ -1818,6 +1901,7 @@ function BillingButton({ node }: { node: NodeDetail }) {
         <Dialog.Title>{t("admin.nodeTable.billing", "账单")}</Dialog.Title>
         <form onSubmit={handleSave}>
           <Flex direction="column" gap="2">
+            <div className={requireSignIn ? "opacity-50 pointer-events-none flex flex-col gap-2" : "flex flex-col gap-2"}>
             <label className="font-bold">
               <label>{t("admin.nodeTable.price")}</label>
               <label className="text-muted-foreground text-sm ml-1 font-medium">
@@ -1865,11 +1949,8 @@ function BillingButton({ node }: { node: NodeDetail }) {
             </Flex>
             <TextField.Root
               name="expiredAt"
-              defaultValue={
-                node.expired_at
-                  ? new Date(node.expired_at).toISOString().slice(0, 10)
-                  : "0001-01-01"
-              }
+              value={expiredAt}
+              onChange={(e) => setExpiredAt(e.target.value)}
               type="date"
             >
               <TextField.Slot side="right">
@@ -1877,14 +1958,9 @@ function BillingButton({ node }: { node: NodeDetail }) {
                   type="button"
                   variant="ghost"
                   onClick={() => {
-                    const dateInput = document.querySelector(
-                      'input[name="expiredAt"]'
-                    ) as HTMLInputElement;
-                    if (dateInput) {
-                      const futureDate = new Date();
-                      futureDate.setFullYear(futureDate.getFullYear() + 200);
-                      dateInput.value = futureDate.toISOString().slice(0, 10);
-                    }
+                    const futureDate = new Date();
+                    futureDate.setFullYear(futureDate.getFullYear() + 200);
+                    setExpiredAt(futureDate.toISOString().slice(0, 10));
                   }}
                 >
                   {t("admin.nodeTable.setToLongTerm", "设置为长期")}
@@ -1898,6 +1974,59 @@ function BillingButton({ node }: { node: NodeDetail }) {
               defaultChecked={node.auto_renewal || false}
               onChange={setAutoRenewal}
             />
+            </div>
+
+            {/* SignIn Section */}
+            <div className="mt-4 border-t pt-4">
+              <SettingCardSwitch
+                title={t("admin.nodeTable.requireSignIn", "需要签到")}
+                description={""}
+                defaultChecked={requireSignIn}
+                onChange={setRequireSignIn}
+              />
+              {requireSignIn && (
+                <div className="flex flex-col gap-2 mt-4 pl-2 border-l-2 border-violet-500">
+                  <label className="font-bold">{t("admin.nodeTable.signInInterval", "签到周期")}</label>
+                  <SelectOrInput
+                    options={[
+                      { label: "7 " + t("common.day", "天"), value: "7" },
+                      { label: "14 " + t("common.day", "天"), value: "14" },
+                      { label: "30 " + t("common.day", "天"), value: "30" },
+                    ]}
+                    type="number"
+                    name="signInIntervalDays"
+                    value={signInIntervalDays}
+                    onChange={setSignInIntervalDays}
+                  />
+
+                  <label className="font-bold">{t("admin.nodeTable.signInAlertDays", "提前提醒天数")}</label>
+                  <TextField.Root
+                    name="signInAlertDaysBefore"
+                    type="number"
+                    value={signInAlertDaysBefore}
+                    onChange={(e) => setSignInAlertDaysBefore(e.target.value)}
+                  />
+
+                  <label className="font-bold">{t("admin.nodeTable.signInAlertHours", "提醒间隔 (小时)")}</label>
+                  <TextField.Root
+                    name="signInAlertIntervalHours"
+                    type="number"
+                    value={signInAlertIntervalHours}
+                    onChange={(e) => setSignInAlertIntervalHours(e.target.value)}
+                  />
+
+                  {expiredAt && expiredAt !== "0001-01-01" && (
+                    <div className="text-sm text-gray-500 mt-2">
+                      {t("admin.nodeTable.signInPreview", "首次提醒将于 {{date}} 发出，此后每 {{hours}} 小时提醒一次", {
+                        date: new Date(new Date(expiredAt).getTime() - parseInt(signInAlertDaysBefore || "3") * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
+                        hours: signInAlertIntervalHours || "12"
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
             <Button type="submit" disabled={saving}>
               {t("save")}
             </Button>

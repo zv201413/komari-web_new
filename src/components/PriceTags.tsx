@@ -1,5 +1,6 @@
-import { Badge, Flex } from "@radix-ui/themes";
+import { Badge, Flex, Tooltip } from "@radix-ui/themes";
 import { useTranslation } from "react-i18next";
+import { CalendarCheck } from "lucide-react";
 
 const PriceTags = ({
   price = 0,
@@ -9,6 +10,8 @@ const PriceTags = ({
   tags = "",
   ip4 = "",
   ip6 = "",
+  require_sign_in = false,
+  sign_in_interval_days = 30,
   ...props
 }: {
   expired_at?: string | number;
@@ -18,6 +21,8 @@ const PriceTags = ({
   tags?: string;
   ip4?: any;
   ip6?: any;
+  require_sign_in?: boolean;
+  sign_in_interval_days?: number;
 } & React.ComponentProps<typeof Flex>) => {
   if (price == 0) {
     return (
@@ -30,6 +35,16 @@ const PriceTags = ({
 
   return (
     <Flex gap="1" {...props} wrap="wrap">
+      {require_sign_in && (
+        <Tooltip content={t("admin.nodeTable.signInInterval") + " " + sign_in_interval_days + " " + t("common.day")}>
+          <Badge size="1" variant="soft" className="text-sm" color="violet">
+            <label className="flex justify-center items-center gap-1 text-xs">
+              <CalendarCheck size={12} />
+              {t("admin.nodeTable.signInBadge", "签到")}
+            </label>
+          </Badge>
+        </Tooltip>
+      )}
       {ip4 && (
         <Badge size="1" variant="soft" className="text-sm" color="green">
           <label className="flex justify-center items-center gap-1 text-xs">
