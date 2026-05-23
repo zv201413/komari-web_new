@@ -54,6 +54,8 @@ export type NodeBasicInfo = {
   ipv4?: string; 
   ipv6?: string;
   tcp_cc?: string;
+  require_sign_in?: boolean;
+  sign_in_interval_days?: number;
   sign_in_target_date?: string | null;
 };
 
@@ -117,6 +119,9 @@ export const NodeListProvider: React.FC<{ children: React.ReactNode }> = ({
           ipv4: n.ipv4,
           ipv6: n.ipv6,
           tcp_cc: n.tcp_cc ?? "",
+          require_sign_in: n.require_sign_in ?? false,
+          sign_in_interval_days: n.sign_in_interval_days ?? 30,
+          sign_in_target_date: n.sign_in_target_date ?? null,
         }));
         setNodeList(list);
       })
