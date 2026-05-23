@@ -538,9 +538,9 @@ function DeleteButton({ node }: { node: NodeDetail }) {
           {t("admin.nodeTable.confirmDelete")}
         </Dialog.Description>
         <Flex justify="end" gap="2" mt="4">
-          <Dialog.Trigger>
+          <Dialog.Close>
             <Button variant="soft">{t("admin.nodeTable.cancel")}</Button>
-          </Dialog.Trigger>
+          </Dialog.Close>
           <Button disabled={deleting} color="red" onClick={handleDelete}>
             {t("admin.nodeTable.confirmDelete")}
           </Button>
@@ -556,6 +556,7 @@ type InstallOptions = {
   memoryIncludeCache: boolean;
   getIpAddrFromNic: boolean;
   enableGpu: boolean;
+  checkNatType: boolean;
   ghproxy: string;
   dir: string;
   serviceName: string;
@@ -575,6 +576,7 @@ function GenerateCommandButton({ node, settings }: { node: NodeDetail, settings:
     memoryIncludeCache: false,
     getIpAddrFromNic: false,
     enableGpu: false,
+    checkNatType: false,
     ghproxy: "",
     dir: "",
     serviceName: "",
@@ -626,6 +628,9 @@ function GenerateCommandButton({ node, settings }: { node: NodeDetail, settings:
     }
     if (installOptions.enableGpu) {
       args.push("--gpu");
+    }
+    if (installOptions.checkNatType) {
+      args.push("--check-nat-type");
     }
     if (enableGhproxy && installOptions.ghproxy) {
       const finalUrl = (
@@ -878,6 +883,28 @@ function GenerateCommandButton({ node, settings }: { node: NodeDetail, settings:
                   }}
                 >
                   {t("admin.nodeTable.enableGpuMonitoring", "启用详细 GPU 监控")}
+                </label>
+              </Flex>
+              <Flex gap="2" align="center">
+                <Checkbox
+                  checked={installOptions.checkNatType}
+                  onCheckedChange={(checked) => {
+                    setInstallOptions((prev) => ({
+                      ...prev,
+                      checkNatType: Boolean(checked),
+                    }));
+                  }}
+                />
+                <label
+                  className="text-sm font-normal"
+                  onClick={() => {
+                    setInstallOptions((prev) => ({
+                      ...prev,
+                      checkNatType: !prev.checkNatType,
+                    }));
+                  }}
+                >
+                  {t("admin.nodeTable.checkNatType", "检查 NAT 类型")}
                 </label>
               </Flex>
             </div>
@@ -1272,13 +1299,15 @@ function GenerateCommandButton({ node, settings }: { node: NodeDetail, settings:
             </div>
           </Flex>
           <Flex justify="center">
-            <Button
-              style={{ width: "100%" }}
-              onClick={() => copyToClipboard(generateCommand())}
-            >
-              <Copy size={16} />
-              {t("copy")}
-            </Button>
+            <Dialog.Close>
+              <Button
+                style={{ width: "100%" }}
+                onClick={() => copyToClipboard(generateCommand())}
+              >
+                <Copy size={16} />
+                {t("copy")}
+              </Button>
+            </Dialog.Close>
           </Flex>
         </div>
       </Dialog.Content>

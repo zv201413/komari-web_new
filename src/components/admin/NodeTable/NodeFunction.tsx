@@ -370,7 +370,7 @@ export function ActionsCell({ row }: { row: Row<z.infer<typeof schema>> }) {
             <Dialog.Close>
               <Button variant="soft">{t("admin.nodeTable.cancel")}</Button>
             </Dialog.Close>
-            <Dialog.Trigger>
+            <Dialog.Close>
               <Button
                 disabled={removing}
                 color="red"
@@ -385,7 +385,7 @@ export function ActionsCell({ row }: { row: Row<z.infer<typeof schema>> }) {
                   ? t("admin.nodeTable.deleting")
                   : t("admin.nodeTable.confirm")}
               </Button>
-            </Dialog.Trigger>
+            </Dialog.Close>
           </Flex>
         </Dialog.Content>
       </Dialog.Root>
