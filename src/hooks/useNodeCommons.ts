@@ -261,6 +261,41 @@ export const useNodeCommons = (node: NodeData & { stats?: any }) => {
     return (usedTraffic / node.traffic_limit) * 100;
   }, [node.traffic_limit, node.traffic_limit_type, stats, isOnline]);
 
+  const expired_at_label = node.require_sign_in ? "🟣 签到截止:" : t("node.expiredAt");
+
+  const targetDate = node.require_sign_in && node.sign_in_target_date ? node.sign_in_target_date : node.expired_at;
+  const expiredAtStr = targetDate && new Date(targetDate).getTime() > 0
+    ? new Date(targetDate).toLocaleDateString(undefined, { year: "numeric", month: "2-digit", day: "2-digit" })
+    : t("node.notSet");
+
+  let expired_at_value = expiredAtStr;
+  let expired_at_color = "";
+
+  if (daysLeft !== null) {
+    if (node.require_sign_in) {
+      if (daysLeft < 0) {
+        expired_at_color = "text-red-500";
+        expired_at_value = `${expiredAtStr} (已逾期 ${Math.abs(daysLeft)} 天)`;
+      } else if (daysLeft <= 3) {
+        expired_at_color = "text-red-500";
+        expired_at_value = `${expiredAtStr} (还剩 ${daysLeft} 天)`;
+      } else if (daysLeft <= 7) {
+        expired_at_color = "text-orange-500";
+        expired_at_value = `${expiredAtStr} (还剩 ${daysLeft} 天)`;
+      } else {
+        expired_at_color = "text-violet-500";
+        expired_at_value = `${expiredAtStr} (还剩 ${daysLeft} 天)`;
+      }
+    } else {
+      if (daysLeft < 0) expired_at_color = "text-red-500";
+      else if (daysLeft <= 7) expired_at_color = "text-red-500";
+      else if (daysLeft <= 15) expired_at_color = "text-orange-500";
+      else if (daysLeft < 36500) expired_at_color = "text-green-500";
+    }
+  } else if (node.require_sign_in) {
+    expired_at_color = "text-violet-500";
+  }
+
   return {
     stats,
     isOnline,
@@ -271,6 +306,9 @@ export const useNodeCommons = (node: NodeData & { stats?: any }) => {
     diskUsage,
     load,
     expired_at,
+    expired_at_label,
+    expired_at_value,
+    expired_at_color,
     trafficPercentage,
   };
 };

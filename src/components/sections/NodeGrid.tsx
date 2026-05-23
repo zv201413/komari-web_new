@@ -65,7 +65,9 @@ export const NodeGrid = ({
     swapUsage,
     diskUsage,
     load,
-    expired_at,
+    expired_at_label,
+    expired_at_value,
+    expired_at_color,
     trafficPercentage,
   } = useNodeCommons(node);
   const { isShowHWBarInCard, isShowValueUnderProgressBar } = useAppConfig();
@@ -305,8 +307,8 @@ export const NodeGrid = ({
         </div>
         <div className="flex justify-between text-xs">
           <div className="flex justify-start w-full">
-            <span className="mr-1">{t("node.expiredAt")}</span>
-            <span>{expired_at}</span>
+            <span className="mr-1">{expired_at_label}</span>
+            <span className={expired_at_color}>{expired_at_value}</span>
           </div>
           <div className="border-l border-(--accent-4)/50 mx-2"></div>
           <div className="flex justify-end w-full">

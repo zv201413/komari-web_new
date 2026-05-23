@@ -49,7 +49,9 @@ export const NodeCompact = ({ node, onShowDetails }: NodeCompactProps) => {
     memUsage,
     diskUsage,
     load,
-    expired_at,
+    expired_at_label,
+    expired_at_value,
+    expired_at_color,
   } = useNodeCommons(node);
   const { t } = useLocale();
 
@@ -143,8 +145,8 @@ export const NodeCompact = ({ node, onShowDetails }: NodeCompactProps) => {
         </div>
         <div className="flex grid grid-cols-2">
           <span className="col-span-1">
-            <span className="mr-1">{t("node.expiredAt")}</span>
-            <span>{expired_at}</span>
+            <span className="mr-1">{expired_at_label}</span>
+            <span className={expired_at_color}>{expired_at_value}</span>
           </span>
           <span className="col-span-1">
             {isOnline && stats ? (

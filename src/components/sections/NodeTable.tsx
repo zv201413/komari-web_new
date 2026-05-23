@@ -97,7 +97,9 @@ const NodeTableRow = ({
     swapUsage,
     diskUsage,
     load,
-    expired_at,
+    expired_at_label,
+    expired_at_value,
+    expired_at_color,
     trafficPercentage,
   } = useNodeCommons(node);
   const gridCols = enableSwap ? "grid-cols-9" : "grid-cols-8";
@@ -131,9 +133,9 @@ const NodeTableRow = ({
             </Link>
             <Tag className="text-xs" tags={tagList} />
             <div className="flex text-xs">
-              <span>
+              <span className={expired_at_color}>
                 {isOnline && stats
-                  ? `${expired_at} | ${formatUptime(stats.uptime)}`
+                  ? `${expired_at_label} ${expired_at_value} | ${formatUptime(stats.uptime)}`
                   : t("node.offline")}
               </span>
             </div>
