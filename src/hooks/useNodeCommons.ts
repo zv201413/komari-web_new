@@ -228,7 +228,7 @@ export const useNodeCommons = (node: NodeData & { stats?: any }) => {
     return (usedTraffic / node.traffic_limit) * 100;
   }, [node.traffic_limit, node.traffic_limit_type, stats, isOnline]);
 
-  const expired_at_label = node.require_sign_in ? "🟣 签到截止:" : t("node.expiredAt");
+  const expired_at_label = node.require_sign_in ? "签到截止:" : t("node.expiredAt");
 
   const targetDate = node.require_sign_in && node.sign_in_target_date ? node.sign_in_target_date : node.expired_at;
   const expiredAtStr = targetDate && new Date(targetDate).getTime() > 0
@@ -242,27 +242,27 @@ export const useNodeCommons = (node: NodeData & { stats?: any }) => {
     const effectiveDaysLeft = daysLeft !== null ? daysLeft : Math.ceil((new Date(targetDate as string).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
 
     if (node.require_sign_in) {
-      const suffix = daysLeft === null ? `(${effectiveDaysLeft} 天后)` : `(还剩 ${effectiveDaysLeft} 天)`;
+      const suffix = daysLeft === null ? `(${effectiveDaysLeft}天后)` : `(剩${effectiveDaysLeft}天)`;
       if (effectiveDaysLeft < 0) {
         expired_at_color = "text-red-500";
-        expired_at_value = `${expiredAtStr} (已逾期 ${Math.abs(effectiveDaysLeft)} 天)`;
-        daysLeftTag = `🟣 签到截止: ${t("node.expired")} (已逾期 ${Math.abs(effectiveDaysLeft)} 天)<red>`;
+        expired_at_value = `${expiredAtStr} (逾期${Math.abs(effectiveDaysLeft)}天)`;
+        daysLeftTag = `签到截止: ${t("node.expired")} (逾期${Math.abs(effectiveDaysLeft)}天)<red>`;
       } else if (effectiveDaysLeft <= 3) {
         expired_at_color = "text-red-500";
         expired_at_value = `${expiredAtStr} ${suffix}`;
-        daysLeftTag = `🟣 签到截止: ${expiredAtStr} ${suffix}<red>`;
+        daysLeftTag = `签到截止: ${expiredAtStr} ${suffix}<red>`;
       } else if (effectiveDaysLeft <= 7) {
         expired_at_color = "text-orange-500";
         expired_at_value = `${expiredAtStr} ${suffix}`;
-        daysLeftTag = `🟣 签到截止: ${expiredAtStr} ${suffix}<orange>`;
+        daysLeftTag = `签到截止: ${expiredAtStr} ${suffix}<orange>`;
       } else if (effectiveDaysLeft < 36500) {
         expired_at_color = "text-violet-500";
         expired_at_value = `${expiredAtStr} ${suffix}`;
-        daysLeftTag = `🟣 签到截止: ${expiredAtStr} ${suffix}<violet>`;
+        daysLeftTag = `签到截止: ${expiredAtStr} ${suffix}<violet>`;
       } else {
         expired_at_color = "text-violet-500";
         expired_at_value = `${expiredAtStr} ${suffix}`;
-        daysLeftTag = `🟣 签到截止: ${t("node.longTerm")}<violet>`;
+        daysLeftTag = `签到截止: ${t("node.longTerm")}<violet>`;
       }
     } else {
       const daysLeftText = t("node.daysLeft", { daysLeft: effectiveDaysLeft });
@@ -284,7 +284,7 @@ export const useNodeCommons = (node: NodeData & { stats?: any }) => {
     }
   } else if (node.require_sign_in) {
     expired_at_color = "text-violet-500";
-    daysLeftTag = `🟣 签到截止: ${t("node.notSet")}<violet>`;
+    daysLeftTag = `签到截止: ${t("node.notSet")}<violet>`;
   }
 
   return {
