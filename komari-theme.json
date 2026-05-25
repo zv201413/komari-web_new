@@ -48,6 +48,20 @@
                 "help": "移动端背景图片链接，与桌面端一样区分亮暗模式，留空则使用桌面端背景"
             },
             {
+                "key": "backgroundImages",
+                "name": "桌面端背景图（随机轮换）",
+                "type": "multi-image",
+                "default": "[]",
+                "help": "上传多张图片，每次刷新页面时将随机抽取一张展示。留空则降级使用上方的单图设置。"
+            },
+            {
+                "key": "backgroundImagesMobile",
+                "name": "移动端背景图（随机轮换）",
+                "type": "multi-image",
+                "default": "[]",
+                "help": "移动端随机多图设置，留空则降级使用上方的移动端单图设置。"
+            },
+            {
                 "key": "enableVideoBackground",
                 "name": "启用视频背景",
                 "type": "switch",

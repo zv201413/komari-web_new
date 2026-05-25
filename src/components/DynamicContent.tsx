@@ -30,10 +30,28 @@ export function DynamicContent({ children }: { children: ReactNode }) {
 
   const imageUrl = useMemo(() => {
     if (!config) return "";
-    const { backgroundImage, backgroundImageMobile } = config;
-    return (isMobile || isPortrait) && backgroundImageMobile
-      ? getUrlFromConfig(backgroundImageMobile)
-      : getUrlFromConfig(backgroundImage);
+    
+    const isMob = isMobile || isPortrait;
+    let targetMulti = isMob && config.backgroundImagesMobile && config.backgroundImagesMobile !== "[]" 
+      ? config.backgroundImagesMobile 
+      : config.backgroundImages;
+    let targetSingle = isMob && config.backgroundImageMobile 
+      ? config.backgroundImageMobile 
+      : config.backgroundImage;
+
+    const getRandomImage = (jsonStr: string, fallbackUrl: string) => {
+      try {
+        const arr = JSON.parse(jsonStr || "[]");
+        if (Array.isArray(arr) && arr.length > 0) {
+          const randomIndex = Math.floor(Math.random() * arr.length);
+          return arr[randomIndex];
+        }
+      } catch (e) {}
+      return fallbackUrl;
+    };
+
+    const pickedUrlStr = getRandomImage(targetMulti, targetSingle);
+    return getUrlFromConfig(pickedUrlStr);
   }, [config, isMobile, isPortrait, getUrlFromConfig]);
 
   const videoUrl = useMemo(() => {

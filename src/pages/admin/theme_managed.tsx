@@ -8,7 +8,7 @@ import {
   SettingCardLongTextInput,
 } from "@/components/admin/SettingCard";
 import { toast } from "sonner";
-import { UploadCloud, Loader2 } from "lucide-react";
+import { UploadCloud, Loader2, X } from "lucide-react";
 import { apiService } from "@/services/api";
 import Loading from "@/components/loading";
 import { useTranslation } from "react-i18next";
@@ -17,7 +17,7 @@ import { resolveI18nText, type I18nText } from "@/utils/i18nText";
 interface ThemeFieldBase {
   name?: I18nText; // 显示名（字符串或多语言字典）
   help?: I18nText; // 帮助文本（字符串或多语言字典）
-  type: "title" | "switch" | "select" | "number" | "string" | "richtext" | "select-with-custom";
+  type: "title" | "switch" | "select" | "number" | "string" | "richtext" | "select-with-custom" | "multi-image";
   key?: string; // 对应设置键（title 无需）
   default?: any; // 默认值
   options?: string; // 仅 select 支持，逗号分隔
@@ -294,6 +294,101 @@ const ThemeManaged: React.FC = () => {
                         }
                       }}
                     />
+                  </div>
+                </div>
+              );
+            }
+            case "multi-image": {
+              const fieldKey = f.key!;
+              const isUploading = uploadingKeys[fieldKey] || false;
+              let imgList: string[] = [];
+              try {
+                const parsed = JSON.parse(val || "[]");
+                if (Array.isArray(parsed)) imgList = parsed;
+              } catch (e) {}
+
+              return (
+                <div key={fieldKey} className="flex flex-col gap-2 p-4 bg-gray-50 dark:bg-zinc-800 rounded-md border border-gray-200 dark:border-zinc-700">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="font-semibold">{title}</div>
+                      <div className="text-sm text-gray-500">{description}</div>
+                    </div>
+                    <Button
+                      variant="soft"
+                      size="1"
+                      disabled={isUploading}
+                      onClick={() => document.getElementById(`upload-${fieldKey}`)?.click()}
+                    >
+                      {isUploading ? <Loader2 className="animate-spin" /> : <UploadCloud className="mr-1 h-4 w-4" />}
+                      批量上传
+                    </Button>
+                    <input
+                      type="file"
+                      id={`upload-${fieldKey}`}
+                      className="hidden"
+                      multiple
+                      accept="image/*,video/*,.svg"
+                      onChange={async (e) => {
+                        const files = Array.from(e.target.files || []);
+                        if (files.length === 0) return;
+                        setUploadingKeys((prev) => ({ ...prev, [fieldKey]: true }));
+                        
+                        let currentList = [...imgList];
+                        let successCount = 0;
+                        let failCount = 0;
+
+                        try {
+                          for (const file of files) {
+                            try {
+                              const res = await apiService.uploadImage(file);
+                              if (res.status === "success" && res.data?.url) {
+                                currentList.push(res.data.url);
+                                // Update iteratively so UI reflects progress
+                                handleValueChange(fieldKey, JSON.stringify(currentList));
+                                successCount++;
+                              } else {
+                                failCount++;
+                              }
+                            } catch (err) {
+                              failCount++;
+                            }
+                          }
+                          
+                          if (successCount > 0) {
+                            toast.success(`成功上传 ${successCount} 张图片`);
+                          }
+                          if (failCount > 0) {
+                            toast.error(`${failCount} 张图片上传失败`);
+                          }
+                        } finally {
+                          setUploadingKeys((prev) => ({ ...prev, [fieldKey]: false }));
+                          const el = document.getElementById(`upload-${fieldKey}`) as HTMLInputElement;
+                          if (el) el.value = "";
+                        }
+                      }}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 mt-2">
+                    {imgList.map((url, i) => (
+                      <div key={i} className="relative group aspect-video bg-gray-200 dark:bg-zinc-900 rounded overflow-hidden">
+                        <img src={url} alt="bg" className="w-full h-full object-cover" />
+                        <button
+                          className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                          title="删除图片"
+                          onClick={() => {
+                            const newList = imgList.filter((_, idx) => idx !== i);
+                            handleValueChange(fieldKey, JSON.stringify(newList));
+                          }}
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                    {imgList.length === 0 && (
+                      <div className="col-span-full text-sm text-gray-400 italic">暂无图片</div>
+                    )}
                   </div>
                 </div>
               );

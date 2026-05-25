@@ -4,6 +4,8 @@ export interface ConfigOptions {
   mainWidth: number; // 主内容宽度百分比
   backgroundImage: string; // 桌面端背景图片URL
   backgroundImageMobile: string; // 移动端背景图片URL
+  backgroundImages: string; // 桌面端多图JSON数组
+  backgroundImagesMobile: string; // 移动端多图JSON数组
   enableVideoBackground: boolean; // 是否启用视频背景
   videoBackgroundUrl: string; // 桌面端视频背景URL
   videoBackgroundUrlMobile: string; // 移动端视频背景URL
@@ -53,6 +55,8 @@ export const DEFAULT_CONFIG: ConfigOptions = {
   mainWidth: 85,
   backgroundImage: "/assets/Moonlit-Scenery.webp",
   backgroundImageMobile: "",
+  backgroundImages: "[]",
+  backgroundImagesMobile: "[]",
   enableVideoBackground: false,
   videoBackgroundUrl: "/assets/LanternRivers_1080p15fps2Mbps3s.mp4",
   videoBackgroundUrlMobile: "",
