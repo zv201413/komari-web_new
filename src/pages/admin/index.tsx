@@ -1834,7 +1834,7 @@ function BillingButton({ node }: { node: NodeDetail }) {
   const [expiredAt, setExpiredAt] = React.useState<string>(
     node.expired_at
       ? new Date(node.expired_at).toISOString().slice(0, 10)
-      : "0001-01-01"
+      : ""
   );
 
   const [requireSignIn, setRequireSignIn] = useState<boolean>(node.require_sign_in || false);
