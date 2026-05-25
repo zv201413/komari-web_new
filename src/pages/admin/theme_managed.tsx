@@ -17,7 +17,7 @@ import { resolveI18nText, type I18nText } from "@/utils/i18nText";
 interface ThemeFieldBase {
   name?: I18nText; // 显示名（字符串或多语言字典）
   help?: I18nText; // 帮助文本（字符串或多语言字典）
-  type: "title" | "switch" | "select" | "number" | "string" | "richtext";
+  type: "title" | "switch" | "select" | "number" | "string" | "richtext" | "select-with-custom";
   key?: string; // 对应设置键（title 无需）
   default?: any; // 默认值
   options?: string; // 仅 select 支持，逗号分隔
