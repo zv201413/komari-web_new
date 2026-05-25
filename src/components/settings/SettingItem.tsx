@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -8,6 +8,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { UploadCloud, Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import { apiService } from "@/services/api";
 import type { ConfigOptions } from "@/config/default";
 
 interface SettingItemProps {
@@ -95,6 +99,30 @@ const SettingItem = ({
       case "select-with-custom": {
         const optionsList = item.options.split(",");
         const isCustomValue = forceCustom || !optionsList.includes(localValue as string);
+        const [isUploading, setIsUploading] = useState(false);
+        const fileInputRef = useRef<HTMLInputElement>(null);
+
+        const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+          const file = e.target.files?.[0];
+          if (!file) return;
+          setIsUploading(true);
+          try {
+            const res = await apiService.uploadImage(file);
+            if (res.status === "success" && res.data?.url) {
+              setLocalValue(res.data.url);
+              onConfigChange(item.key, res.data.url);
+              toast.success("上传成功并已自动应用");
+            } else {
+              toast.error("上传失败: " + (res.message || "未知错误"));
+            }
+          } catch (err: any) {
+            toast.error("上传出错: " + err.message);
+          } finally {
+            setIsUploading(false);
+            if (fileInputRef.current) fileInputRef.current.value = "";
+          }
+        };
+
         return (
           <div className="flex flex-col gap-2">
             <Select
@@ -122,14 +150,33 @@ const SettingItem = ({
               </SelectContent>
             </Select>
             {isCustomValue && (
-              <Input
-                type="text"
-                placeholder="在此输入自定义 URL..."
-                className="theme-card-style mt-1"
-                value={localValue as string}
-                onChange={(e) => setLocalValue(e.target.value)}
-                onBlur={handleBlur}
-              />
+              <div className="flex items-center gap-2 mt-1">
+                <Input
+                  type="text"
+                  placeholder="在此输入自定义 URL..."
+                  className="theme-card-style flex-1"
+                  value={localValue as string}
+                  onChange={(e) => setLocalValue(e.target.value)}
+                  onBlur={handleBlur}
+                />
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="shrink-0"
+                  disabled={isUploading}
+                  onClick={() => fileInputRef.current?.click()}
+                  title="直传文件"
+                >
+                  {isUploading ? <Loader2 className="animate-spin size-4" /> : <UploadCloud className="size-4" />}
+                </Button>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  className="hidden"
+                  accept="image/*,video/*,.svg"
+                  onChange={handleUpload}
+                />
+              </div>
             )}
           </div>
         );
