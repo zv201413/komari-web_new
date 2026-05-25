@@ -68,7 +68,7 @@ const Instance = memo(({ node }: InstanceProps) => {
         <InfoItem label={t("instancePage.os")} value={node.os} />
         {node.tcp_cc && (
           <InfoItem
-            label={t("node.networkSpeed")}
+            label={t("node.tcpCc")}
             value={node.tcp_cc}
           />
         )}

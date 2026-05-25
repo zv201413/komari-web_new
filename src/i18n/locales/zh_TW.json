@@ -369,7 +369,7 @@
     "monitoring": "監控資訊",
     "name": "節點名稱",
     "networkDownloadSpeed": "下載速度",
-    "networkSpeed": "網路",
+    "networkCongestion": "擁堵算法",
     "networkTraffic": "網路/流量",
     "networkUploadSpeed": "上傳速度",
     "offline": "離線",
@@ -770,5 +770,8 @@
     "mode": "顯示模式"
   },
   "warn_https": "當前連接不是 HTTPS！您的敏感數據存在嚴重風險。請立即採取措施確保連接安全！複製操作可能無法使用！",
-  "warn_websocket": "RPC2 請求失敗，請檢查網絡連接或伺服器狀態！"
+  "warn_websocket": "RPC2 請求失敗，請檢查網絡連接或伺服器狀態！",
+  "node": {
+    "tcpCc": "擁堵算法"
+  }
 }

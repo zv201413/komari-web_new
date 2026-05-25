@@ -220,7 +220,7 @@ const Node = React.memo(({ basic, live, online }: NodeProps) => {
 
           <Flex justify="between" hidden={isMobile}>
             <Text size="2" color="gray" className="flex items-center">
-              {basic.tcp_cc ? `${t("nodeCard.networkSpeed")} (${basic.tcp_cc})` : t("nodeCard.networkSpeed")}
+              {basic.tcp_cc ? `${t("node.tcpCc")} (${basic.tcp_cc})` : t("nodeCard.networkSpeed")}
             </Text>
             <Text size="2">
               ↑ {uploadSpeed}/s ↓ {downloadSpeed}/s
@@ -229,7 +229,7 @@ const Node = React.memo(({ basic, live, online }: NodeProps) => {
 
           <Flex justify="between" gap="2" hidden={!isMobile}>
             <Text size="2">
-              {basic.tcp_cc ? `${t("nodeCard.networkSpeed")} (${basic.tcp_cc})` : t("nodeCard.networkSpeed")}
+              {basic.tcp_cc ? `${t("node.tcpCc")} (${basic.tcp_cc})` : t("nodeCard.networkSpeed")}
             </Text>
             <Text size="2">
               ↑ {uploadSpeed}/s ↓ {downloadSpeed}/s

@@ -274,13 +274,15 @@ export function getOSName(osString: string): string {
       nat = "地址限制";
     } else if (nat.includes("端口限制")) {
       nat = "端口限制";
-    } else if (nat.includes("对称")) {
+    } else if (nat.includes("对称") || nat.includes("Symmetric NAT")) {
       nat = "对称型";
-    } else if (nat.includes("公网")) {
+    } else if (nat.includes("锥") || nat.includes("Cone NAT")) {
+      nat = "锥型 NAT";
+    } else if (nat.includes("公网") || nat.includes("No NAT")) {
       nat = "公网 IP";
     } else if (nat.includes("屏蔽") || nat.includes("Blocked")) {
       nat = "UDP 屏蔽";
-    } else if (nat.includes("检测中")) {
+    } else if (nat.includes("检测中") || nat.includes("Detecting")) {
       nat = "检测中";
     } else if (nat.includes("未知")) {
       nat = "未知";

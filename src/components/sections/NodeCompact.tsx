@@ -109,7 +109,7 @@ export const NodeCompact = ({ node, onShowDetails }: NodeCompactProps) => {
             <GaugeIcon className="size-5 text-(--accent-11) mr-2" />
             <div>
               <div className="text-secondary-foreground">
-                {node.tcp_cc ? `${t("statsBar.networkSpeedShort")} (${node.tcp_cc})` : t("node.network")}
+                {node.tcp_cc ? `${t("node.tcpCc")} (${node.tcp_cc})` : t("node.network")}
               </div>
               <div>
                 {t("node.uploadPrefix")}{" "}

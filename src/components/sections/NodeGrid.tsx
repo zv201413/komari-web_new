@@ -245,7 +245,7 @@ export const NodeGrid = ({
         )}
         <div className="border-t border-(--accent-4)/50 my-2"></div>
         <div className="flex justify-between text-xs">
-          <span>{node.tcp_cc ? `${t("statsBar.networkSpeedShort")} (${node.tcp_cc})` : t("node.network")}</span>
+          <span>{node.tcp_cc ? `${t("node.tcpCc")} (${node.tcp_cc})` : t("node.network")}</span>
           <div>
             <span>
               {t("node.uploadPrefix")}{" "}

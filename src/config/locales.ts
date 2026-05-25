@@ -14,6 +14,7 @@ export const defaultTexts = {
     network: "网络",
     load: "负载",
     networkSpeed: "网络速度",
+    tcpCc: "拥堵算法",
     uptime: "在线:",
     expiredAt: "到期:",
     offline: "离线",
