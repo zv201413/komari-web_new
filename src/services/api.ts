@@ -253,6 +253,30 @@ class ApiService {
     return { status: "private-unauthenticated", publicInfo: null };
   }
 
+  async uploadImage(file: File): Promise<ApiResponse<{ url: string }>> {
+    try {
+      const formData = new FormData();
+      formData.append("image", file);
+      
+      const response = await fetch(`${this.baseUrl}/api/admin/update/image`, {
+        method: "POST",
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return await response.json();
+    } catch (error) {
+      console.error("Failed to upload image:", error);
+      return {
+        status: "error",
+        message: error instanceof Error ? error.message : "Unknown error",
+        data: null as any,
+      };
+    }
+  }
+
   async saveThemeSettings(
     theme: string,
     settings: Partial<any>
