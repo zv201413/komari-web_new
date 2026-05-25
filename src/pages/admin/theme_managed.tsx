@@ -8,6 +8,8 @@ import {
   SettingCardLongTextInput,
 } from "@/components/admin/SettingCard";
 import { toast } from "sonner";
+import { UploadCloud, Loader2 } from "lucide-react";
+import { apiService } from "@/services/api";
 import Loading from "@/components/loading";
 import { useTranslation } from "react-i18next";
 import { resolveI18nText, type I18nText } from "@/utils/i18nText";
@@ -46,6 +48,7 @@ const ThemeManaged: React.FC = () => {
   const [values, setValues] = useState<Record<string, any>>({});
   const [error, setError] = useState<string | null>(null);
   const [firstLoading, setFirstLoading] = useState(true);
+  const [uploadingKeys, setUploadingKeys] = useState<Record<string, boolean>>({});
 
   // 拉取主题配置
   useEffect(() => {
@@ -242,18 +245,60 @@ const ThemeManaged: React.FC = () => {
                 />
               );
             case "string":
-            default:
+            default: {
+              const fieldKey = f.key!;
+              const isUploading = uploadingKeys[fieldKey] || false;
               return (
-                <SettingCardShortTextInput
-                  key={f.key}
-                  title={title}
-                  description={description}
-                  value={val !== undefined ? String(val) : ""}
-                  required={f.required}
-                  showSaveButton={false}
-                  onChange={(e) => handleValueChange(f.key!, e.target.value)}
-                />
+                <div key={fieldKey} className="flex items-start gap-2">
+                  <div className="flex-1">
+                    <SettingCardShortTextInput
+                      title={title}
+                      description={description}
+                      value={val !== undefined ? String(val) : ""}
+                      required={f.required}
+                      showSaveButton={false}
+                      onChange={(e) => handleValueChange(fieldKey, e.target.value)}
+                    />
+                  </div>
+                  <div className="mt-5 shrink-0">
+                    <Button
+                      variant="soft"
+                      size="1"
+                      disabled={isUploading}
+                      onClick={() => document.getElementById(`upload-${fieldKey}`)?.click()}
+                    >
+                      {isUploading ? <Loader2 className="animate-spin" /> : <UploadCloud />}
+                    </Button>
+                    <input
+                      type="file"
+                      id={`upload-${fieldKey}`}
+                      className="hidden"
+                      accept="image/*,video/*,.svg"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        setUploadingKeys((prev) => ({ ...prev, [fieldKey]: true }));
+                        try {
+                          const res = await apiService.uploadImage(file);
+                          if (res.status === "success" && res.data?.url) {
+                            handleValueChange(fieldKey, res.data.url);
+                            toast.success("上传成功并已自动应用");
+                          } else {
+                            toast.error("上传失败: " + (res.message || "未知错误"));
+                          }
+                        } catch (err: any) {
+                          toast.error("上传出错: " + err.message);
+                        } finally {
+                          setUploadingKeys((prev) => ({ ...prev, [fieldKey]: false }));
+                          const el = document.getElementById(`upload-${fieldKey}`) as HTMLInputElement;
+                          if (el) el.value = "";
+                        }
+                      }}
+                    />
+                  </div>
+                </div>
               );
+            }
           }
         })}
       </Flex>
