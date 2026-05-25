@@ -1819,6 +1819,13 @@ function DetailView({ node }: { node: NodeDetail }) {
   );
 }
 
+function toLocalDateString(dateStr: string | null | undefined): string {
+  if (!dateStr) return "";
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return "";
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
 function BillingButton({ node }: { node: NodeDetail }) {
   const { t } = useTranslation();
   const { refresh } = useNodeDetails();
@@ -1832,9 +1839,7 @@ function BillingButton({ node }: { node: NodeDetail }) {
   );
   const [currency, setCurrency] = React.useState<string>(node.currency || "$");
   const [expiredAt, setExpiredAt] = React.useState<string>(
-    node.expired_at
-      ? new Date(node.expired_at).toISOString().slice(0, 10)
-      : ""
+    toLocalDateString(node.expired_at)
   );
 
   const [requireSignIn, setRequireSignIn] = useState<boolean>(node.require_sign_in || false);
@@ -1842,7 +1847,7 @@ function BillingButton({ node }: { node: NodeDetail }) {
     node.sign_in_target_date && node.sign_in_target_date !== "" ? "target" : "interval"
   );
   const [signInTargetDate, setSignInTargetDate] = useState<string>(
-    node.sign_in_target_date ? new Date(node.sign_in_target_date).toISOString().slice(0, 10) : ""
+    toLocalDateString(node.sign_in_target_date)
   );
   const [signInIntervalDays, setSignInIntervalDays] = useState<string>(node.sign_in_interval_days?.toString() || "30");
   const [signInAlertDaysBefore, setSignInAlertDaysBefore] = useState<string>(node.sign_in_alert_days_before?.toString() || "3");
