@@ -244,8 +244,7 @@ const ThemeManaged: React.FC = () => {
                   onChange={(e) => handleValueChange(f.key!, e.target.value)}
                 />
               );
-            case "string":
-            default: {
+            case "select-with-custom": {
               const fieldKey = f.key!;
               const isUploading = uploadingKeys[fieldKey] || false;
               return (
@@ -299,6 +298,19 @@ const ThemeManaged: React.FC = () => {
                 </div>
               );
             }
+            case "string":
+            default:
+              return (
+                <SettingCardShortTextInput
+                  key={f.key}
+                  title={title}
+                  description={description}
+                  value={val !== undefined ? String(val) : ""}
+                  required={f.required}
+                  showSaveButton={false}
+                  onChange={(e) => handleValueChange(f.key!, e.target.value)}
+                />
+              );
           }
         })}
       </Flex>
