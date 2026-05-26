@@ -18,8 +18,16 @@ export function DynamicContent({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    const timer = setInterval(() => setRandomTick(t => t + 1), 20 * 60 * 1000);
-    return () => clearInterval(timer);
+    let tid: ReturnType<typeof setTimeout>;
+    const scheduleNext = () => {
+      const delay = Math.random() * 20 * 60 * 1000;
+      tid = setTimeout(() => {
+        setRandomTick(t => t + 1);
+        scheduleNext();
+      }, delay);
+    };
+    scheduleNext();
+    return () => clearTimeout(tid);
   }, []);
 
   const getUrlFromConfig = useCallback(
