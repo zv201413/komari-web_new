@@ -46,7 +46,7 @@ const AdminPanelBar = ({ content }: AdminPanelBarProps) => {
   const [openSubMenus, setOpenSubMenus] = useState<{ [key: string]: boolean }>({
     // 默认所有子菜单关闭
   });
-  const { account } = useAccount();
+  const { account, loading } = useAccount();
   const isMobile = useIsMobile();
   const ishttps = window.location.protocol === "https:";
   const [t, i18n] = useTranslation();
@@ -275,7 +275,11 @@ const AdminPanelBar = ({ content }: AdminPanelBarProps) => {
     window.open("/api/logout", "_self");
   }
 
-  if (account && !account.logged_in) {
+  if (loading) {
+    return <div className="flex w-screen h-screen items-center justify-center" style={{backgroundColor: "var(--accent-1)"}}>Loading...</div>;
+  }
+
+  if (!account || !account.logged_in) {
     return (
       <div className="flex w-screen h-screen items-center justify-center" style={{backgroundColor: "var(--accent-1)"}}>
         <LoginDialog
