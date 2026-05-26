@@ -274,6 +274,21 @@ const AdminPanelBar = ({ content }: AdminPanelBarProps) => {
   function logout() {
     window.open("/api/logout", "_self");
   }
+
+  if (account && !account.logged_in) {
+    return (
+      <div className="flex w-screen h-screen items-center justify-center" style={{backgroundColor: "var(--accent-1)"}}>
+        <LoginDialog
+          autoOpen={true}
+          showSettings={false}
+          onLoginSuccess={() => {
+            window.location.reload();
+          }}
+        />
+      </div>
+    );
+  }
+
   return (
     <>
       <Grid
@@ -384,15 +399,6 @@ const AdminPanelBar = ({ content }: AdminPanelBarProps) => {
               </label>
             </Flex>
             <Flex gap="3" align="center" overflowX="auto">
-              {account && !account.logged_in && (
-                <LoginDialog
-                  autoOpen={true}
-                  showSettings={false}
-                  onLoginSuccess={() => {
-                    window.location.reload();
-                  }}
-                />
-              )}
               <ThemeSwitch />
               <ColorSwitch />
               <LanguageSwitch />
