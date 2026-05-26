@@ -7,6 +7,7 @@ import {
   Button,
   Box,
   IconButton,
+  Checkbox,
 } from "@radix-ui/themes";
 import { useTranslation } from "react-i18next";
 import { TablerSettings } from "./Icones/Tabler";
@@ -28,6 +29,7 @@ const LoginDialog = ({ trigger, autoOpen = false, showSettings = true, info, onL
     const [username, setUsername] = React.useState("");
     const [password, setPassword] = React.useState("");
     const [twoFac, setTwoFac] = React.useState("");
+    const [remember, setRemember] = React.useState(false);
     const [errorMsg, setErrorMsg] = React.useState("");
     const [isLoading, setIsLoading] = React.useState(false);
     const [require2FA, setRequire2FA] = React.useState(false);
@@ -63,6 +65,7 @@ const LoginDialog = ({ trigger, autoOpen = false, showSettings = true, info, onL
           body: JSON.stringify({
             username,
             password,
+            remember,
             ...(twoFac && !account?.["2fa_enabled"] ? { "2fa_code": twoFac } : {}),
           }),
         });
@@ -198,6 +201,16 @@ const LoginDialog = ({ trigger, autoOpen = false, showSettings = true, info, onL
                       disabled={isLoading}
                     />
                   </label>
+                  <Text as="label" size="2">
+                    <Flex gap="2">
+                      <Checkbox 
+                        checked={remember} 
+                        onCheckedChange={(checked) => setRemember(checked === true)} 
+                        disabled={isLoading}
+                      /> 
+                      {t("login.remember_me", "记住我 (Remember me)")}
+                    </Flex>
+                  </Text>
                   <label hidden={!require2FA}>
                     <Text as="div" size="2" mb="1" weight="bold">
                       {t("login.two_factor")}
