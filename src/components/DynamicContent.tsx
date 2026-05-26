@@ -8,12 +8,18 @@ export function DynamicContent({ children }: { children: ReactNode }) {
   const isMobile = useIsMobile();
   const { appearance } = useTheme();
   const [isPortrait, setIsPortrait] = useState(false);
+  const [randomTick, setRandomTick] = useState(0);
 
   useEffect(() => {
     const checkPortrait = () => setIsPortrait(window.innerHeight > window.innerWidth);
     checkPortrait();
     window.addEventListener("resize", checkPortrait);
     return () => window.removeEventListener("resize", checkPortrait);
+  }, []);
+
+  useEffect(() => {
+    const timer = setInterval(() => setRandomTick(t => t + 1), 20 * 60 * 1000);
+    return () => clearInterval(timer);
   }, []);
 
   const getUrlFromConfig = useCallback(
@@ -52,7 +58,7 @@ export function DynamicContent({ children }: { children: ReactNode }) {
 
     const pickedUrlStr = getRandomImage(targetMulti, targetSingle);
     return getUrlFromConfig(pickedUrlStr);
-  }, [config, isMobile, isPortrait, getUrlFromConfig]);
+  }, [config, isMobile, isPortrait, getUrlFromConfig, randomTick]);
 
   const videoUrl = useMemo(() => {
     if (!config || !config.enableVideoBackground) return "";
