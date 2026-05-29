@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Flex, Heading, Callout, Separator, Button } from "@radix-ui/themes";
+import { Flex, Heading, Callout, Separator, Button, DropdownMenu } from "@radix-ui/themes";
 import { usePublicInfo } from "@/contexts/PublicInfoContext";
 import {
   SettingCardSelect,
@@ -8,7 +8,7 @@ import {
   SettingCardLongTextInput,
 } from "@/components/admin/SettingCard";
 import { toast } from "sonner";
-import { UploadCloud, Loader2, X } from "lucide-react";
+import { UploadCloud, Loader2, X, ChevronDownIcon } from "lucide-react";
 import { apiService } from "@/services/api";
 import Loading from "@/components/loading";
 import { useTranslation } from "react-i18next";
@@ -30,6 +30,15 @@ interface ThemeConfigResponse {
   };
   [k: string]: any;
 }
+
+// 通用解析选项函数
+const parseOptions = (optionsStr: string) => {
+  const separator = optionsStr.includes("|") ? "|" : ",";
+  return optionsStr.split(separator).map((s) => s.trim()).filter(Boolean).map((o) => {
+    const parts = o.split(":");
+    return { value: parts[0].trim(), label: parts[1] ? parts[1].trim() : parts[0].trim() };
+  });
+};
 
 const ThemeManaged: React.FC = () => {
   const { publicInfo, refresh } = usePublicInfo();
@@ -93,6 +102,30 @@ const ThemeManaged: React.FC = () => {
     }
     load();
   }, [theme, themeSettings]);
+
+  // 实时预览背景图片和对齐方式的变更
+  useEffect(() => {
+    const imageBackground = document.getElementById("image-background");
+    if (imageBackground && !firstLoading) {
+      const alignStr = values["backgroundAlignment"] || values["backagroundAlignment"];
+      if (alignStr) {
+        const [size, position] = alignStr.split(",").map((s: string) => s.trim());
+        if (size && position) {
+          imageBackground.style.backgroundSize = size;
+          imageBackground.style.backgroundPosition = position;
+        }
+      }
+      
+      const bgImage = values["backgroundImage"];
+      if (bgImage) {
+        // 处理亮暗模式
+        const isDark = document.documentElement.classList.contains("dark");
+        const urlList = bgImage.split("|").map((u: string) => u.trim());
+        const targetUrl = urlList.length > 1 ? (isDark ? urlList[1] : urlList[0]) : urlList[0];
+        imageBackground.style.backgroundImage = `url(${targetUrl})`;
+      }
+    }
+  }, [values["backgroundImage"], values["backgroundAlignment"], values["backagroundAlignment"], firstLoading]);
 
   const handleValueChange = (key: string, val: any) => {
     setValues((v) => ({ ...v, [key]: val }));
@@ -197,11 +230,7 @@ const ThemeManaged: React.FC = () => {
                 />
               );
             case "select": {
-              const opts = (f.options || "")
-                .split(",")
-                .map((s) => s.trim())
-                .filter(Boolean)
-                .map((o) => ({ value: o }));
+              const opts = parseOptions(f.options || "");
               return (
                 <SettingCardSelect
                   key={f.key}
@@ -247,6 +276,7 @@ const ThemeManaged: React.FC = () => {
             case "select-with-custom": {
               const fieldKey = f.key!;
               const isUploading = uploadingKeys[fieldKey] || false;
+              const opts = parseOptions(f.options || "");
               return (
                 <div key={fieldKey} className="flex items-start gap-2">
                   <div className="flex-1">
@@ -259,7 +289,23 @@ const ThemeManaged: React.FC = () => {
                       onChange={(e) => handleValueChange(fieldKey, e.target.value)}
                     />
                   </div>
-                  <div className="mt-5 shrink-0">
+                  <div className="mt-5 shrink-0 flex gap-1">
+                    {opts.length > 0 && (
+                      <DropdownMenu.Root>
+                        <DropdownMenu.Trigger disabled={isUploading}>
+                          <Button variant="soft" size="1">
+                            <ChevronDownIcon size={16} />
+                          </Button>
+                        </DropdownMenu.Trigger>
+                        <DropdownMenu.Content>
+                          {opts.map((opt) => (
+                            <DropdownMenu.Item key={opt.value} onSelect={() => handleValueChange(fieldKey, opt.value)}>
+                              {opt.label || opt.value}
+                            </DropdownMenu.Item>
+                          ))}
+                        </DropdownMenu.Content>
+                      </DropdownMenu.Root>
+                    )}
                     <Button
                       variant="soft"
                       size="1"
