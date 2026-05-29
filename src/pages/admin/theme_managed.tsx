@@ -105,27 +105,28 @@ const ThemeManaged: React.FC = () => {
 
   // 实时预览背景图片和对齐方式的变更
   useEffect(() => {
+    if (firstLoading) return;
     const imageBackground = document.getElementById("image-background");
-    if (imageBackground && !firstLoading) {
-      const alignStr = values["backgroundAlignment"] || values["backagroundAlignment"];
-      if (alignStr) {
-        const [size, position] = alignStr.split(",").map((s: string) => s.trim());
-        if (size && position) {
-          imageBackground.style.backgroundSize = size;
-          imageBackground.style.backgroundPosition = position;
-        }
-      }
-      
-      const bgImage = values["backgroundImage"];
-      if (bgImage) {
-        // 处理亮暗模式
-        const isDark = document.documentElement.classList.contains("dark");
-        const urlList = bgImage.split("|").map((u: string) => u.trim());
-        const targetUrl = urlList.length > 1 ? (isDark ? urlList[1] : urlList[0]) : urlList[0];
-        imageBackground.style.backgroundImage = `url(${targetUrl})`;
+    if (!imageBackground) return;
+
+    const alignStr = values["backgroundAlignment"] || values["backagroundAlignment"];
+    if (alignStr) {
+      const parts = alignStr.split(",").map((s: string) => s.trim());
+      if (parts.length >= 2) {
+        imageBackground.style.backgroundSize = parts[0];
+        imageBackground.style.backgroundPosition = parts[1];
       }
     }
-  }, [values["backgroundImage"], values["backgroundAlignment"], values["backagroundAlignment"], firstLoading]);
+
+    const bgImage = values["backgroundImage"];
+    if (bgImage) {
+      // 处理亮暗模式
+      const isDark = document.documentElement.classList.contains("dark");
+      const urlList = bgImage.split("|").map((u: string) => u.trim());
+      const targetUrl = urlList.length > 1 ? (isDark ? urlList[1] : urlList[0]) : urlList[0];
+      imageBackground.style.backgroundImage = `url(${targetUrl})`;
+    }
+  }, [values, firstLoading]);
 
   const handleValueChange = (key: string, val: any) => {
     setValues((v) => ({ ...v, [key]: val }));
