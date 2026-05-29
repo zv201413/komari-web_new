@@ -276,12 +276,12 @@ const AdminPanelBar = ({ content }: AdminPanelBarProps) => {
   }
 
   if (loading) {
-    return <div className="flex w-screen h-screen items-center justify-center" style={{backgroundColor: "var(--accent-1)"}}>Loading...</div>;
+    return <div className="flex w-screen h-screen items-center justify-center" style={{backgroundColor: "transparent"}}>Loading...</div>;
   }
 
   if (!account || !account.logged_in) {
     return (
-      <div className="flex w-screen h-screen items-center justify-center" style={{backgroundColor: "var(--accent-1)"}}>
+      <div className="flex w-screen h-screen items-center justify-center" style={{backgroundColor: "transparent"}}>
         <LoginDialog
           autoOpen={true}
           showSettings={false}
@@ -302,7 +302,7 @@ const AdminPanelBar = ({ content }: AdminPanelBarProps) => {
           height: "100vh",
           width: "100vw",
           overflow: "auto",
-          backgroundColor: "var(--accent-1)",
+          backgroundColor: "transparent",
         }}
       >
         {/* Navbar */}
@@ -421,7 +421,9 @@ const AdminPanelBar = ({ content }: AdminPanelBarProps) => {
             animate={sidebarOpen ? "open" : "closed"}
             exit="closed"
             style={{
-              backgroundColor: "var(--accent-1)",
+              backgroundColor: "color-mix(in srgb, var(--accent-1) 70%, transparent)",
+              backdropFilter: "blur(12px)",
+              WebkitBackdropFilter: "blur(12px)",
               height: "100%",
               position: isMobile ? "absolute" : "relative",
               zIndex: isMobile ? 10 : 1,
@@ -631,7 +633,7 @@ const AdminPanelBar = ({ content }: AdminPanelBarProps) => {
           variants={contentVariants}
           animate={sidebarOpen ? "open" : "closed"}
           style={{
-            backgroundColor: "var(--accent-3)",
+            backgroundColor: "transparent",
             display: isMobile && sidebarOpen ? "none" : "block",
             height: "100%", // Ensure the container takes full height
             overflow: "hidden", // Prevent this container from scrolling
@@ -639,7 +641,9 @@ const AdminPanelBar = ({ content }: AdminPanelBarProps) => {
         >
           <div
             style={{
-              backgroundColor: "var(--accent-1)",
+              backgroundColor: "color-mix(in srgb, var(--accent-1) 60%, transparent)",
+              backdropFilter: "blur(16px)",
+              WebkitBackdropFilter: "blur(16px)",
               height: "100%",
               borderRadius: "0",
               padding: isMobile ? "8px" : "16px",
