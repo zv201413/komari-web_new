@@ -103,30 +103,20 @@ const ThemeManaged: React.FC = () => {
     load();
   }, [theme, themeSettings]);
 
-  // 实时预览背景图片和对齐方式的变更
-  useEffect(() => {
-    if (firstLoading) return;
-    const imageBackground = document.getElementById("image-background");
-    if (!imageBackground) return;
-
-    const alignStr = values["backgroundAlignment"] || values["backagroundAlignment"];
-    if (alignStr) {
-      const parts = alignStr.split(",").map((s: string) => s.trim());
-      if (parts.length >= 2) {
-        imageBackground.style.backgroundSize = parts[0];
-        imageBackground.style.backgroundPosition = parts[1];
-      }
-    }
-
+  // 计算预览所需的背景图 URL 和对齐参数
+  const previewBgUrl = useMemo(() => {
     const bgImage = values["backgroundImage"];
-    if (bgImage) {
-      // 处理亮暗模式
-      const isDark = document.documentElement.classList.contains("dark");
-      const urlList = bgImage.split("|").map((u: string) => u.trim());
-      const targetUrl = urlList.length > 1 ? (isDark ? urlList[1] : urlList[0]) : urlList[0];
-      imageBackground.style.backgroundImage = `url(${targetUrl})`;
-    }
-  }, [values, firstLoading]);
+    if (!bgImage) return "";
+    const isDark = document.documentElement.classList.contains("dark");
+    const urlList = bgImage.split("|").map((u: string) => u.trim());
+    return urlList.length > 1 ? (isDark ? urlList[1] : urlList[0]) : urlList[0];
+  }, [values["backgroundImage"]]);
+
+  const previewAlign = useMemo(() => {
+    const alignStr = values["backgroundAlignment"] || values["backagroundAlignment"] || "cover,center";
+    const parts = alignStr.split(",").map((s: string) => s.trim());
+    return { size: parts[0] || "cover", position: parts[1] || "center" };
+  }, [values["backgroundAlignment"], values["backagroundAlignment"]]);
 
   const handleValueChange = (key: string, val: any) => {
     setValues((v) => ({ ...v, [key]: val }));
@@ -178,6 +168,9 @@ const ThemeManaged: React.FC = () => {
     }
   };
 
+  // 判断是否有背景图可预览
+  const hasPreview = !firstLoading && previewBgUrl;
+
   return (
     <Flex direction="column" gap="4" className="p-2 md:p-4">
       <Flex justify="between" align="center">
@@ -194,6 +187,48 @@ const ThemeManaged: React.FC = () => {
           </Button>
         )}
       </Flex>
+
+      {/* 内嵌实时预览面板 */}
+      {hasPreview && (
+        <div
+          style={{
+            position: "relative",
+            width: "100%",
+            height: "220px",
+            borderRadius: "12px",
+            overflow: "hidden",
+            border: "1px solid var(--accent-6)",
+            backgroundImage: `url(${previewBgUrl})`,
+            backgroundSize: previewAlign.size,
+            backgroundPosition: previewAlign.position,
+            backgroundRepeat: "no-repeat",
+            backgroundColor: "var(--accent-3)",
+            transition: "background-image 0.3s ease, background-size 0.3s ease, background-position 0.3s ease",
+          }}
+        >
+          <div
+            style={{
+              position: "absolute",
+              bottom: 0,
+              left: 0,
+              right: 0,
+              padding: "8px 14px",
+              background: "linear-gradient(transparent, rgba(0,0,0,0.6))",
+              color: "white",
+              fontSize: "13px",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <span>🖼️ 背景预览</span>
+            <span style={{ opacity: 0.8, fontSize: "12px" }}>
+              {previewAlign.size}, {previewAlign.position}
+            </span>
+          </div>
+        </div>
+      )}
+
       {error && (
         <Callout.Root color="red">
           <Callout.Text>{error}</Callout.Text>
