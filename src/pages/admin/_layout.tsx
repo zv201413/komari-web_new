@@ -22,49 +22,51 @@ const AdminLayout = () => {
     <>
       <div
         id="background-container"
-        className="fixed top-0 left-0 w-full h-full -z-10 overflow-hidden pointer-events-none"
+        className="fixed top-0 left-0 w-full h-full z-0 overflow-hidden pointer-events-none"
       >
         <div
           id="image-background"
-          className="absolute top-0 left-0 w-full h-full bg-cover bg-no-repeat z-10"
+          className="absolute top-0 left-0 w-full h-full bg-cover bg-no-repeat"
         />
       </div>
-      <Dialog.Root open={open}>
-        <Dialog.Content>
+      <div className="relative z-10">
+        <Dialog.Root open={open}>
           <Dialog.Content>
-            <Dialog.Title>法律声明与合规指引</Dialog.Title>
-            <div className="flex flex-col gap-2">
-              <div className="max-h-[70vh] overflow-y-auto space-y-4">
-                <pre className="text-wrap">{Eula}</pre>
+            <Dialog.Content>
+              <Dialog.Title>法律声明与合规指引</Dialog.Title>
+              <div className="flex flex-col gap-2">
+                <div className="max-h-[70vh] overflow-y-auto space-y-4">
+                  <pre className="text-wrap">{Eula}</pre>
+                </div>
+                <div className="flex flex-row gap-2 justify-end items-center">
+                  <Button
+                    variant="soft"
+                    color="red"
+                    onClick={() => window.close()}
+                  >
+                    不接受
+                  </Button>
+                  <Button
+                    variant="solid"
+                    onClick={() => {
+                      setOpen(false);
+                      updateSettingsWithToast(
+                        { eula_accepted: true },
+                        (key) => key
+                      );
+                    }}
+                  >
+                    我已详细阅读并接受
+                  </Button>
+                </div>
               </div>
-              <div className="flex flex-row gap-2 justify-end items-center">
-                <Button
-                  variant="soft"
-                  color="red"
-                  onClick={() => window.close()}
-                >
-                  不接受
-                </Button>
-                <Button
-                  variant="solid"
-                  onClick={() => {
-                    setOpen(false);
-                    updateSettingsWithToast(
-                      { eula_accepted: true },
-                      (key) => key
-                    );
-                  }}
-                >
-                  我已详细阅读并接受
-                </Button>
-              </div>
-            </div>
+            </Dialog.Content>
           </Dialog.Content>
-        </Dialog.Content>
-      </Dialog.Root>
-      <AccountProvider>
-        <AdminPanelBar content={<Outlet />} />
-      </AccountProvider>
+        </Dialog.Root>
+        <AccountProvider>
+          <AdminPanelBar content={<Outlet />} />
+        </AccountProvider>
+      </div>
     </>
   );
 };
