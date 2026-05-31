@@ -9,7 +9,8 @@ export interface ConfigOptions {
   enableVideoBackground: boolean; // 是否启用视频背景
   videoBackgroundUrl: string; // 桌面端视频背景URL
   videoBackgroundUrlMobile: string; // 移动端视频背景URL
-  backgroundAlignment: string; // 背景对齐方式
+  backgroundAlignment: string; // 背景对齐方式（图片：size,position）
+  videoBackgroundAlignment?: string; // 视频背景对齐（size,position）；为空则继承 backgroundAlignment
   blurValue: number; // 磨砂玻璃模糊值
   blurBackgroundColor: string; // 磨砂玻璃背景颜色
   enableTransparentTags: boolean; // 是否启用标签透明背景

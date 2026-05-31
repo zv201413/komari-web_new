@@ -416,14 +416,12 @@ const AdminPanelBar = ({ content }: AdminPanelBarProps) => {
         {/* Sidebar */}
         <AnimatePresence>
           <motion.div
+            className="purcarte-blur"
             variants={sidebarVariants}
             initial="closed"
             animate={sidebarOpen ? "open" : "closed"}
             exit="closed"
             style={{
-              backgroundColor: "color-mix(in srgb, var(--accent-1) 70%, transparent)",
-              backdropFilter: "blur(12px)",
-              WebkitBackdropFilter: "blur(12px)",
               height: "100%",
               position: isMobile ? "absolute" : "relative",
               zIndex: isMobile ? 10 : 1,
@@ -640,10 +638,8 @@ const AdminPanelBar = ({ content }: AdminPanelBarProps) => {
           }}
         >
           <div
+            className="purcarte-blur"
             style={{
-              backgroundColor: "color-mix(in srgb, var(--accent-1) 60%, transparent)",
-              backdropFilter: "blur(16px)",
-              WebkitBackdropFilter: "blur(16px)",
               height: "100%",
               borderRadius: "0",
               padding: isMobile ? "8px" : "16px",

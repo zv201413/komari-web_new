@@ -3,6 +3,7 @@ import { useIsMobile } from "@/hooks/useMobile";
 import { useAppConfig } from "@/config";
 import { DEFAULT_CONFIG, allAppearance } from "@/config/default";
 import type { AppearanceType, ColorType, ViewModeType } from "@/config/default";
+import { parseStatusCardsVisibility } from "@/config/parse";
 
 type themeAppearanceType = "light" | "dark";
 const defaultThemeAppearance: themeAppearanceType = "light";
@@ -164,14 +165,9 @@ export const useThemeManager = () => {
 
   const [statusCardsVisibility, setStatusCardsVisibility] = useStoredState(
     "statusCardsVisibility",
-    (() => {
-      const visibility: { [key: string]: boolean } = {};
-      defaultstatusCardsVisibility.split(",").forEach((item) => {
-        const [key, value] = item.split(":");
-        visibility[key] = value === "true";
-      });
-      return visibility as ThemeContextType["statusCardsVisibility"];
-    })()
+    parseStatusCardsVisibility(
+      defaultstatusCardsVisibility
+    ) as ThemeContextType["statusCardsVisibility"]
   );
 
   const handleSetStatusCardsVisibility = (

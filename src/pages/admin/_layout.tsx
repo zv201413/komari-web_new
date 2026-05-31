@@ -20,15 +20,6 @@ const AdminLayout = () => {
   }, [loading, settings, lang]);
   return (
     <>
-      <div
-        id="background-container"
-        className="fixed top-0 left-0 w-full h-full z-0 overflow-hidden pointer-events-none"
-      >
-        <div
-          id="image-background"
-          className="absolute top-0 left-0 w-full h-full bg-cover bg-no-repeat"
-        />
-      </div>
       <div className="relative z-10">
         <Dialog.Root open={open}>
           <Dialog.Content>

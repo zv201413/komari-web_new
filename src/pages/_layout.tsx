@@ -8,7 +8,6 @@ import { Theme } from "@radix-ui/themes";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Header } from "@/components/sections/Header";
 import { useAppConfig } from "@/config";
-import { DynamicContent } from "@/components/DynamicContent";
 import { useTheme } from "@/hooks/useTheme";
 import { NodeDataProvider } from "@/contexts/NodeDataContext";
 import { LiveDataProvider } from "@/contexts/LiveDataContext";
@@ -262,7 +261,7 @@ export const AppContent = () => {
       scaling="110%"
       style={{ backgroundColor: "transparent" }}>
       <Toaster />
-      <DynamicContent>
+      <div className="fade-in relative z-30">
         <div
           className={`grid h-dvh transition-all duration-300 ${
             isSettingsOpen && !isMobile
@@ -308,7 +307,7 @@ export const AppContent = () => {
             onClose={() => setIsSettingsOpen(false)}
           />
         </div>
-      </DynamicContent>
+      </div>
     </Theme>
   );
 };

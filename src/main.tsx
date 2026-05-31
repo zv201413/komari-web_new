@@ -14,6 +14,7 @@ import { PublicInfoProvider } from "./contexts/PublicInfoContext";
 import { PWAInstallPrompt } from "./components/PWAInstallPrompt";
 import { PWAUpdatePrompt } from "./components/PWAUpdatePrompt";
 import { OfflineIndicator } from "./components/OfflineIndicator";
+import { AppearanceRuntime } from "./components/AppearanceRuntime";
 import { RPC2Provider } from "./contexts/RPC2Context";
 import { ConfigProvider } from "./config";
 import { ThemeProvider } from "./contexts/ThemeContext";
@@ -51,6 +52,7 @@ const App = () => {
                 scaling="110%"
                 style={{ backgroundColor: "transparent" }}
               >
+                <AppearanceRuntime />
                 <OfflineIndicator />
                 <Toaster />
                 {routing}

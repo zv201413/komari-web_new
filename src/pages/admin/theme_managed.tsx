@@ -219,241 +219,241 @@ const ThemeManaged: React.FC = () => {
 
           // 渲染字段的通用函数
           const renderField = () => {
-          switch (f.type) {
-            case "switch":
-              return (
-                <SettingCardSwitch
-                  key={f.key}
-                  title={title}
-                  description={description}
-                  defaultChecked={!!val}
-                  onChange={(checked) => handleValueChange(f.key!, checked)}
-                />
-              );
-            case "select": {
-              const opts = parseOptions(f.options || "");
-              return (
-                <SettingCardSelect
-                  key={f.key}
-                  title={title}
-                  description={description}
-                  value={val}
-                  options={opts}
-                  OnSave={(v) => handleValueChange(f.key!, v)}
-                  label={val || "选择"}
-                />
-              );
-            }
-            case "number":
-              return (
-                <SettingCardShortTextInput
-                  key={f.key}
-                  title={title}
-                  description={description}
-                  type="number"
-                  showSaveButton={false}
-                  value={val !== undefined ? String(val) : ""}
-                  onChange={(e) =>
-                    handleValueChange(
-                      f.key!,
-                      e.target.value === ""
-                        ? undefined
-                        : Number(e.target.value),
-                    )
-                  }
-                />
-              );
-            case "richtext":
-              return (
-                <SettingCardLongTextInput
-                  key={f.key}
-                  title={title}
-                  description={description}
-                  defaultValue={val !== undefined ? String(val) : ""}
-                  showSaveButton={false}
-                  onChange={(e) => handleValueChange(f.key!, e.target.value)}
-                />
-              );
-            case "select-with-custom": {
-              const fieldKey = f.key!;
-              const isUploading = uploadingKeys[fieldKey] || false;
-              const opts = parseOptions(f.options || "");
-              return (
-                <div key={fieldKey} className="flex items-start gap-2">
-                  <div className="flex-1">
-                    <SettingCardShortTextInput
-                      title={title}
-                      description={description}
-                      value={val !== undefined ? String(val) : ""}
-                      required={f.required}
-                      showSaveButton={false}
-                      onChange={(e) => handleValueChange(fieldKey, e.target.value)}
-                    />
-                  </div>
-                  <div className="mt-5 shrink-0 flex gap-1">
-                    {opts.length > 0 && (
-                      <DropdownMenu.Root>
-                        <DropdownMenu.Trigger disabled={isUploading}>
-                          <Button variant="soft" size="1">
-                            <ChevronDownIcon size={16} />
-                          </Button>
-                        </DropdownMenu.Trigger>
-                        <DropdownMenu.Content>
-                          {opts.map((opt) => (
-                            <DropdownMenu.Item key={opt.value} onSelect={() => handleValueChange(fieldKey, opt.value)}>
-                              {opt.label || opt.value}
-                            </DropdownMenu.Item>
-                          ))}
-                        </DropdownMenu.Content>
-                      </DropdownMenu.Root>
-                    )}
-                    <Button
-                      variant="soft"
-                      size="1"
-                      disabled={isUploading}
-                      onClick={() => document.getElementById(`upload-${fieldKey}`)?.click()}
-                    >
-                      {isUploading ? <Loader2 className="animate-spin" /> : <UploadCloud />}
-                    </Button>
-                    <input
-                      type="file"
-                      id={`upload-${fieldKey}`}
-                      className="hidden"
-                      accept="image/*,video/*,.svg"
-                      onChange={async (e) => {
-                        const file = e.target.files?.[0];
-                        if (!file) return;
-                        setUploadingKeys((prev) => ({ ...prev, [fieldKey]: true }));
-                        try {
-                          const res = await apiService.uploadImage(file);
-                          if (res.status === "success" && res.data?.url) {
-                            handleValueChange(fieldKey, res.data.url);
-                            toast.success("上传成功并已自动应用");
-                          } else {
-                            toast.error("上传失败: " + (res.message || "未知错误"));
-                          }
-                        } catch (err: any) {
-                          toast.error("上传出错: " + err.message);
-                        } finally {
-                          setUploadingKeys((prev) => ({ ...prev, [fieldKey]: false }));
-                          const el = document.getElementById(`upload-${fieldKey}`) as HTMLInputElement;
-                          if (el) el.value = "";
-                        }
-                      }}
-                    />
-                  </div>
-                </div>
-              );
-            }
-            case "multi-image": {
-              const fieldKey = f.key!;
-              const isUploading = uploadingKeys[fieldKey] || false;
-              let imgList: string[] = [];
-              try {
-                const parsed = JSON.parse(val || "[]");
-                if (Array.isArray(parsed)) imgList = parsed;
-              } catch (e) {}
-
-              return (
-                <div key={fieldKey} className="flex flex-col gap-2 p-4 bg-gray-50 dark:bg-zinc-800 rounded-md border border-gray-200 dark:border-zinc-700">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="font-semibold">{title}</div>
-                      <div className="text-sm text-gray-500">{description}</div>
+            switch (f.type) {
+              case "switch":
+                return (
+                  <SettingCardSwitch
+                    key={f.key}
+                    title={title}
+                    description={description}
+                    defaultChecked={!!val}
+                    onChange={(checked) => handleValueChange(f.key!, checked)}
+                  />
+                );
+              case "select": {
+                const opts = parseOptions(f.options || "");
+                return (
+                  <SettingCardSelect
+                    key={f.key}
+                    title={title}
+                    description={description}
+                    value={val}
+                    options={opts}
+                    OnSave={(v) => handleValueChange(f.key!, v)}
+                    label={val || "选择"}
+                  />
+                );
+              }
+              case "number":
+                return (
+                  <SettingCardShortTextInput
+                    key={f.key}
+                    title={title}
+                    description={description}
+                    type="number"
+                    showSaveButton={false}
+                    value={val !== undefined ? String(val) : ""}
+                    onChange={(e) =>
+                      handleValueChange(
+                        f.key!,
+                        e.target.value === ""
+                          ? undefined
+                          : Number(e.target.value),
+                      )
+                    }
+                  />
+                );
+              case "richtext":
+                return (
+                  <SettingCardLongTextInput
+                    key={f.key}
+                    title={title}
+                    description={description}
+                    defaultValue={val !== undefined ? String(val) : ""}
+                    showSaveButton={false}
+                    onChange={(e) => handleValueChange(f.key!, e.target.value)}
+                  />
+                );
+              case "select-with-custom": {
+                const fieldKey = f.key!;
+                const isUploading = uploadingKeys[fieldKey] || false;
+                const opts = parseOptions(f.options || "");
+                return (
+                  <div key={fieldKey} className="flex items-start gap-2">
+                    <div className="flex-1">
+                      <SettingCardShortTextInput
+                        title={title}
+                        description={description}
+                        value={val !== undefined ? String(val) : ""}
+                        required={f.required}
+                        showSaveButton={false}
+                        onChange={(e) => handleValueChange(fieldKey, e.target.value)}
+                      />
                     </div>
-                    <Button
-                      variant="soft"
-                      size="1"
-                      disabled={isUploading}
-                      onClick={() => document.getElementById(`upload-${fieldKey}`)?.click()}
-                    >
-                      {isUploading ? <Loader2 className="animate-spin" /> : <UploadCloud className="mr-1 h-4 w-4" />}
-                      批量上传
-                    </Button>
-                    <input
-                      type="file"
-                      id={`upload-${fieldKey}`}
-                      className="hidden"
-                      multiple
-                      accept="image/*,video/*,.svg"
-                      onChange={async (e) => {
-                        const files = Array.from(e.target.files || []);
-                        if (files.length === 0) return;
-                        setUploadingKeys((prev) => ({ ...prev, [fieldKey]: true }));
-                        
-                        let currentList = [...imgList];
-                        let successCount = 0;
-                        let failCount = 0;
+                    <div className="mt-5 shrink-0 flex gap-1">
+                      {opts.length > 0 && (
+                        <DropdownMenu.Root>
+                          <DropdownMenu.Trigger disabled={isUploading}>
+                            <Button variant="soft" size="1">
+                              <ChevronDownIcon size={16} />
+                            </Button>
+                          </DropdownMenu.Trigger>
+                          <DropdownMenu.Content>
+                            {opts.map((opt) => (
+                              <DropdownMenu.Item key={opt.value} onSelect={() => handleValueChange(fieldKey, opt.value)}>
+                                {opt.label || opt.value}
+                              </DropdownMenu.Item>
+                            ))}
+                          </DropdownMenu.Content>
+                        </DropdownMenu.Root>
+                      )}
+                      <Button
+                        variant="soft"
+                        size="1"
+                        disabled={isUploading}
+                        onClick={() => document.getElementById(`upload-${fieldKey}`)?.click()}
+                      >
+                        {isUploading ? <Loader2 className="animate-spin" /> : <UploadCloud />}
+                      </Button>
+                      <input
+                        type="file"
+                        id={`upload-${fieldKey}`}
+                        className="hidden"
+                        accept="image/*,video/*,.svg"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          setUploadingKeys((prev) => ({ ...prev, [fieldKey]: true }));
+                          try {
+                            const res = await apiService.uploadImage(file);
+                            if (res.status === "success" && res.data?.url) {
+                              handleValueChange(fieldKey, res.data.url);
+                              toast.success("上传成功并已自动应用");
+                            } else {
+                              toast.error("上传失败: " + (res.message || "未知错误"));
+                            }
+                          } catch (err: any) {
+                            toast.error("上传出错: " + err.message);
+                          } finally {
+                            setUploadingKeys((prev) => ({ ...prev, [fieldKey]: false }));
+                            const el = document.getElementById(`upload-${fieldKey}`) as HTMLInputElement;
+                            if (el) el.value = "";
+                          }
+                        }}
+                      />
+                    </div>
+                  </div>
+                );
+              }
+              case "multi-image": {
+                const fieldKey = f.key!;
+                const isUploading = uploadingKeys[fieldKey] || false;
+                let imgList: string[] = [];
+                try {
+                  const parsed = JSON.parse(val || "[]");
+                  if (Array.isArray(parsed)) imgList = parsed;
+                } catch (e) {}
 
-                        try {
-                          for (const file of files) {
-                            try {
-                              const res = await apiService.uploadImage(file);
-                              if (res.status === "success" && res.data?.url) {
-                                currentList.push(res.data.url);
-                                // Update iteratively so UI reflects progress
-                                handleValueChange(fieldKey, JSON.stringify(currentList));
-                                successCount++;
-                              } else {
+                return (
+                  <div key={fieldKey} className="flex flex-col gap-2 p-4 bg-gray-50 dark:bg-zinc-800 rounded-md border border-gray-200 dark:border-zinc-700">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="font-semibold">{title}</div>
+                        <div className="text-sm text-gray-500">{description}</div>
+                      </div>
+                      <Button
+                        variant="soft"
+                        size="1"
+                        disabled={isUploading}
+                        onClick={() => document.getElementById(`upload-${fieldKey}`)?.click()}
+                      >
+                        {isUploading ? <Loader2 className="animate-spin" /> : <UploadCloud className="mr-1 h-4 w-4" />}
+                        批量上传
+                      </Button>
+                      <input
+                        type="file"
+                        id={`upload-${fieldKey}`}
+                        className="hidden"
+                        multiple
+                        accept="image/*,video/*,.svg"
+                        onChange={async (e) => {
+                          const files = Array.from(e.target.files || []);
+                          if (files.length === 0) return;
+                          setUploadingKeys((prev) => ({ ...prev, [fieldKey]: true }));
+                          
+                          let currentList = [...imgList];
+                          let successCount = 0;
+                          let failCount = 0;
+
+                          try {
+                            for (const file of files) {
+                              try {
+                                const res = await apiService.uploadImage(file);
+                                if (res.status === "success" && res.data?.url) {
+                                  currentList.push(res.data.url);
+                                  // Update iteratively so UI reflects progress
+                                  handleValueChange(fieldKey, JSON.stringify(currentList));
+                                  successCount++;
+                                } else {
+                                  failCount++;
+                                }
+                              } catch (err) {
                                 failCount++;
                               }
-                            } catch (err) {
-                              failCount++;
                             }
+                            
+                            if (successCount > 0) {
+                              toast.success(`成功上传 ${successCount} 张图片`);
+                            }
+                            if (failCount > 0) {
+                              toast.error(`${failCount} 张图片上传失败`);
+                            }
+                          } finally {
+                            setUploadingKeys((prev) => ({ ...prev, [fieldKey]: false }));
+                            const el = document.getElementById(`upload-${fieldKey}`) as HTMLInputElement;
+                            if (el) el.value = "";
                           }
-                          
-                          if (successCount > 0) {
-                            toast.success(`成功上传 ${successCount} 张图片`);
-                          }
-                          if (failCount > 0) {
-                            toast.error(`${failCount} 张图片上传失败`);
-                          }
-                        } finally {
-                          setUploadingKeys((prev) => ({ ...prev, [fieldKey]: false }));
-                          const el = document.getElementById(`upload-${fieldKey}`) as HTMLInputElement;
-                          if (el) el.value = "";
-                        }
-                      }}
-                    />
-                  </div>
+                        }}
+                      />
+                    </div>
 
-                  <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 mt-2">
-                    {imgList.map((url, i) => (
-                      <div key={i} className="relative group aspect-video bg-gray-200 dark:bg-zinc-900 rounded overflow-hidden">
-                        <img src={url} alt="bg" className="w-full h-full object-cover" />
-                        <button
-                          className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                          title="删除图片"
-                          onClick={() => {
-                            const newList = imgList.filter((_, idx) => idx !== i);
-                            handleValueChange(fieldKey, JSON.stringify(newList));
-                          }}
-                        >
-                          <X className="w-3 h-3" />
-                        </button>
-                      </div>
-                    ))}
-                    {imgList.length === 0 && (
-                      <div className="col-span-full text-sm text-gray-400 italic">暂无图片</div>
-                    )}
+                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 mt-2">
+                      {imgList.map((url, i) => (
+                        <div key={i} className="relative group aspect-video bg-gray-200 dark:bg-zinc-900 rounded overflow-hidden">
+                          <img src={url} alt="bg" className="w-full h-full object-cover" />
+                          <button
+                            className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                            title="删除图片"
+                            onClick={() => {
+                              const newList = imgList.filter((_, idx) => idx !== i);
+                              handleValueChange(fieldKey, JSON.stringify(newList));
+                            }}
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </div>
+                      ))}
+                      {imgList.length === 0 && (
+                        <div className="col-span-full text-sm text-gray-400 italic">暂无图片</div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              );
+                );
+              }
+              case "string":
+              default:
+                return (
+                  <SettingCardShortTextInput
+                    key={f.key}
+                    title={title}
+                    description={description}
+                    value={val !== undefined ? String(val) : ""}
+                    required={f.required}
+                    showSaveButton={false}
+                    onChange={(e) => handleValueChange(f.key!, e.target.value)}
+                  />
+                );
             }
-            case "string":
-            default:
-              return (
-                <SettingCardShortTextInput
-                  key={f.key}
-                  title={title}
-                  description={description}
-                  value={val !== undefined ? String(val) : ""}
-                  required={f.required}
-                  showSaveButton={false}
-                  onChange={(e) => handleValueChange(f.key!, e.target.value)}
-                />
-              );
-          }
           };
 
 // 在 backgroundAlignment 字段后面追加实时预览面板
