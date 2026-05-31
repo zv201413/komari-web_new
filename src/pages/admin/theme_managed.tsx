@@ -13,6 +13,7 @@ import { apiService } from "@/services/api";
 import Loading from "@/components/loading";
 import { useTranslation } from "react-i18next";
 import { resolveI18nText, type I18nText } from "@/utils/i18nText";
+import { useTheme } from "@/hooks/useTheme";
 
 interface ThemeFieldBase {
   name?: I18nText; // 显示名（字符串或多语言字典）
@@ -45,6 +46,7 @@ const ThemeManaged: React.FC = () => {
   const theme = publicInfo?.theme;
   const themeSettings = publicInfo?.theme_settings || {}; // 当前值
   const { t, i18n } = useTranslation();
+  const { appearance } = useTheme();
 
   const currentLanguage =
     i18n.resolvedLanguage ||
@@ -103,20 +105,20 @@ const ThemeManaged: React.FC = () => {
     load();
   }, [theme, themeSettings]);
 
-  // 计算预览所需的背景图 URL 和对齐参数
+  // 计算预览所需的背景图 URL 和对齐参数 - 改进版本，增加更多依赖确保及时更新
   const previewBgUrl = useMemo(() => {
     const bgImage = values["backgroundImage"];
     if (!bgImage) return "";
-    const isDark = document.documentElement.classList.contains("dark");
+    const isDark = appearance === "dark";
     const urlList = bgImage.split("|").map((u: string) => u.trim());
     return urlList.length > 1 ? (isDark ? urlList[1] : urlList[0]) : urlList[0];
-  }, [values["backgroundImage"]]);
+  }, [values, appearance]);
 
   const previewAlign = useMemo(() => {
     const alignStr = values["backgroundAlignment"] || values["backagroundAlignment"] || "cover,center";
     const parts = alignStr.split(",").map((s: string) => s.trim());
     return { size: parts[0] || "cover", position: parts[1] || "center" };
-  }, [values["backgroundAlignment"], values["backagroundAlignment"]]);
+  }, [values]);
 
   const handleValueChange = (key: string, val: any) => {
     setValues((v) => ({ ...v, [key]: val }));
@@ -169,7 +171,7 @@ const ThemeManaged: React.FC = () => {
   };
 
   // 判断是否有背景图可预览
-  const hasPreview = !firstLoading && previewBgUrl;
+  const hasPreview = !firstLoading && !!previewBgUrl;
 
   return (
     <Flex direction="column" gap="4" className="p-2 md:p-4">
@@ -188,46 +190,6 @@ const ThemeManaged: React.FC = () => {
         )}
       </Flex>
 
-      {/* 内嵌实时预览面板 */}
-      {hasPreview && (
-        <div
-          style={{
-            position: "relative",
-            width: "100%",
-            height: "220px",
-            borderRadius: "12px",
-            overflow: "hidden",
-            border: "1px solid var(--accent-6)",
-            backgroundImage: `url(${previewBgUrl})`,
-            backgroundSize: previewAlign.size,
-            backgroundPosition: previewAlign.position,
-            backgroundRepeat: "no-repeat",
-            backgroundColor: "var(--accent-3)",
-            transition: "background-image 0.3s ease, background-size 0.3s ease, background-position 0.3s ease",
-          }}
-        >
-          <div
-            style={{
-              position: "absolute",
-              bottom: 0,
-              left: 0,
-              right: 0,
-              padding: "8px 14px",
-              background: "linear-gradient(transparent, rgba(0,0,0,0.6))",
-              color: "white",
-              fontSize: "13px",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <span>🖼️ 背景预览</span>
-            <span style={{ opacity: 0.8, fontSize: "12px" }}>
-              {previewAlign.size}, {previewAlign.position}
-            </span>
-          </div>
-        </div>
-      )}
 
       {error && (
         <Callout.Root color="red">
@@ -254,6 +216,9 @@ const ThemeManaged: React.FC = () => {
           const val = values[f.key];
           const title = resolveI18nText(f.name, currentLanguage);
           const description = resolveI18nText(f.help, currentLanguage);
+
+          // 渲染字段的通用函数
+          const renderField = () => {
           switch (f.type) {
             case "switch":
               return (
@@ -489,6 +454,57 @@ const ThemeManaged: React.FC = () => {
                 />
               );
           }
+          };
+
+// 在 backgroundAlignment 字段后面追加实时预览面板
+          if (f.key === "backgroundAlignment" || f.key === "backagroundAlignment") {
+            return (
+              <React.Fragment key={f.key}>
+                {renderField()}
+                {hasPreview && (
+                  <div
+                    style={{
+                      position: "relative",
+                      width: "100%",
+                      height: "220px",
+                      borderRadius: "12px",
+                      overflow: "hidden",
+                      border: "1px solid var(--accent-6)",
+                      backgroundImage: `url(${previewBgUrl})`,
+                      backgroundSize: previewAlign.size,
+                      backgroundPosition: previewAlign.position,
+                      backgroundRepeat: "no-repeat",
+                      backgroundColor: "var(--accent-3)",
+                      transition: "background-size 0.3s ease, background-position 0.3s ease",
+                    }}
+                  >
+                    <div
+                      style={{
+                        position: "absolute",
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        padding: "8px 14px",
+                        background: "linear-gradient(transparent, rgba(0,0,0,0.6))",
+                        color: "white",
+                        fontSize: "13px",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                      }}
+                    >
+                      <span>🖼️ 背景预览</span>
+                      <span style={{ opacity: 0.8, fontSize: "12px" }}>
+                        {previewAlign.size}, {previewAlign.position}
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </React.Fragment>
+            );
+          }
+
+          return renderField();
         })}
       </Flex>
       {fields.length > 0 && (
