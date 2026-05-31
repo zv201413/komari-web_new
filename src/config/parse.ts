@@ -32,6 +32,48 @@ export function parseAlignment(
   return { size, position };
 }
 
+/** backgroundImages 数组元素：旧格式为纯 URL 字符串，新格式带 per-image 焦点/缩放。 */
+export interface BackgroundImageEntry {
+  url: string;
+  /** background-size，如 "160%"；undefined 时回退全局 backgroundAlignment 的 size。 */
+  size?: string;
+  /** background-position，如 "72% 30%"；undefined 时回退全局 position。 */
+  position?: string;
+}
+
+/**
+ * 解析 backgroundImages（JSON 数组字符串）。元素可为：
+ *  - 旧格式 string（纯 URL，可含 "light|dark"）；
+ *  - 新格式 { url, size?, position? }。
+ * 非法元素剔除；解析失败返回空数组。向后兼容旧配置。
+ */
+export function parseBackgroundImages(
+  json: string | undefined
+): BackgroundImageEntry[] {
+  let arr: unknown;
+  try {
+    arr = JSON.parse(json || "[]");
+  } catch {
+    return [];
+  }
+  if (!Array.isArray(arr)) return [];
+  return arr.flatMap((it): BackgroundImageEntry[] => {
+    if (typeof it === "string") return it ? [{ url: it }] : [];
+    if (it && typeof it === "object" && typeof (it as { url?: unknown }).url === "string") {
+      const o = it as { url: string; size?: unknown; position?: unknown };
+      return [
+        {
+          url: o.url,
+          size: typeof o.size === "string" && o.size ? o.size : undefined,
+          position:
+            typeof o.position === "string" && o.position ? o.position : undefined,
+        },
+      ];
+    }
+    return [];
+  });
+}
+
 /**
  * 把对齐里的 size 收敛为合法的 object-fit。
  * 这样“图片合法但视频非法”（如 "100% 100%"）的取值不会让视频静默回退到 fill。

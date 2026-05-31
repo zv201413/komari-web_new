@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAppConfig } from "@/config/hooks";
 import { useIsMobile } from "@/hooks/useMobile";
 import { useTheme } from "@/hooks/useTheme";
-import { resolveAppearance } from "@/config/parse";
+import { resolveAppearance, parseBackgroundImages, parseAlignment } from "@/config/parse";
 
 /**
  * 根级外观运行时。
@@ -55,34 +55,39 @@ export function AppearanceRuntime() {
     [appearance]
   );
 
-  const imageUrl = useMemo(() => {
-    if (!config) return "";
+  // 选定背景图：复数列表随机抽一张（轮换依赖 randomTick），其自带 size/position
+  // 逐字段回退到全局 backgroundAlignment；列表为空时回退单数图（pipe light|dark，无 per-image）。
+  const pickedImage = useMemo(() => {
+    const fallback = parseAlignment(config?.backgroundAlignment);
+    if (!config)
+      return { url: "", size: fallback.size, position: fallback.position };
 
     const isMob = isMobile || isPortrait;
-    let targetMulti =
+    const multi =
       isMob &&
       config.backgroundImagesMobile &&
       config.backgroundImagesMobile !== "[]"
         ? config.backgroundImagesMobile
         : config.backgroundImages;
-    let targetSingle =
+    const single =
       isMob && config.backgroundImageMobile
         ? config.backgroundImageMobile
         : config.backgroundImage;
 
-    const getRandomImage = (jsonStr: string, fallbackUrl: string) => {
-      try {
-        const arr = JSON.parse(jsonStr || "[]");
-        if (Array.isArray(arr) && arr.length > 0) {
-          const randomIndex = Math.floor(Math.random() * arr.length);
-          return arr[randomIndex];
-        }
-      } catch (e) {}
-      return fallbackUrl;
+    const entries = parseBackgroundImages(multi);
+    if (entries.length > 0) {
+      const picked = entries[Math.floor(Math.random() * entries.length)];
+      return {
+        url: getUrlFromConfig(picked.url),
+        size: picked.size ?? fallback.size,
+        position: picked.position ?? fallback.position,
+      };
+    }
+    return {
+      url: getUrlFromConfig(single || ""),
+      size: fallback.size,
+      position: fallback.position,
     };
-
-    const pickedUrlStr = getRandomImage(targetMulti, targetSingle);
-    return getUrlFromConfig(pickedUrlStr);
   }, [config, isMobile, isPortrait, getUrlFromConfig, randomTick]);
 
   const videoUrl = useMemo(() => {
@@ -103,13 +108,13 @@ export function AppearanceRuntime() {
     const { glass, blurPx } = appearanceStyles;
     const styles: string[] = [
       `--main-width: ${config.mainWidth}vw;`,
-      `--body-background-url: url(${imageUrl});`,
+      `--body-background-url: url(${pickedImage.url});`,
       `--purcarte-blur: ${blurPx}px;`,
       `--card-light: ${glass.light};`,
       `--card-dark: ${glass.dark};`,
     ];
     return `:root { ${styles.join(" ")} }`;
-  }, [config, imageUrl, appearanceStyles]);
+  }, [config, pickedImage, appearanceStyles]);
 
   const showVideo = Boolean(config?.enableVideoBackground && videoUrl);
 
@@ -124,9 +129,9 @@ export function AppearanceRuntime() {
           id="image-background"
           className="absolute top-0 left-0 w-full h-full bg-no-repeat z-10"
           style={{
-            backgroundImage: imageUrl ? `url(${imageUrl})` : undefined,
-            backgroundSize: appearanceStyles.image.size,
-            backgroundPosition: appearanceStyles.image.position,
+            backgroundImage: pickedImage.url ? `url(${pickedImage.url})` : undefined,
+            backgroundSize: pickedImage.size,
+            backgroundPosition: pickedImage.position,
           }}
         />
         {showVideo && (

@@ -8,12 +8,14 @@ import {
   SettingCardLongTextInput,
 } from "@/components/admin/SettingCard";
 import { toast } from "sonner";
-import { UploadCloud, Loader2, X, ChevronDownIcon } from "lucide-react";
+import { UploadCloud, Loader2, ChevronDownIcon } from "lucide-react";
 import { apiService } from "@/services/api";
 import Loading from "@/components/loading";
 import { useTranslation } from "react-i18next";
 import { resolveI18nText, type I18nText } from "@/utils/i18nText";
 import { useTheme } from "@/hooks/useTheme";
+import { BackgroundImageItem } from "@/components/admin/BackgroundImageItem";
+import { parseBackgroundImages, type BackgroundImageEntry } from "@/config/parse";
 
 interface ThemeFieldBase {
   name?: I18nText; // 显示名（字符串或多语言字典）
@@ -348,11 +350,9 @@ const ThemeManaged: React.FC = () => {
               case "multi-image": {
                 const fieldKey = f.key!;
                 const isUploading = uploadingKeys[fieldKey] || false;
-                let imgList: string[] = [];
-                try {
-                  const parsed = JSON.parse(val || "[]");
-                  if (Array.isArray(parsed)) imgList = parsed;
-                } catch (e) {}
+                const imgList: BackgroundImageEntry[] = parseBackgroundImages(val);
+                const commitList = (next: BackgroundImageEntry[]) =>
+                  handleValueChange(fieldKey, JSON.stringify(next));
 
                 return (
                   <div key={fieldKey} className="flex flex-col gap-2 p-4 bg-gray-50 dark:bg-zinc-800 rounded-md border border-gray-200 dark:border-zinc-700">
@@ -390,7 +390,7 @@ const ThemeManaged: React.FC = () => {
                               try {
                                 const res = await apiService.uploadImage(file);
                                 if (res.status === "success" && res.data?.url) {
-                                  currentList.push(res.data.url);
+                                  currentList.push({ url: res.data.url });
                                   // Update iteratively so UI reflects progress
                                   handleValueChange(fieldKey, JSON.stringify(currentList));
                                   successCount++;
@@ -417,21 +417,18 @@ const ThemeManaged: React.FC = () => {
                       />
                     </div>
 
-                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 mt-2">
-                      {imgList.map((url, i) => (
-                        <div key={i} className="relative group aspect-video bg-gray-200 dark:bg-zinc-900 rounded overflow-hidden">
-                          <img src={url} alt="bg" className="w-full h-full object-cover" />
-                          <button
-                            className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                            title="删除图片"
-                            onClick={() => {
-                              const newList = imgList.filter((_, idx) => idx !== i);
-                              handleValueChange(fieldKey, JSON.stringify(newList));
-                            }}
-                          >
-                            <X className="w-3 h-3" />
-                          </button>
-                        </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mt-2">
+                      {imgList.map((entry, i) => (
+                        <BackgroundImageItem
+                          key={i}
+                          entry={entry}
+                          onChange={(next) =>
+                            commitList(imgList.map((it, idx) => (idx === i ? next : it)))
+                          }
+                          onDelete={() =>
+                            commitList(imgList.filter((_, idx) => idx !== i))
+                          }
+                        />
                       ))}
                       {imgList.length === 0 && (
                         <div className="col-span-full text-sm text-gray-400 italic">暂无图片</div>
