@@ -199,7 +199,7 @@ const NodeTable: React.FC<NodeTableProps> = ({ nodes, liveData }) => {
   });
 
   return (
-    <div className="mx-4 overflow-x-auto rounded-xl node-table-container">
+    <div className="mx-4 overflow-x-auto rounded-xl node-table-container bg-[var(--accent-1)]">
       <Table>
         <TableHeader>
           <TableRow>

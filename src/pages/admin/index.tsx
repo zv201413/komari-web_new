@@ -439,7 +439,7 @@ const NodeTable = ({
         onDragEnd={handleDragEnd}
       >
         <Table>
-          <TableHeader style={{ backgroundColor: "var(--accent-4)" }}>
+          <TableHeader>
             <TableRow>
               <TableHead></TableHead>
               <TableHead>

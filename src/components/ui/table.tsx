@@ -12,9 +12,6 @@ function Table({ className, ...props }: React.ComponentProps<"table">) {
         data-slot="table"
         className={cn("w-full caption-bottom text-sm", className)}
         {...props}
-        style={{
-          backgroundColor: "var(--accent-1)", // 浅色背景
-        }}
       />
     </div>
   );
@@ -25,9 +22,6 @@ function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
     <thead
       data-slot="table-header"
       className={cn("[&_tr]:border-b", className)}
-      style={{
-        backgroundColor: "var(--accent-2)", // 更浅的表头背景
-      }}
       {...props}
     />
   );
@@ -48,9 +42,6 @@ function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
     <tfoot
       data-slot="table-footer"
       className={cn("border-t font-medium [&>tr]:last:border-b-0", className)}
-      style={{
-        backgroundColor: "var(--accent-2)", // 浅色底部
-      }}
       {...props}
     />
   );
@@ -77,9 +68,6 @@ function TableHead({ className, ...props }: React.ComponentProps<"th">) {
         "h-10 px-2 text-left align-middle font-medium whitespace-nowrap text-[var(--accent-12)] [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
         className
       )}
-      style={{
-        backgroundColor: "var(--accent-4)", // 浅色表头
-      }}
       {...props}
     />
   );

@@ -119,7 +119,7 @@ function SelectorInner<T>(props: SelectorProps<T>) {
           <Search size="16" />
         </TextField.Slot>
       </TextField.Root>
-      <div className="selector rounded-md overflow-hidden">
+      <div className="selector rounded-md overflow-hidden bg-[var(--accent-1)]">
         <Table>
           <TableHeader>
             <TableHead>
