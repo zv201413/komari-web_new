@@ -9,6 +9,8 @@ interface NodeSelectorProps {
   value: string[]; // uuid 列表
   onChange: (uuids: string[]) => void;
   hiddenUuidOnlyClient?: boolean;
+  /** 透明面板：透出父级玻璃卡片（admin 玻璃页用）。默认实色。 */
+  transparent?: boolean;
 }
 
 const NodeSelector: React.FC<NodeSelectorProps> = ({
@@ -17,6 +19,7 @@ const NodeSelector: React.FC<NodeSelectorProps> = ({
   value,
   onChange,
   hiddenUuidOnlyClient = false,
+  transparent = false,
 }) => {
   const { nodeDetail, isLoading, error } = useNodeDetails();
   const { t } = useTranslation();
@@ -33,6 +36,7 @@ const NodeSelector: React.FC<NodeSelectorProps> = ({
     <Selector
       className={className}
       hiddenDescription={hiddenDescription}
+      transparent={transparent}
       value={nodesFiltered}
       onChange={onChange}
       items={[...nodeDetail]}

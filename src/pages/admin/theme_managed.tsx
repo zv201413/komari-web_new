@@ -13,7 +13,6 @@ import { apiService } from "@/services/api";
 import Loading from "@/components/loading";
 import { useTranslation } from "react-i18next";
 import { resolveI18nText, type I18nText } from "@/utils/i18nText";
-import { useTheme } from "@/hooks/useTheme";
 import { BackgroundImageItem } from "@/components/admin/BackgroundImageItem";
 import { parseBackgroundImages, type BackgroundImageEntry } from "@/config/parse";
 
@@ -48,7 +47,6 @@ const ThemeManaged: React.FC = () => {
   const theme = publicInfo?.theme;
   const themeSettings = publicInfo?.theme_settings || {}; // 当前值
   const { t, i18n } = useTranslation();
-  const { appearance } = useTheme();
 
   const currentLanguage =
     i18n.resolvedLanguage ||
@@ -62,6 +60,26 @@ const ThemeManaged: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [firstLoading, setFirstLoading] = useState(true);
   const [uploadingKeys, setUploadingKeys] = useState<Record<string, boolean>>({});
+
+  // 预览卡比例（纯编辑器辅助，按 fieldKey 存 localStorage；不影响保存值/运行时）
+  const [previewRatios, setPreviewRatios] = useState<Record<string, number>>(() => {
+    try {
+      return JSON.parse(localStorage.getItem("komari:bgPreviewRatio") || "{}");
+    } catch {
+      return {};
+    }
+  });
+  const setPreviewRatio = (key: string, ratio: number) => {
+    setPreviewRatios((prev) => {
+      const next = { ...prev, [key]: ratio };
+      try {
+        localStorage.setItem("komari:bgPreviewRatio", JSON.stringify(next));
+      } catch {
+        /* ignore */
+      }
+      return next;
+    });
+  };
 
   // 拉取主题配置
   useEffect(() => {
@@ -106,21 +124,6 @@ const ThemeManaged: React.FC = () => {
     }
     load();
   }, [theme, themeSettings]);
-
-  // 计算预览所需的背景图 URL 和对齐参数 - 改进版本，增加更多依赖确保及时更新
-  const previewBgUrl = useMemo(() => {
-    const bgImage = values["backgroundImage"];
-    if (!bgImage) return "";
-    const isDark = appearance === "dark";
-    const urlList = bgImage.split("|").map((u: string) => u.trim());
-    return urlList.length > 1 ? (isDark ? urlList[1] : urlList[0]) : urlList[0];
-  }, [values, appearance]);
-
-  const previewAlign = useMemo(() => {
-    const alignStr = values["backgroundAlignment"] || values["backagroundAlignment"] || "cover,center";
-    const parts = alignStr.split(",").map((s: string) => s.trim());
-    return { size: parts[0] || "cover", position: parts[1] || "center" };
-  }, [values]);
 
   const handleValueChange = (key: string, val: any) => {
     setValues((v) => ({ ...v, [key]: val }));
@@ -171,9 +174,6 @@ const ThemeManaged: React.FC = () => {
       setSaving(false);
     }
   };
-
-  // 判断是否有背景图可预览
-  const hasPreview = !firstLoading && !!previewBgUrl;
 
   return (
     <Flex direction="column" gap="4" className="p-2 md:p-4">
@@ -349,6 +349,14 @@ const ThemeManaged: React.FC = () => {
               }
               case "multi-image": {
                 const fieldKey = f.key!;
+                // 移动端背景图列表用竖屏预览卡，桌面端用横屏（匹配各自实际显示方向）
+                const portrait = /mobile/i.test(fieldKey);
+                // 预览卡比例：localStorage 自定义优先，否则按方向给默认；presets 供一键切换
+                const previewRatio =
+                  previewRatios[fieldKey] ?? (portrait ? 9 / 16 : 16 / 9);
+                const ratioPresets: [string, number][] = portrait
+                  ? [["9:16", 9 / 16], ["9:19.5", 9 / 19.5], ["9:20", 9 / 20], ["3:4", 3 / 4]]
+                  : [["16:9", 16 / 9], ["16:10", 16 / 10], ["21:9", 21 / 9], ["4:3", 4 / 3]];
                 const isUploading = uploadingKeys[fieldKey] || false;
                 const imgList: BackgroundImageEntry[] = parseBackgroundImages(val);
                 const commitList = (next: BackgroundImageEntry[]) =>
@@ -417,11 +425,45 @@ const ThemeManaged: React.FC = () => {
                       />
                     </div>
 
+                    {/* 预览比例（纯编辑器辅助；运行时按各设备视口自适应，不受此影响） */}
+                    <div className="flex flex-wrap items-center gap-1 text-xs">
+                      <span className="mr-1 text-gray-500">预览比例</span>
+                      {ratioPresets.map(([label, r]) => {
+                        const active = Math.abs(r - previewRatio) < 0.001;
+                        return (
+                          <button
+                            key={label}
+                            type="button"
+                            onClick={() => setPreviewRatio(fieldKey, r)}
+                            className={`rounded border px-2 py-0.5 ${active ? "border-blue-500 bg-blue-50 text-blue-600 dark:bg-blue-950" : "border-gray-300 text-gray-500 dark:border-zinc-600"}`}
+                          >
+                            {label}
+                          </button>
+                        );
+                      })}
+                      {!portrait && (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setPreviewRatio(fieldKey, window.innerWidth / window.innerHeight)
+                          }
+                          className="rounded border border-gray-300 px-2 py-0.5 text-gray-500 dark:border-zinc-600"
+                          title="贴合你当前显示器的宽高比"
+                        >
+                          📐 用当前屏幕
+                        </button>
+                      )}
+                      <span className="ml-1 tabular-nums text-gray-400">
+                        ≈{previewRatio.toFixed(2)}
+                      </span>
+                    </div>
+
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mt-2">
                       {imgList.map((entry, i) => (
                         <BackgroundImageItem
                           key={i}
                           entry={entry}
+                          aspectRatio={previewRatio}
                           onChange={(next) =>
                             commitList(imgList.map((it, idx) => (idx === i ? next : it)))
                           }
@@ -452,54 +494,6 @@ const ThemeManaged: React.FC = () => {
                 );
             }
           };
-
-// 在 backgroundAlignment 字段后面追加实时预览面板
-          if (f.key === "backgroundAlignment" || f.key === "backagroundAlignment") {
-            return (
-              <React.Fragment key={f.key}>
-                {renderField()}
-                {hasPreview && (
-                  <div
-                    style={{
-                      position: "relative",
-                      width: "100%",
-                      height: "220px",
-                      borderRadius: "12px",
-                      overflow: "hidden",
-                      border: "1px solid var(--accent-6)",
-                      backgroundImage: `url(${previewBgUrl})`,
-                      backgroundSize: previewAlign.size,
-                      backgroundPosition: previewAlign.position,
-                      backgroundRepeat: "no-repeat",
-                      backgroundColor: "var(--accent-3)",
-                      transition: "background-size 0.3s ease, background-position 0.3s ease",
-                    }}
-                  >
-                    <div
-                      style={{
-                        position: "absolute",
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        padding: "8px 14px",
-                        background: "linear-gradient(transparent, rgba(0,0,0,0.6))",
-                        color: "white",
-                        fontSize: "13px",
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                      }}
-                    >
-                      <span>🖼️ 背景预览</span>
-                      <span style={{ opacity: 0.8, fontSize: "12px" }}>
-                        {previewAlign.size}, {previewAlign.position}
-                      </span>
-                    </div>
-                  </div>
-                )}
-              </React.Fragment>
-            );
-          }
 
           return renderField();
         })}

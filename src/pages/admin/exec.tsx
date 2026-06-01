@@ -283,6 +283,7 @@ const ExecContent = () => {
                                 value={selectedNodes}
                                 onChange={setSelectedNodes}
                                 className="min-h-[200px]"
+                                transparent
                             />
                         </SettingCardCollapse>
                         {selectedNodes.length > 0 && (

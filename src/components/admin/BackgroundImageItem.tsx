@@ -6,6 +6,8 @@ interface BackgroundImageItemProps {
   entry: BackgroundImageEntry;
   onChange: (next: BackgroundImageEntry) => void;
   onDelete: () => void;
+  /** 预览卡宽高比（宽/高）；如 16/9 横屏、9/16 竖屏。默认 16/9。 */
+  aspectRatio?: number;
 }
 
 /** "light|dark" 取第一段做缩略图预览。 */
@@ -36,6 +38,7 @@ export function BackgroundImageItem({
   entry,
   onChange,
   onDelete,
+  aspectRatio = 16 / 9,
 }: BackgroundImageItemProps) {
   const previewRef = useRef<HTMLDivElement>(null);
   const [dragging, setDragging] = useState(false);
@@ -57,8 +60,9 @@ export function BackgroundImageItem({
     <div className="flex flex-col gap-1">
       <div
         ref={previewRef}
-        className="relative group aspect-video bg-gray-200 dark:bg-zinc-900 rounded overflow-hidden cursor-crosshair touch-none"
+        className="relative group bg-gray-200 dark:bg-zinc-900 rounded overflow-hidden cursor-crosshair touch-none"
         style={{
+          aspectRatio: String(aspectRatio),
           backgroundImage: `url(${getThumbUrl(entry.url)})`,
           backgroundSize: entry.size ?? "cover",
           backgroundPosition: entry.position ?? "center top",

@@ -35,6 +35,8 @@ export interface SelectorProps<T> {
   searchPlaceholder?: string;
   /** 表头标题（第二列） */
   headerLabel?: React.ReactNode;
+  /** 透明面板：去掉实色底，让父级玻璃卡片透出（admin 玻璃页用）。默认实色 bg-accent-1。 */
+  transparent?: boolean;
 }
 
 function SelectorInner<T>(props: SelectorProps<T>) {
@@ -50,6 +52,7 @@ function SelectorInner<T>(props: SelectorProps<T>) {
     filterItem,
     searchPlaceholder = "Search…",
     headerLabel = "Items",
+    transparent = false,
   } = props;
 
   const value = externalValue ?? [];
@@ -119,7 +122,7 @@ function SelectorInner<T>(props: SelectorProps<T>) {
           <Search size="16" />
         </TextField.Slot>
       </TextField.Root>
-      <div className="selector rounded-md overflow-hidden bg-[var(--accent-1)]">
+      <div className={`selector rounded-md overflow-hidden ${transparent ? "" : "bg-[var(--accent-1)]"}`}>
         <Table>
           <TableHeader>
             <TableHead>
