@@ -19,6 +19,7 @@ import { RPC2Provider } from "./contexts/RPC2Context";
 import { ConfigProvider } from "./config";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { useThemeManager } from "./hooks/useTheme";
+import { AccountProvider } from "./contexts/AccountContext";
 import { Theme } from "@radix-ui/themes";
 import { Toaster } from "./components/ui/sonner";
 
@@ -44,8 +45,9 @@ const App = () => {
     <Suspense fallback={<Loading />}>
       <RPC2Provider>
         <PublicInfoProvider>
-          <ConfigProvider>
-            <ThemeProvider value={themeManager}>
+          <AccountProvider>
+            <ConfigProvider>
+              <ThemeProvider value={themeManager}>
               <Theme
                 appearance={themeManager.appearance}
                 accentColor={themeManager.color}
@@ -61,6 +63,7 @@ const App = () => {
               </Theme>
             </ThemeProvider>
           </ConfigProvider>
+          </AccountProvider>
         </PublicInfoProvider>
       </RPC2Provider>
     </Suspense>

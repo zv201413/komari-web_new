@@ -20,7 +20,6 @@ export function AppearanceRuntime() {
   const isMobile = useIsMobile();
   const { appearance } = useTheme();
   const [isPortrait, setIsPortrait] = useState(false);
-  const [randomTick, setRandomTick] = useState(0);
 
   useEffect(() => {
     const checkPortrait = () =>
@@ -30,18 +29,7 @@ export function AppearanceRuntime() {
     return () => window.removeEventListener("resize", checkPortrait);
   }, []);
 
-  useEffect(() => {
-    let tid: ReturnType<typeof setTimeout>;
-    const scheduleNext = () => {
-      const delay = Math.random() * 20 * 60 * 1000;
-      tid = setTimeout(() => {
-        setRandomTick((t) => t + 1);
-        scheduleNext();
-      }, delay);
-    };
-    scheduleNext();
-    return () => clearTimeout(tid);
-  }, []);
+
 
   const getUrlFromConfig = useCallback(
     (urls: string) => {
@@ -88,7 +76,7 @@ export function AppearanceRuntime() {
       size: fallback.size,
       position: fallback.position,
     };
-  }, [config, isMobile, isPortrait, getUrlFromConfig, randomTick]);
+  }, [config, isMobile, isPortrait, getUrlFromConfig]);
 
   const videoUrl = useMemo(() => {
     if (!config || !config.enableVideoBackground) return "";

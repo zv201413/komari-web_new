@@ -259,7 +259,7 @@ const ExecContent = () => {
             <Separator size="4" />
 
             {/* 命令输入区域 */}
-            <Card className="p-6">
+            <Card className="p-6" style={{ backgroundColor: "transparent" }}>
                 <Flex direction="column" gap="4">
 
                     <label className="text-xl font-bold">
@@ -316,7 +316,7 @@ const ExecContent = () => {
 
             {/* 执行结果区域 */}
             {results.length > 0 && (
-                <Card className="p-6">
+                <Card className="p-6" style={{ backgroundColor: "transparent" }}>
                     <Flex direction="column" gap="4">
                         <Flex justify="between" align="center">
                             <Text size="4" weight="medium">
@@ -333,7 +333,7 @@ const ExecContent = () => {
                             {results.map((result) => {
                                 const status = getTaskStatus(result);
                                 return (
-                                    <Card key={result.client} className="p-4">
+                                    <Card key={result.client} className="p-4" style={{ backgroundColor: "transparent" }}>
                                         <Flex direction="column" gap="3">
                                             {/* 节点信息和状态 */}
                                             <label className="text-xl font-medium">
