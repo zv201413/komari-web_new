@@ -19,6 +19,7 @@ export const defaultTexts = {
     expiredAt: "到期:",
     offline: "离线",
     online: "在线",
+    adminOnly: "仅管理员可见",
     off: "OFF",
     notAvailable: "N/A",
     notEnabled: "未启用",

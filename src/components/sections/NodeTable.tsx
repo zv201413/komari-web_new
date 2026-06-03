@@ -109,6 +109,15 @@ const NodeTableRow = ({
 
   return (
     <Card
+      style={
+        node.hidden
+          ? {
+              opacity: 0.9,
+              outline: "1px dashed var(--gray-8)",
+              outlineOffset: "-2px",
+            }
+          : undefined
+      }
       className={
         !isOnline
           ? "striped-bg-red-translucent-diagonal ring-2 ring-red-500/50"
@@ -131,6 +140,11 @@ const NodeTableRow = ({
               className="hover:underline hover:text-(--accent-11)">
               <div className="text-base font-bold">{node.name}</div>
             </Link>
+            {node.hidden && (
+              <span className="inline-block rounded px-1.5 py-0.5 text-xs font-medium bg-gray-500/15 text-gray-500 whitespace-nowrap">
+                {t("node.adminOnly")}
+              </span>
+            )}
             <Tag className="text-xs" tags={tagList} />
             <div className="flex text-xs">
               <span className={expired_at_color}>

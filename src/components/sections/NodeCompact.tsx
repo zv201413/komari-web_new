@@ -57,6 +57,15 @@ export const NodeCompact = ({ node, onShowDetails }: NodeCompactProps) => {
 
   return (
     <Card
+      style={
+        node.hidden
+          ? {
+              opacity: 0.9,
+              outline: "1px dashed var(--gray-8)",
+              outlineOffset: "-2px",
+            }
+          : undefined
+      }
       className={`flex flex-col mx-auto w-full max-w-sm ${
         isOnline
           ? ""
@@ -75,6 +84,11 @@ export const NodeCompact = ({ node, onShowDetails }: NodeCompactProps) => {
               loading="lazy"
             />
             <CardTitle className="text-sm font-bold">{node.name}</CardTitle>
+            {node.hidden && (
+              <span className="rounded px-1.5 py-0.5 text-xs font-medium bg-gray-500/15 text-gray-500 whitespace-nowrap">
+                {t("node.adminOnly")}
+              </span>
+            )}
           </div>
         </Link>
         <button onClick={onShowDetails}>
