@@ -88,7 +88,7 @@ const SettingItem = ({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {item.options.split(",").map((option: string) => (
+              {item.options.split(",").filter((o: string) => o !== "").map((option: string) => (
                 <SelectItem key={option} value={option}>
                   {option}
                 </SelectItem>
@@ -97,7 +97,7 @@ const SettingItem = ({
           </Select>
         );
       case "select-with-custom": {
-        const optionsList = item.options.split(",");
+        const optionsList = item.options.split(",").filter((o: string) => o !== "");
         const isCustomValue = forceCustom || !optionsList.includes(localValue as string);
         const [isUploading, setIsUploading] = useState(false);
         const fileInputRef = useRef<HTMLInputElement>(null);

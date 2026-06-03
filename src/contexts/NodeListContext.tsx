@@ -1,5 +1,6 @@
 import React from "react";
 import { useRPC2Call } from "./RPC2Context";
+import { useAccount } from "./AccountContext";
 
 export type NodeBasicInfo = {
   /** 节点唯一标识符 */
@@ -57,6 +58,7 @@ export type NodeBasicInfo = {
   require_sign_in?: boolean;
   sign_in_interval_days?: number;
   sign_in_target_date?: string | null;
+  hidden?: boolean;
 };
 
 interface NodeListContextType {
@@ -122,6 +124,7 @@ export const NodeListProvider: React.FC<{ children: React.ReactNode }> = ({
           require_sign_in: n.require_sign_in ?? false,
           sign_in_interval_days: n.sign_in_interval_days ?? 30,
           sign_in_target_date: n.sign_in_target_date ?? null,
+          hidden: n.hidden ?? false,
         }));
         setNodeList(list);
       })
@@ -137,8 +140,16 @@ export const NodeListProvider: React.FC<{ children: React.ReactNode }> = ({
   React.useEffect(() => {
     refresh();
   }, []);
+
+  const { account } = useAccount();
+
+  const filteredNodeList = React.useMemo(() => {
+    if (!nodeList) return null;
+    return nodeList.filter(n => !n.hidden || account !== null);
+  }, [nodeList, account]);
+
   return (
-    <NodeListContext.Provider value={{ nodeList, isLoading, error, refresh }}>
+    <NodeListContext.Provider value={{ nodeList: filteredNodeList, isLoading, error, refresh }}>
       {children}
     </NodeListContext.Provider>
   );

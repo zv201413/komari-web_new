@@ -9,6 +9,7 @@ import { Pencil } from "lucide-react";
 import { t } from "i18next";
 import { toast } from "sonner";
 import { Button, Dialog, Flex, IconButton, TextField } from "@radix-ui/themes";
+import { Switch } from "@/components/ui/switch";
 
 export function EditDialog({ item }: { item: z.infer<typeof schema> }) {
   const [form, setForm] = React.useState<ClientFormData & { weight: number }>({
@@ -16,6 +17,7 @@ export function EditDialog({ item }: { item: z.infer<typeof schema> }) {
     token: item.token || "", // 从 item 初始化 token
     remark: item.remark || "", // 从 item 初始化 remark
     public_remark: item.public_remark || "", // 从 item 初始化 public_remark
+    hidden: item.hidden || false,
     weight: item.weight || 0,
   });
   const [loading, setLoading] = React.useState(false);
@@ -116,6 +118,17 @@ export function EditDialog({ item }: { item: z.infer<typeof schema> }) {
               disabled={loading}
             />
           </div>
+          <div className="flex items-center justify-between">
+            <label className="text-sm font-medium text-muted-foreground">
+              {t("admin.nodeEdit.hidden", "前台隐藏（仅管理员可见）")}
+            </label>
+            <Switch
+              checked={!!form.hidden}
+              onCheckedChange={(checked) =>
+                setForm((f) => ({ ...f, hidden: checked }))
+              }
+            />
+          </div>
         </div>
         <Flex gap="2" align={"start"} className="mt-4">
           <Button
@@ -127,6 +140,7 @@ export function EditDialog({ item }: { item: z.infer<typeof schema> }) {
                 token: form.token,
                 remark: form.remark,
                 public_remark: form.public_remark,
+                hidden: form.hidden,
               };
               saveClientData(item.uuid, payload, setLoading, () =>
                 setOpen(false)

@@ -27,6 +27,24 @@ import Tips from "../ui/tips";
 import { CircleFadingArrowUp } from "lucide-react";
 import { useRPC2Call } from "@/contexts/RPC2Context";
 import { resolveI18nText } from "@/utils/i18nText";
+import { Switch } from "@/components/ui/switch";
+
+function useGlassToggle(pathname: string) {
+  const [glassEnabled, setGlassEnabled] = useState(false);
+
+  useEffect(() => {
+    const storageKey = `glass-toggle-${pathname}`;
+    setGlassEnabled(localStorage.getItem(storageKey) === "true");
+  }, [pathname]);
+
+  const toggle = (val: boolean) => {
+    setGlassEnabled(val);
+    const storageKey = `glass-toggle-${pathname}`;
+    localStorage.setItem(storageKey, val.toString());
+  };
+
+  return [glassEnabled, toggle] as const;
+}
 
 // 将JSON配置转换为类型安全的菜单项数组 (基础静态菜单)
 const baseMenuItems = (menuConfig as { menu: MenuItem[] }).menu;
@@ -79,6 +97,7 @@ const AdminPanelBar = ({ content }: AdminPanelBarProps) => {
   const [releasesSince, setReleasesSince] = useState<GithubReleaseInfo[]>([]);
 
   const currentTheme = publicInfo?.theme;
+  const [glassEnabled, setGlassEnabled] = useGlassToggle(location.pathname);
 
   // 动态扩展菜单
   const [extraMenuItems, setExtraMenuItems] = useState<ExtendedMenuItem[]>([]);
@@ -638,7 +657,7 @@ const AdminPanelBar = ({ content }: AdminPanelBarProps) => {
           }}
         >
           <div
-            className="purcarte-blur"
+            className={glassEnabled ? "purcarte-blur theme-card-style" : ""}
             style={{
               height: "100%",
               borderRadius: "0",
@@ -647,6 +666,12 @@ const AdminPanelBar = ({ content }: AdminPanelBarProps) => {
               boxSizing: "border-box",
             }}
           >
+            <Flex justify="end" mb="4" align="center" gap="2" className="mr-2 mt-2">
+              <label className="text-sm font-medium text-muted-foreground">
+                {t("admin.glassPanel", "深色透明面板")}
+              </label>
+              <Switch checked={glassEnabled} onCheckedChange={setGlassEnabled} />
+            </Flex>
             <Callout.Root mb="2" hidden={ishttps} color="red">
               <Callout.Icon>
                 <svg

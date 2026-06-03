@@ -5,6 +5,7 @@ export interface ClientFormData {
   token: string;
   remark: string;
   public_remark: string;
+  hidden?: boolean;
 }
 
 export const schema = z.object({
@@ -30,4 +31,5 @@ export const schema = z.object({
   token: z.string().optional(),
   remark: z.string().optional(),
   public_remark: z.string().optional(),
+  hidden: z.boolean().optional(),
 });
