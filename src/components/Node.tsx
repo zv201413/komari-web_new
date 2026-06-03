@@ -66,6 +66,9 @@ const Node = React.memo(({ basic, live, online }: NodeProps) => {
         width: "100%",
         margin: "0 auto",
         transition: "all 0.2s ease-in-out",
+        opacity: basic.hidden ? 0.9 : undefined,
+        outline: basic.hidden ? "1px dashed var(--gray-8)" : undefined,
+        outlineOffset: basic.hidden ? "-2px" : undefined,
       }}
       id={basic.uuid}
       className="node-card hover:cursor-pointer hover:shadow-lg hover:bg-accent-2"
@@ -130,6 +133,11 @@ const Node = React.memo(({ basic, live, online }: NodeProps) => {
                 </IconButton>
               }
             />
+            {basic.hidden && (
+              <Badge color="gray" variant="soft">
+                {t("nodeCard.adminOnly", "仅管理员可见")}
+              </Badge>
+            )}
             <Badge color={online ? "green" : "red"} variant="soft">
               {online ? t("nodeCard.online") : t("nodeCard.offline")}
             </Badge>

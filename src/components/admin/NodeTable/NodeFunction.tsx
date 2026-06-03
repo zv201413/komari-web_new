@@ -13,6 +13,7 @@ import {
   Flex,
   IconButton,
   SegmentedControl,
+  Text,
   TextArea,
   TextField,
   Switch,
@@ -52,6 +53,11 @@ export function ActionsCell({ row }: { row: Row<z.infer<typeof schema>> }) {
     serviceName: "",
   });
   const [open, setOpen] = React.useState(false);
+  // 前台隐藏开关：初值取节点当前 hidden（新节点默认 false，已设置的反映真实状态）。
+  // 与安装选项不同——它不生成命令参数，而是即时调用编辑接口作用于 server 端节点属性。
+  const [nodeHidden, setNodeHidden] = React.useState(
+    row.original.hidden ?? false
+  );
 
   const generateCommand = () => {
     const host = window.location.origin;
@@ -137,6 +143,38 @@ export function ActionsCell({ row }: { row: Row<z.infer<typeof schema>> }) {
       console.error("Failed to copy text: ", err);
     } finally {
       setOpen(false);
+    }
+  };
+
+  // 切换"前台隐藏"：复用编辑接口（与 NodeEditDialog 同一 body 形态，按字段更新，
+  // 不会覆盖未提交的 group/tags/traffic_limit）。即时生效，失败回滚开关。
+  const updateNodeHidden = async (hidden: boolean) => {
+    setNodeHidden(hidden);
+    try {
+      const res = await fetch(
+        `/api/admin/client/${row.original.uuid}/edit`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: row.original.name,
+            token: row.original.token ?? "",
+            remark: row.original.remark ?? "",
+            public_remark: row.original.public_remark ?? "",
+            hidden,
+          }),
+        }
+      );
+      if (res.status === 200) {
+        toast.success(t("admin.nodeEdit.saveSuccess", "保存成功"));
+        refreshTable?.();
+      } else {
+        toast.error(t("admin.nodeEdit.saveError", "保存失败"));
+        setNodeHidden(!hidden);
+      }
+    } catch {
+      toast.error(t("admin.nodeEdit.saveError", "保存失败"));
+      setNodeHidden(!hidden);
     }
   };
 
@@ -258,6 +296,28 @@ export function ActionsCell({ row }: { row: Row<z.infer<typeof schema>> }) {
                   </label>
                 </Flex>
               </div>
+              <Flex direction="column" gap="1" className="mt-1">
+                <Flex gap="2" align="center">
+                  <Switch
+                    checked={nodeHidden}
+                    onCheckedChange={(checked) =>
+                      updateNodeHidden(Boolean(checked))
+                    }
+                  />
+                  <label
+                    className="text-sm font-normal"
+                    onClick={() => updateNodeHidden(!nodeHidden)}
+                  >
+                    {t("admin.nodeEdit.hidden", "前台隐藏（仅管理员可见）")}
+                  </label>
+                </Flex>
+                <Text size="1" color="gray">
+                  {t(
+                    "admin.nodeTable.hiddenTip",
+                    "勾选后该节点将从公共面板隐藏，仅登录管理员可见（立即生效）"
+                  )}
+                </Text>
+              </Flex>
               <Flex direction="column" gap="2">
                 <label className="text-sm font-bold">
                   {t("admin.nodeTable.ghproxy", "GitHub 代理")}

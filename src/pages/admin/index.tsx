@@ -15,6 +15,7 @@ import {
   IconButton,
   TextArea,
   SegmentedControl,
+  Switch,
 } from "@radix-ui/themes";
 import {
   CircleDollarSign,
@@ -667,6 +668,16 @@ function GenerateCommandButton({ node, settings }: { node: NodeDetail, settings:
   const [enableInterval, setEnableInterval] = React.useState(false);
   const [enableMonthRotate, setEnableMonthRotate] = React.useState(false);
 
+  // 前台隐藏开关：初值取节点当前 hidden（新建/未设置默认 false，符合“默认不勾选”）。
+  // 不进安装命令参数，而是即时调用编辑接口设置 server 端节点属性（与编辑对话框同形态）。
+  const { refresh } = useNodeDetails();
+  const [nodeHidden, setNodeHidden] = React.useState<boolean>(
+    node.hidden ?? false
+  );
+  React.useEffect(() => {
+    setNodeHidden(node.hidden ?? false);
+  }, [node.hidden]);
+
   const generateCommand = () => {
     const host = function () {
       if (!settings.script_domain) {
@@ -791,6 +802,36 @@ function GenerateCommandButton({ node, settings }: { node: NodeDetail, settings:
     }
   };
   const { t } = useTranslation();
+
+  // 切换“前台隐藏”：复用编辑接口（与编辑对话框同一 body 形态，后端按字段更新，
+  // 不覆盖 group/tags/traffic 等未提交字段）。即时生效，成功后刷新列表，失败回滚开关。
+  const updateNodeHidden = async (hidden: boolean) => {
+    setNodeHidden(hidden);
+    try {
+      const res = await fetch(`/api/admin/client/${node.uuid}/edit`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: node.name,
+          token: node.token ?? "",
+          remark: node.remark ?? "",
+          public_remark: node.public_remark ?? "",
+          hidden,
+        }),
+      });
+      if (res.ok) {
+        toast.success(t("admin.nodeEdit.saveSuccess", "保存成功"));
+        refresh();
+      } else {
+        toast.error(t("admin.nodeEdit.saveError", "保存失败"));
+        setNodeHidden(!hidden);
+      }
+    } catch {
+      toast.error(t("admin.nodeEdit.saveError", "保存失败"));
+      setNodeHidden(!hidden);
+    }
+  };
+
   return (
     <Dialog.Root>
       <Dialog.Trigger>
@@ -977,6 +1018,29 @@ function GenerateCommandButton({ node, settings }: { node: NodeDetail, settings:
                 </label>
               </Flex>
             </div>
+            {/* 前台隐藏（仅管理员可见）：默认不勾选，即时生效，独立于安装命令参数 */}
+            <Flex direction="column" gap="1">
+              <Flex gap="2" align="center">
+                <Switch
+                  checked={nodeHidden}
+                  onCheckedChange={(checked) =>
+                    updateNodeHidden(Boolean(checked))
+                  }
+                />
+                <label
+                  className="text-sm font-normal cursor-pointer"
+                  onClick={() => updateNodeHidden(!nodeHidden)}
+                >
+                  {t("admin.nodeEdit.hidden", "隐藏节点")}
+                </label>
+              </Flex>
+              <Text size="1" color="gray">
+                {t(
+                  "admin.nodeEdit.hidden_description",
+                  "在未登陆的情况下隐藏该节点"
+                )}
+              </Text>
+            </Flex>
             <Flex direction="column" gap="2">
               <Flex gap="2" align="center">
                 <Checkbox
