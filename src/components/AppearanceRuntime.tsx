@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useAppConfig } from "@/config/hooks";
 import { useIsMobile } from "@/hooks/useMobile";
 import { useTheme } from "@/hooks/useTheme";
@@ -43,7 +43,11 @@ export function AppearanceRuntime() {
     [appearance]
   );
 
-  // 选定背景图：复数列表随机抽一张（轮换依赖 randomTick），其自带 size/position
+  // 锁定随机选图：按图片列表内容缓存随机值，导航导致的 memo 重算不会重新摇号，
+  // 仅当列表内容真正变化（切换移动端列表 / 改配置）才重新随机。
+  const randomPickRef = useRef<{ key: string; rand: number }>({ key: "", rand: 0 });
+
+  // 选定背景图：复数列表随机抽一张（按列表内容锁定，不随导航变化），其自带 size/position
   // 逐字段回退到全局 backgroundAlignment；列表为空时回退单数图（pipe light|dark，无 per-image）。
   const pickedImage = useMemo(() => {
     const fallback = parseAlignment(config?.backgroundAlignment);
@@ -64,7 +68,13 @@ export function AppearanceRuntime() {
 
     const entries = parseBackgroundImages(multi);
     if (entries.length > 0) {
-      const picked = entries[Math.floor(Math.random() * entries.length)];
+      // 列表内容不变则复用同一随机值，避免导航触发的 memo 重算摇出新图
+      const listKey = entries.map((e) => e.url).join("|");
+      if (randomPickRef.current.key !== listKey) {
+        randomPickRef.current = { key: listKey, rand: Math.random() };
+      }
+      const picked =
+        entries[Math.floor(randomPickRef.current.rand * entries.length)];
       return {
         url: getUrlFromConfig(picked.url),
         size: picked.size ?? fallback.size,
