@@ -108,6 +108,8 @@
       "billing": "Billing",
       "billingCycle": "Billing cycle",
       "billingCycleMonthlyNote": "\"Monthly / Quarterly / Yearly\" renew by calendar month (actual 28 / 30 / 31 days), not a fixed 30 days. E.g. expiry 3/31 + 1 month → 4/30.",
+      "billingCycleCurrent": "Current billing cycle: {label}",
+      "billingCustomDays": "Custom {days} days",
       "billingCycleTips": "<b>Billing Cycle Rules</b><br/> <br/> <b>By Preset Cycle (Calendar Renewal)</b><br/> When the number of days entered is close to the preset plan (such as monthly, quarterly, annually), it will renew according to the corresponding <b>calendar cycle</b>.<br/> - Common values: 30 (monthly), 92 (quarterly), 365 (annually), 730 (biennially), etc.<br/> - Example: Entering 30, the service renews on March 15, and the new expiration date will be April 15.<br/> <br/> <b>By Custom Days</b><br/> When other numbers of days are entered (such as 7, 45, 100), it will strictly renew according to the number of days.<br/> - Example: Entering 45, the service renews on March 15, and the new expiration date will be April 29 (45 days later).<br/> <br/> <b>One-time Payment</b><br/> Entering -1 indicates a one-time payment.",
       "cancel": "Cancel",
       "cannotUndo": "This operation will not be restored!",

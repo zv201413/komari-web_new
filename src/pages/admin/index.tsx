@@ -1969,6 +1969,28 @@ function BillingButton({ node }: { node: NodeDetail }) {
   const [billingCycle, setBillingCycle] = React.useState<string>(
     node.billing_cycle.toString()
   );
+  // 计费周期预设项(单一数据源:同时驱动下拉与下方"当前周期"提示,label 随 t 变化故 i18n 安全)
+  const billingOptions = [
+    { label: t("common.monthly"), value: "30" },
+    { label: t("common.quarterly"), value: "92" },
+    { label: t("common.semi_annual"), value: "184" },
+    { label: t("common.annual"), value: "365" },
+    { label: t("common.biennial"), value: "730" },
+    { label: t("common.triennial"), value: "1095" },
+    { label: t("common.quinquennial"), value: "1825" },
+    { label: t("common.once"), value: "-1" },
+  ];
+  // 当前选中周期的友好名:命中预设取其 label,否则按自定义天数显示;空或 0 不显示该行
+  const billingMatched = billingOptions.find((o) => o.value === billingCycle);
+  const billingDays = parseInt(billingCycle);
+  const billingCurrentLabel = billingMatched
+    ? billingMatched.label
+    : !isNaN(billingDays) && billingDays > 0
+      ? t("admin.nodeTable.billingCustomDays", "自定义 {days} 天").replace(
+          "{days}",
+          String(billingDays)
+        )
+      : "";
   const [autoRenewal, setAutoRenewal] = React.useState<boolean>(
     node.auto_renewal || false
   );
@@ -2073,21 +2095,20 @@ function BillingButton({ node }: { node: NodeDetail }) {
               {t("admin.nodeTable.billingCycle")} <Tips><span dangerouslySetInnerHTML={{ __html: t("admin.nodeTable.billingCycleTips") }}></span></Tips>
             </label>
             <SelectOrInput
-            options={[
-              { label: t("common.monthly"), value: "30" },
-              { label: t("common.quarterly"), value: "92" },
-              { label: t("common.semi_annual"), value: "184" },
-              { label: t("common.annual"), value: "365" },
-              { label: t("common.biennial"), value: "730" },
-              { label: t("common.triennial"), value: "1095" },
-              { label: t("common.quinquennial"), value: "1825" },
-              { label: t("common.once"), value: "-1" },
-            ]}
+            options={billingOptions}
             type="number"
             name="billingCycle"
             value={billingCycle === "0" ? "" : billingCycle}
             onChange={setBillingCycle}
           />
+            {billingCurrentLabel && (
+              <label className="text-muted-foreground text-xs">
+                {t("admin.nodeTable.billingCycleCurrent", "当前计费周期：{label}").replace(
+                  "{label}",
+                  billingCurrentLabel
+                )}
+              </label>
+            )}
             <label className="text-muted-foreground text-xs">
               {t(
                 "admin.nodeTable.billingCycleMonthlyNote",
