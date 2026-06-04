@@ -1461,6 +1461,10 @@ function EditButton({ node }: { node: NodeDetail }) {
   const [saving, setSaving] = useState(false);
   const [traffic_limit, setTrafficLimit] = useState(0);
   const [traffic_limit_type, setTrafficLimitType] = useState("sum");
+  // 已用流量校正：输入真实已用值(字符串，经 stringToBytes 解析)，由后端换算为偏移量
+  const [calibUp, setCalibUp] = useState("");
+  const [calibDown, setCalibDown] = useState("");
+  const [calibrating, setCalibrating] = useState(false);
 
   React.useEffect(() => {
     setHidden(node.hidden);
@@ -1494,6 +1498,31 @@ function EditButton({ node }: { node: NodeDetail }) {
       console.error("Error updating client:", error);
     } finally {
       setSaving(false);
+    }
+  };
+
+  // 应用流量校正：发送真实已用流量(上传/下载，字节)，后端换算 offset = 真实值 − 当前实测并存储。
+  const applyCalibration = async () => {
+    try {
+      setCalibrating(true);
+      const res = await fetch(`/api/admin/client/${node.uuid}/edit`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          set_traffic_used_up: stringToBytes(calibUp),
+          set_traffic_used_down: stringToBytes(calibDown),
+        }),
+      });
+      if (res.ok) {
+        toast.success(t("admin.nodeEdit.saveSuccess", "保存成功"));
+        refresh();
+      } else {
+        toast.error(t("admin.nodeEdit.saveError", "保存失败"));
+      }
+    } catch {
+      toast.error(t("admin.nodeEdit.saveError", "保存失败"));
+    } finally {
+      setCalibrating(false);
     }
   };
   return (
@@ -1629,6 +1658,39 @@ function EditButton({ node }: { node: NodeDetail }) {
                 e.currentTarget.value = formatBytes(traffic_limit);
               }}
             ></SettingCardShortTextInput>
+            <div className="mt-2 border-t border-(--gray-a4) pt-2" />
+            <SettingCardShortTextInput
+              bordless
+              title={t("admin.nodeEdit.trafficCalibrateUp", "校正已用上传")}
+              description={t(
+                "admin.nodeEdit.trafficCalibrate_description",
+                "输入商家面板显示的真实已用流量，面板将校准到该值并继续累加。需同时填写上传与下载后点击应用。"
+              )}
+              defaultValue=""
+              showSaveButton={false}
+              onChange={(e) => setCalibUp(e.currentTarget.value)}
+            ></SettingCardShortTextInput>
+            <SettingCardShortTextInput
+              bordless
+              title={t("admin.nodeEdit.trafficCalibrateDown", "校正已用下载")}
+              defaultValue=""
+              showSaveButton={false}
+              onChange={(e) => setCalibDown(e.currentTarget.value)}
+            ></SettingCardShortTextInput>
+            <Flex justify="end" className="mt-2">
+              <Button
+                type="button"
+                variant="soft"
+                disabled={
+                  calibrating || !calibUp.trim() || !calibDown.trim()
+                }
+                onClick={applyCalibration}
+              >
+                {calibrating
+                  ? t("admin.nodeEdit.waiting", "等待...")
+                  : t("admin.nodeEdit.trafficCalibrateApply", "应用流量校正")}
+              </Button>
+            </Flex>
           </SettingCardCollapse>
         </div>
         <Flex gap="2" justify={"end"} className="mt-4">
@@ -1890,6 +1952,14 @@ function toLocalDateString(dateStr: string | null | undefined): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
+// 到期时间精确到分钟：datetime-local 需要 `YYYY-MM-DDTHH:mm`（本地时区）。
+function toLocalDateTimeString(dateStr: string | null | undefined): string {
+  if (!dateStr) return "";
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return "";
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}T${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+}
+
 function BillingButton({ node }: { node: NodeDetail }) {
   const { t } = useTranslation();
   const { refresh } = useNodeDetails();
@@ -1903,7 +1973,7 @@ function BillingButton({ node }: { node: NodeDetail }) {
   );
   const [currency, setCurrency] = React.useState<string>(node.currency || "$");
   const [expiredAt, setExpiredAt] = React.useState<string>(
-    toLocalDateString(node.expired_at)
+    toLocalDateTimeString(node.expired_at)
   );
 
   const [requireSignIn, setRequireSignIn] = useState<boolean>(node.require_sign_in || false);
@@ -1941,7 +2011,7 @@ function BillingButton({ node }: { node: NodeDetail }) {
         body: JSON.stringify({
           price,
           billing_cycle: billingCycleValue,
-          expired_at: expiredAtValue,
+          expired_at: expiredAtValue ? new Date(expiredAtValue).toISOString() : "",
           currency: currencyValue,
           auto_renewal: autoRenewal,
           require_sign_in: requireSignIn,
@@ -2027,7 +2097,7 @@ function BillingButton({ node }: { node: NodeDetail }) {
               name="expiredAt"
               value={expiredAt}
               onChange={(e) => setExpiredAt(e.target.value)}
-              type="date"
+              type="datetime-local"
             >
               <TextField.Slot side="right">
                 <Button
@@ -2036,7 +2106,7 @@ function BillingButton({ node }: { node: NodeDetail }) {
                   onClick={() => {
                     const futureDate = new Date();
                     futureDate.setFullYear(futureDate.getFullYear() + 200);
-                    setExpiredAt(futureDate.toISOString().slice(0, 10));
+                    setExpiredAt(toLocalDateTimeString(futureDate.toISOString()));
                   }}
                 >
                   {t("admin.nodeTable.setToLongTerm", "设置为长期")}

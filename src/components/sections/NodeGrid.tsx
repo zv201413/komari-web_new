@@ -103,7 +103,7 @@ export const NodeGrid = ({
             />
             <CardTitle className="text-base font-bold">{node.name}</CardTitle>
             {node.hidden && (
-              <span className="rounded px-1.5 py-0.5 text-xs font-medium bg-gray-500/15 text-gray-500 whitespace-nowrap">
+              <span className="rounded px-1.5 py-0.5 text-xs font-semibold bg-green-500/15 text-green-700 dark:text-green-400 border border-green-500/40 whitespace-nowrap">
                 {t("node.adminOnly")}
               </span>
             )}
