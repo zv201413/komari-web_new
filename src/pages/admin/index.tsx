@@ -1503,15 +1503,16 @@ function EditButton({ node }: { node: NodeDetail }) {
 
   // 应用流量校正：发送真实已用流量(上传/下载，字节)，后端换算 offset = 真实值 − 当前实测并存储。
   const applyCalibration = async () => {
+    const body: Record<string, number> = {};
+    if (calibUp.trim()) body.set_traffic_used_up = stringToBytes(calibUp);
+    if (calibDown.trim()) body.set_traffic_used_down = stringToBytes(calibDown);
+    if (Object.keys(body).length === 0) return;
     try {
       setCalibrating(true);
       const res = await fetch(`/api/admin/client/${node.uuid}/edit`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          set_traffic_used_up: stringToBytes(calibUp),
-          set_traffic_used_down: stringToBytes(calibDown),
-        }),
+        body: JSON.stringify(body),
       });
       if (res.ok) {
         toast.success(t("admin.nodeEdit.saveSuccess", "保存成功"));
@@ -1664,7 +1665,7 @@ function EditButton({ node }: { node: NodeDetail }) {
               title={t("admin.nodeEdit.trafficCalibrateUp", "校正已用上传")}
               description={t(
                 "admin.nodeEdit.trafficCalibrate_description",
-                "输入商家面板显示的真实已用流量，面板将校准到该值并继续累加。需同时填写上传与下载后点击应用。"
+                "输入商家面板显示的真实已用流量，面板将校准到该值并继续累加。上传/下载可单独校正，只填写需要校正的一项即可。"
               )}
               defaultValue=""
               showSaveButton={false}
@@ -1682,7 +1683,7 @@ function EditButton({ node }: { node: NodeDetail }) {
                 type="button"
                 variant="soft"
                 disabled={
-                  calibrating || !calibUp.trim() || !calibDown.trim()
+                  calibrating || (!calibUp.trim() && !calibDown.trim())
                 }
                 onClick={applyCalibration}
               >
@@ -2087,6 +2088,12 @@ function BillingButton({ node }: { node: NodeDetail }) {
             value={billingCycle === "0" ? "" : billingCycle}
             onChange={setBillingCycle}
           />
+            <label className="text-muted-foreground text-xs">
+              {t(
+                "admin.nodeTable.billingCycleMonthlyNote",
+                "「月 / 季 / 年」按自然月动态续费（实际 28 / 30 / 31 天），并非固定 30 天。例：到期日 3/31 续 1 个月 → 4/30。"
+              )}
+            </label>
 
             <Flex gap="2" align="center">
               <label className="font-bold">
