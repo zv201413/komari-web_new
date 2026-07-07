@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { Button, Code, Flex, Text, TextField } from "@radix-ui/themes";
+import { Button, Code, Flex, Text, TextField, Dialog } from "@radix-ui/themes";
 import {
   updateSettingsWithToast,
   useSettings,
@@ -24,6 +24,10 @@ export default function GeneralSettings() {
   const [geoip_testResult, setGeoipTestResult] = React.useState<string | null>(
     null
   );
+  const [showDisableDialog, setShowDisableDialog] = React.useState(false);
+  const [sudoDisableCode, setSudoDisableCode] = React.useState("");
+  const [disablePromise, setDisablePromise] = React.useState<{resolve: () => void, reject: () => void} | null>(null);
+  const [verifying, setVerifying] = React.useState(false);
   const [expected_usage, setExpectedUsage] = React.useState<string | null>(
     null
   );
@@ -65,7 +69,14 @@ export default function GeneralSettings() {
         description={t("settings.sudo_2fa.description", "开启后，访问服务器终端前将强制要求输入管理员的 2FA 动态码")}
         defaultChecked={settings.sudo_2fa_required}
         onChange={async (checked) => {
-          await updateSettingsWithToast({ sudo_2fa_required: checked }, t);
+          if (checked) {
+            await updateSettingsWithToast({ sudo_2fa_required: true }, t);
+          } else {
+            return new Promise<void>((resolve, reject) => {
+              setDisablePromise({ resolve, reject });
+              setShowDisableDialog(true);
+            });
+          }
         }}
       />
       <label className="text-xl font-bold">{t("settings.geoip.title")}</label>
@@ -241,6 +252,65 @@ export default function GeneralSettings() {
           await updateSettingsWithToast({ nezha_compat_listen: value }, t);
         }}
       />
+      <Dialog.Root open={showDisableDialog} onOpenChange={(open) => {
+        if (!open) {
+          if (disablePromise) disablePromise.reject();
+          setShowDisableDialog(false);
+          setSudoDisableCode("");
+          setDisablePromise(null);
+        }
+      }}>
+        <Dialog.Content>
+          <Dialog.Title>{t("settings.sudo_2fa.disable_title", "关闭终端 Sudo 验证")}</Dialog.Title>
+          <Dialog.Description>
+            {t("settings.sudo_2fa.disable_desc", "为了安全起见，关闭此功能需要验证您的 6 位身份验证器动态码。")}
+          </Dialog.Description>
+          <Flex direction="column" gap="3" mt="4">
+            <TextField.Root
+              placeholder="000000"
+              value={sudoDisableCode}
+              onChange={(e) => setSudoDisableCode(e.target.value)}
+              maxLength={6}
+            />
+            <Flex gap="3" justify="end">
+              <Button variant="soft" color="gray" onClick={() => {
+                if (disablePromise) disablePromise.reject();
+                setShowDisableDialog(false);
+                setSudoDisableCode("");
+                setDisablePromise(null);
+              }}>
+                {t("common.cancel", "取消")}
+              </Button>
+              <Button disabled={verifying || sudoDisableCode.length !== 6} onClick={async () => {
+                setVerifying(true);
+                try {
+                  const res = await fetch("/api/admin/settings", {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                      "X-2FA-Code": sudoDisableCode
+                    },
+                    body: JSON.stringify({ sudo_2fa_required: false })
+                  });
+                  const data = await res.json();
+                  if (!res.ok) throw new Error(data.message || data.error || "Failed to save");
+                  toast.success(t("settings.settings_saved", "保存成功"));
+                  if (disablePromise) disablePromise.resolve();
+                  setShowDisableDialog(false);
+                  setSudoDisableCode("");
+                  setDisablePromise(null);
+                } catch (e: any) {
+                  toast.error(e.message);
+                } finally {
+                  setVerifying(false);
+                }
+              }}>
+                {t("common.confirm", "确认")}
+              </Button>
+            </Flex>
+          </Flex>
+        </Dialog.Content>
+      </Dialog.Root>
     </>
   );
 }
