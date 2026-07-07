@@ -140,9 +140,7 @@ const SudoAuthDialog: React.FC<SudoAuthDialogProps> = ({
             }
           />
           <Select.Root value={duration} onValueChange={setDuration}>
-            <Select.Trigger>
-              <Select.Value />
-            </Select.Trigger>
+            <Select.Trigger />
             <Select.Content>
               {Object.entries(SudoDurations).map(([value, labelKey]) => (
                 <Select.Item key={value} value={value}>
