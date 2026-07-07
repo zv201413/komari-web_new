@@ -517,12 +517,12 @@ const TerminalPage = () => {
           {isClipboardOpen && <ClipboardPanel />}
         </Flex>
       </Theme>
-    </TerminalContext.Provider>
       <SudoAuthDialog
         open={showSudoDialog}
         onOpenChange={setShowSudoDialog}
         onVerified={() => setSudoVerified(true)}
       />
+    </TerminalContext.Provider>
   );
 };
 
