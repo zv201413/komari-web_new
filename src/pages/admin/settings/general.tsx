@@ -59,6 +59,15 @@ export default function GeneralSettings() {
         {t("settings.general.auto_discovery")}
       </SettingCardLabel>
       <ApiCard settings={settings} />
+      <label className="text-xl font-bold">{t("settings.security.title", "安全配置")}</label>
+      <SettingCardSwitch
+        title={t("settings.sudo_2fa.title", "终端 Sudo 二次验证")}
+        description={t("settings.sudo_2fa.description", "开启后，访问服务器终端前将强制要求输入管理员的 2FA 动态码")}
+        defaultChecked={settings.sudo_2fa_required}
+        onChange={async (checked) => {
+          await updateSettingsWithToast({ sudo_2fa_required: checked }, t);
+        }}
+      />
       <label className="text-xl font-bold">{t("settings.geoip.title")}</label>
       <SettingCardSwitch
         title={t("settings.geoip.enable_title")}
