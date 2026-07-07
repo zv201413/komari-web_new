@@ -563,14 +563,23 @@ function SignInButton({ node }: { node: NodeDetail }) {
   const handleSignIn = async () => {
     try {
       setSigningIn(true);
-      await fetch(`/api/admin/client/${node.uuid}/sign-in`, {
+      const res = await fetch(`/api/admin/client/${node.uuid}/sign-in`, {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
       });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data.message || `HTTP ${res.status}`);
+      }
       toast.success(t("admin.nodeTable.signInSuccess", "签到成功"));
       setOpen(false);
       refresh();
     } catch (error) {
-      toast.error("Sign-in failed");
+      toast.error(
+        `${t("admin.nodeTable.signInFailed", "签到失败")}: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
     } finally {
       setSigningIn(false);
     }
@@ -603,11 +612,14 @@ function SignInButton({ node }: { node: NodeDetail }) {
               {t("cancel")}
             </Button>
           </AlertDialog.Cancel>
-          <AlertDialog.Action>
+          <AlertDialog.Action asChild>
             <Button
               variant="solid"
               color="violet"
-              onClick={handleSignIn}
+              onClick={(e) => {
+                e.preventDefault();
+                handleSignIn();
+              }}
               loading={signingIn}
             >
               {t("confirm")}

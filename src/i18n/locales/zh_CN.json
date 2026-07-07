@@ -163,6 +163,7 @@
       "signInPreview": "首次提醒将于 {{date}} 发出，此后每 {{hours}} 小时提醒一次",
       "signInConfirm": "确认签到？下次截止时间将更新为 {{date}}",
       "signInSuccess": "签到成功",
+      "signInFailed": "签到失败",
       "signInBadge": "签到",
       "serviceName": "服务名称",
       "serviceName_placeholder": "服务名称，为空则使用默认名称(komari-agent)",
@@ -709,7 +710,16 @@
   "terminal": {
     "disconnect": "连接已断开",
     "no_active_connection": "没有活动连接",
-    "title": "终端"
+    "title": "终端",
+    "sudo_title": "需要 2FA 验证",
+    "sudo_description": "打开终端前需要验证您的二步验证身份。",
+    "sudo_code_placeholder": "6 位验证码",
+    "sudo_duration_1h": "信任本设备 1 小时",
+    "sudo_duration_24h": "信任本设备 24 小时",
+    "sudo_duration_always": "每次都验证",
+    "sudo_verify_button": "验证",
+    "sudo_invalid_code": "验证码错误或已过期",
+    "sudo_expired": "Sudo Token 已过期，请重新验证"
   },
   "theme": {
     "active": "当前使用",

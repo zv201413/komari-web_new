@@ -5,7 +5,7 @@ import { WebLinksAddon } from "xterm-addon-web-links";
 import { SearchAddon } from "xterm-addon-search";
 import "xterm/css/xterm.css";
 import "./Terminal.css";
-import { Callout, Flex, IconButton, Theme } from "@radix-ui/themes";
+import { AlertDialog, Button, Callout, Flex, IconButton, Select, TextField, Theme } from "@radix-ui/themes";
 import { useTranslation } from "react-i18next";
 import { Cross1Icon } from "@radix-ui/react-icons";
 import { TablerAlertTriangleFilled } from "../../components/Icones/Tabler";
@@ -59,16 +59,136 @@ const ClipboardPanel: React.FC = () => (
   </div>
 );
 
+const SudoDurations: Record<string, string> = {
+  "1h": "sudo_duration_1h",
+  "24h": "sudo_duration_24h",
+  "always": "sudo_duration_always",
+};
+
+interface SudoAuthDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onVerified: () => void;
+}
+
+const SudoAuthDialog: React.FC<SudoAuthDialogProps> = ({
+  open,
+  onOpenChange,
+  onVerified,
+}) => {
+  const { t } = useTranslation();
+  const [code, setCode] = useState("");
+  const [duration, setDuration] = useState("1h");
+  const [verifying, setVerifying] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleVerify = async () => {
+    if (code.length < 6) return;
+    setVerifying(true);
+    setError("");
+    try {
+      const res = await fetch("/api/admin/sudo-auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ "2fa_code": code, duration }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(
+          data.message ||
+            t("terminal.sudo_invalid_code", "Invalid or expired code")
+        );
+      }
+      onOpenChange(false);
+      onVerified();
+    } catch (e) {
+      setError(
+        e instanceof Error
+          ? e.message
+          : t("terminal.sudo_invalid_code", "Invalid or expired code")
+      );
+    } finally {
+      setVerifying(false);
+    }
+  };
+
+  return (
+    <AlertDialog.Root open={open} onOpenChange={onOpenChange}>
+      <AlertDialog.Trigger>
+        <button style={{ display: "none" }} />
+      </AlertDialog.Trigger>
+      <AlertDialog.Content maxWidth="450px">
+        <AlertDialog.Title>
+          {t("terminal.sudo_title", "需要 2FA 验证")}
+        </AlertDialog.Title>
+        <AlertDialog.Description size="2">
+          {t(
+            "terminal.sudo_description",
+            "打开终端前需要验证您的二步验证身份。"
+          )}
+        </AlertDialog.Description>
+        <Flex direction="column" gap="3" mt="3">
+          <TextField.Root
+            placeholder={t(
+              "terminal.sudo_code_placeholder",
+              "6 位验证码"
+            )}
+            maxLength={6}
+            value={code}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setCode(e.target.value.replace(/\s/g, ""))
+            }
+          />
+          <Select.Root value={duration} onValueChange={setDuration}>
+            <Select.Trigger />
+            <Select.Content>
+              {Object.entries(SudoDurations).map(([value, labelKey]) => (
+                <Select.Item key={value} value={value}>
+                  {t(`terminal.${labelKey}`, value)}
+                </Select.Item>
+              ))}
+            </Select.Content>
+          </Select.Root>
+          {error && (
+            <Callout.Root color="red" size="1">
+              <Callout.Text>{error}</Callout.Text>
+            </Callout.Root>
+          )}
+        </Flex>
+        <Flex gap="3" mt="4" justify="end">
+          <AlertDialog.Cancel>
+            <Button variant="soft" color="gray">
+              {t("cancel")}
+            </Button>
+          </AlertDialog.Cancel>
+          <Button
+            variant="solid"
+            color="violet"
+            onClick={handleVerify}
+            loading={verifying}
+          >
+            {t("terminal.sudo_verify_button", "验证")}
+          </Button>
+        </Flex>
+      </AlertDialog.Content>
+    </AlertDialog.Root>
+  );
+};
+
 const TerminalPage = () => {
   const terminalRef = useRef<HTMLDivElement>(null);
   const terminalInstance = useRef<Terminal | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const heartbeatIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const stopHeartbeatRef = useRef<(() => void) | null>(null);
   const params = new URLSearchParams(window.location.search);
   const uuid = params.get("uuid");
   const [callout, setCallout] = useState(false);
+  const [showSudoDialog, setShowSudoDialog] = useState(false);
+  const [sudoVerified, setSudoVerified] = useState(false);
   const [t] = useTranslation();
   const firstBinary = useRef(false);
+  const onDataDisposeRef = useRef<(() => void) | null>(null);
   const [isClipboardOpen, setIsClipboardOpen] = useState(false);
   const [leftWidth, setLeftWidth] = useState<number>(window.innerWidth * 0.7);
   const draggingRef = useRef(false);
@@ -90,6 +210,81 @@ const TerminalPage = () => {
       );
     }
   }, []);
+
+  const connectWs = useCallback(() => {
+    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    const host = window.location.host;
+    const baseUrl = `${protocol}//${host}`;
+
+    // Close old connection if any
+    stopHeartbeatRef.current?.();
+    const oldWs = wsRef.current;
+    if (oldWs) {
+      if (oldWs.readyState === WebSocket.OPEN || oldWs.readyState === WebSocket.CONNECTING) {
+        oldWs.close();
+      }
+    }
+
+    const ws = new WebSocket(`${baseUrl}/api/admin/client/${uuid}/terminal`);
+    ws.binaryType = "arraybuffer";
+    wsRef.current = ws;
+
+    const startHeartbeat = () => {
+      heartbeatIntervalRef.current = setInterval(() => {
+        if (ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify({ type: "heartbeat", timestamp: new Date().toISOString() }));
+        }
+      }, 10000);
+    };
+
+    const stopHeartbeat = () => {
+      if (heartbeatIntervalRef.current) {
+        clearInterval(heartbeatIntervalRef.current);
+        heartbeatIntervalRef.current = null;
+      }
+    };
+    stopHeartbeatRef.current = stopHeartbeat;
+
+    ws.onopen = () => {
+      resizeTerminal();
+      startHeartbeat();
+    };
+
+    ws.onmessage = (event) => {
+      const term = terminalInstance.current;
+      if (!term) return;
+      if (event.data instanceof ArrayBuffer) {
+        term.write(new Uint8Array(event.data));
+      } else {
+        term.write(event.data);
+      }
+      if (!firstBinary.current && event.data instanceof ArrayBuffer) {
+        firstBinary.current = true;
+        setTimeout(() => {
+          const t = terminalInstance.current;
+          if (t) { t.resize(t.cols - 1, t.rows); }
+          resizeTerminal();
+        }, 200);
+      }
+    };
+
+    ws.onclose = () => {
+      stopHeartbeat();
+      const term = terminalInstance.current;
+      if (term) { term.write(`\n ${t("terminal.disconnect")}`); }
+      setSudoVerified(false);
+    };
+
+    // Data from terminal → send to ws
+    onDataDisposeRef.current?.();
+    const onDataHandler = (data: string) => {
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send(new TextEncoder().encode(data));
+      }
+    };
+    const onDataDispose = terminalInstance.current?.onData(onDataHandler);
+    onDataDisposeRef.current = () => onDataDispose?.dispose();
+  }, [t, uuid, resizeTerminal]);
 
   const startDragging = useCallback(
     (e: React.MouseEvent | React.TouchEvent) => {
@@ -192,125 +387,68 @@ const TerminalPage = () => {
     term.open(terminalRef.current);
     terminalInstance.current = term;
 
-    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-    const host = window.location.host;
-    const baseUrl = `${protocol}//${host}`;
-    const ws = new WebSocket(`${baseUrl}/api/admin/client/${uuid}/terminal`);
-    ws.binaryType = "arraybuffer";
-    wsRef.current = ws;
-
-    ws.onopen = () => {
-      resizeTerminal();
-      startHeartbeat();
-    };
-
-    const startHeartbeat = () => {
-      heartbeatIntervalRef.current = setInterval(() => {
-        if (ws.readyState === WebSocket.OPEN) {
-          ws.send(
-            JSON.stringify({
-              type: "heartbeat",
-              timestamp: new Date().toISOString(),
-            })
-          );
+    // Sudo preflight: check sudo token, then connect or show dialog
+    fetch("/api/admin/sudo-check")
+      .then((r) => {
+        if (r.ok) {
+          connectWs();
+        } else {
+          setShowSudoDialog(true);
         }
-      }, 10000);
-    };
+      })
+      .catch(() => setShowSudoDialog(true));
 
-    const stopHeartbeat = () => {
-      if (heartbeatIntervalRef.current) {
-        clearInterval(heartbeatIntervalRef.current);
-        heartbeatIntervalRef.current = null;
-      }
-    };
-
-    ws.onmessage = (event) => {
-      if (event.data instanceof ArrayBuffer) {
-        const uint8Array = new Uint8Array(event.data);
-        term.write(uint8Array);
-      } else {
-        term.write(event.data);
-      }
-      if (!firstBinary.current && event.data instanceof ArrayBuffer) {
-        firstBinary.current = true;
-        setTimeout(() => {
-          const term = terminalInstance.current;
-          if (term) {
-            term.resize(term.cols - 1, term.rows);
-          }
-          resizeTerminal();
-        }, 200);
-      }
-    };
-
-    ws.onclose = () => {
-      stopHeartbeat();
-      term.write(`\n ${t("terminal.disconnect")}`);
-    };
-
-    term.onData((data) => {
-      if (ws.readyState === WebSocket.OPEN) {
-        const encoder = new TextEncoder();
-        const uint8Array = encoder.encode(data);
-        ws.send(uint8Array);
-      }
-    });
-
-    const handleResize = () => {
-      resizeTerminal();
-    };
+    const handleResize = () => resizeTerminal();
     window.addEventListener("resize", handleResize);
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.ctrlKey) {
-        if (e.key === "f" || e.key === "d") {
-          searchAddon.findNext("");
-          e.preventDefault();
-        }
+      if (e.ctrlKey && (e.key === "f" || e.key === "d")) {
+        searchAddon.findNext("");
+        e.preventDefault();
       }
     };
     document.addEventListener("keydown", handleKeyDown);
 
     const handleContextMenu = (e: MouseEvent) => {
-      if (e.ctrlKey || ws.readyState !== WebSocket.OPEN) {
-        return;
-      }
-      const selection = window.getSelection();
-      const hasSelection = selection && selection.toString().length > 0;
-      if (hasSelection) {
+      const ws = wsRef.current;
+      if (!ws || e.ctrlKey || ws.readyState !== WebSocket.OPEN) return;
+      const sel = window.getSelection();
+      if (sel && sel.toString().length > 0) {
         e.preventDefault();
-        const selectedText = selection.toString();
-        navigator.clipboard.writeText(selectedText).finally(() => {
+        navigator.clipboard.writeText(sel.toString()).finally(() => {
           term.focus();
-          term.clearSelection();
+          (sel as any).empty?.();
         });
       } else {
         e.preventDefault();
         term.focus();
         navigator.clipboard.readText().then((text) => {
-          const encoder = new TextEncoder();
-          const uint8Array = encoder.encode(text.replace(/\r?\n/g, "\r"));
-          ws.send(uint8Array);
+          ws.send(new TextEncoder().encode(text.replace(/\r?\n/g, "\r")));
         });
       }
     };
-
     document.addEventListener("contextmenu", handleContextMenu);
 
     return () => {
-      stopHeartbeat();
+      stopHeartbeatRef.current?.();
+      onDataDisposeRef.current?.();
       term.dispose();
-      if (
-        ws.readyState === WebSocket.OPEN ||
-        ws.readyState === WebSocket.CONNECTING
-      ) {
+      const ws = wsRef.current;
+      if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) {
         ws.close();
       }
       window.removeEventListener("resize", handleResize);
       document.removeEventListener("keydown", handleKeyDown);
       document.removeEventListener("contextmenu", handleContextMenu);
     };
-  }, [t, uuid, resizeTerminal]);
+  }, [t, uuid, resizeTerminal, connectWs]);
+
+  // When sudo is verified (after 2FA auth), connect WebSocket
+  useEffect(() => {
+    if (sudoVerified && terminalInstance.current) {
+      connectWs();
+    }
+  }, [sudoVerified, connectWs]);
 
   // 移除对 leftWidth 的直接依赖，改用防抖
   useEffect(() => {
@@ -380,6 +518,11 @@ const TerminalPage = () => {
         </Flex>
       </Theme>
     </TerminalContext.Provider>
+      <SudoAuthDialog
+        open={showSudoDialog}
+        onOpenChange={setShowSudoDialog}
+        onVerified={() => setSudoVerified(true)}
+      />
   );
 };
 

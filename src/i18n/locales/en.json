@@ -699,7 +699,16 @@
   "terminal": {
     "disconnect": "Disconnected",
     "no_active_connection": "No active connection",
-    "title": "Terminal"
+    "title": "Terminal",
+    "sudo_title": "2FA Verification Required",
+    "sudo_description": "Please verify your two-factor authentication before accessing the terminal.",
+    "sudo_code_placeholder": "6-digit code",
+    "sudo_duration_1h": "Trust this device for 1 hour",
+    "sudo_duration_24h": "Trust this device for 24 hours",
+    "sudo_duration_always": "Verify every time",
+    "sudo_verify_button": "Verify",
+    "sudo_invalid_code": "Invalid or expired code",
+    "sudo_expired": "Sudo token expired, please re-verify"
   },
   "theme": {
     "active": "Active",
