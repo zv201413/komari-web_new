@@ -612,19 +612,14 @@ function SignInButton({ node }: { node: NodeDetail }) {
               {t("cancel")}
             </Button>
           </AlertDialog.Cancel>
-          <AlertDialog.Action asChild>
-            <Button
-              variant="solid"
-              color="violet"
-              onClick={(e) => {
-                e.preventDefault();
-                handleSignIn();
-              }}
-              loading={signingIn}
-            >
-              {t("confirm")}
-            </Button>
-          </AlertDialog.Action>
+          <Button
+            variant="solid"
+            color="violet"
+            onClick={handleSignIn}
+            loading={signingIn}
+          >
+            {t("confirm")}
+          </Button>
         </Flex>
       </AlertDialog.Content>
     </AlertDialog.Root>
