@@ -140,7 +140,9 @@ const SudoAuthDialog: React.FC<SudoAuthDialogProps> = ({
             }
           />
           <Select.Root value={duration} onValueChange={setDuration}>
-            <Select.Trigger />
+            <Select.Trigger>
+              <Select.Value />
+            </Select.Trigger>
             <Select.Content>
               {Object.entries(SudoDurations).map(([value, labelKey]) => (
                 <Select.Item key={value} value={value}>
@@ -388,7 +390,7 @@ const TerminalPage = () => {
     terminalInstance.current = term;
 
     // Sudo preflight: check sudo token, then connect or show dialog
-    fetch("/api/admin/sudo-check")
+    fetch("/api/admin/sudo-check", { cache: "no-store" })
       .then((r) => {
         if (r.ok) {
           connectWs();
