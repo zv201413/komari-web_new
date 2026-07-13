@@ -230,16 +230,16 @@ export const useNodeCommons = (node: NodeData & { stats?: any }) => {
 
   const expired_at_label = node.require_sign_in ? "签到截止:" : t("node.expiredAt");
 
-  const targetDate = node.expired_at;
-  const expiredAtStr = targetDate && new Date(targetDate).getTime() > 0
-    ? new Date(targetDate).toLocaleDateString(undefined, { year: "numeric", month: "2-digit", day: "2-digit" })
+  const deadline = node.expired_at;
+  const expiredAtStr = deadline && new Date(deadline).getTime() > 0
+    ? new Date(deadline).toLocaleDateString(undefined, { year: "numeric", month: "2-digit", day: "2-digit" })
     : t("node.notSet");
 
   let expired_at_value = expiredAtStr;
   let expired_at_color = "";
 
-  if (daysLeft !== null || (node.require_sign_in && targetDate && new Date(targetDate).getTime() > 0)) {
-    const effectiveDaysLeft = daysLeft !== null ? daysLeft : Math.ceil((new Date(targetDate as string).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+  if (daysLeft !== null || (node.require_sign_in && deadline && new Date(deadline).getTime() > 0)) {
+    const effectiveDaysLeft = daysLeft !== null ? daysLeft : Math.ceil((new Date(deadline as string).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
 
     if (node.require_sign_in) {
       const suffix = daysLeft === null ? `(${effectiveDaysLeft}天后)` : `(剩${effectiveDaysLeft}天)`;
