@@ -230,7 +230,7 @@ export const useNodeCommons = (node: NodeData & { stats?: any }) => {
 
   const expired_at_label = node.require_sign_in ? "签到截止:" : t("node.expiredAt");
 
-  const targetDate = node.require_sign_in && node.sign_in_target_date ? node.sign_in_target_date : node.expired_at;
+  const targetDate = node.expired_at;
   const expiredAtStr = targetDate && new Date(targetDate).getTime() > 0
     ? new Date(targetDate).toLocaleDateString(undefined, { year: "numeric", month: "2-digit", day: "2-digit" })
     : t("node.notSet");
