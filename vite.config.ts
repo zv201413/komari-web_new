@@ -122,12 +122,10 @@ export default defineConfig(({ mode }) => {
       __BUILD_TIME__: JSON.stringify(buildTime),
     },
     resolve: {
-      alias: {
-        "@": path.resolve(__dirname, "./src"),
-        // Force xterm to use the CJS build to avoid a rollup bug where `||=` in
-        // xterm.mjs is incorrectly lowered, causing `ReferenceError: i is not defined`.
-        "xterm": path.resolve(__dirname, "node_modules/xterm/lib/xterm.js"),
-      },
+      alias: [
+        { find: "@", replacement: path.resolve(__dirname, "./src") },
+        { find: /^xterm$/, replacement: path.resolve(__dirname, "node_modules/xterm/lib/xterm.js") },
+      ],
     },
     build: {
       assetsDir: "assets",
