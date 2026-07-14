@@ -15,7 +15,7 @@ interface ThemeSwitchProps {
 
 const ThemeSwitch = ({
   icon = (
-    <IconButton variant="soft">
+    <IconButton variant="soft" color="violet" highContrast>
       <SunIcon />
     </IconButton>
   ),

@@ -10,7 +10,7 @@ interface ColorSwitchProps {
 
 const ColorSwitch = ({ 
   icon = (
-    <IconButton variant="soft">
+    <IconButton variant="soft" color="violet" highContrast>
       <BlendingModeIcon />
     </IconButton>
   ),
