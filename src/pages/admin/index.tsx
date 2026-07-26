@@ -2911,8 +2911,13 @@ function BillingButton({ node }: { node: NodeDetail }) {
         (formData.get("billingCycle") as string) || "30"
       );
       const expiredAtValue = (formData.get("expiredAt") as string) || "";
+      // datetime-local 输入值已带 "T HH:mm"；纯日期值才补 T00:00:00
       const expiredAt = expiredAtValue
-        ? new Date(`${expiredAtValue}T00:00:00`).toISOString()
+        ? new Date(
+            expiredAtValue.includes("T")
+              ? expiredAtValue
+              : `${expiredAtValue}T00:00:00`
+          ).toISOString()
         : null;
       const currencyValue = (formData.get("currency") as string) || "$";
 
