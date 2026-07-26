@@ -172,7 +172,8 @@ const AdminPanelBar = ({ content }: AdminPanelBarProps) => {
     return () => {
       ignore = true;
     };
-  }, [currentTheme]);
+    // currentLanguage/t 入依赖：切换语言时重算菜单文案，否则停留在加载时的语言
+  }, [currentTheme, currentLanguage, t]);
   useEffect(() => {
     const fetchVersionInfo = async () => {
       try {
