@@ -35,6 +35,7 @@ const NodeDisplay: React.FC<NodeDisplayProps> = ({ nodes, liveData }) => {
     "all",
   );
   const searchRef = useRef<HTMLInputElement>(null);
+  const onlineSet = useMemo(() => new Set(liveData?.online ?? []), [liveData]);
 
   // 获取所有的分组
   const groups = useMemo(() => {
@@ -97,14 +98,14 @@ const NodeDisplay: React.FC<NodeDisplayProps> = ({ nodes, liveData }) => {
         !isNaN(Number(term)) && node.price.toString().includes(term);
 
       // 状态搜索
-      const isOnline = liveData?.online?.includes(node.uuid) || false;
+      const isOnline = onlineSet.has(node.uuid);
       const statusMatch =
         ((term === "online" || term === "在线") && isOnline) ||
         ((term === "offline" || term === "离线") && !isOnline);
 
       return basicMatch || regionMatch || priceMatch || statusMatch;
     });
-  }, [nodes, searchTerm, liveData, selectedGroup]);
+  }, [nodes, searchTerm, onlineSet, selectedGroup]);
 
   return (
     <div className="w-full">
@@ -125,9 +126,7 @@ const NodeDisplay: React.FC<NodeDisplayProps> = ({ nodes, liveData }) => {
         >
           <TextField.Root
             ref={searchRef}
-            placeholder={t("search.placeholder", {
-              defaultValue: "搜索节点名称、地区、系统...",
-            })}
+            placeholder={t("search.placeholder")}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="search-box flex-1 pr-8 min-w-32"
@@ -154,7 +153,7 @@ const NodeDisplay: React.FC<NodeDisplayProps> = ({ nodes, liveData }) => {
         {/* 视图模式切换 */}
         <Flex align="center" gap="2">
           <label className="whitespace-nowrap text-md text-muted-foreground">
-            {t("view.mode", { defaultValue: "显示模式" })}
+            {t("view.mode")}
           </label>
           <Flex gap="1">
             <IconButton
@@ -182,7 +181,7 @@ const NodeDisplay: React.FC<NodeDisplayProps> = ({ nodes, liveData }) => {
           className="mx-4 mb-2 -mt-2 overflow-x-auto"
         >
           <label className="whitespace-nowrap text-md text-muted-foreground">
-            {t("common.group", { defaultValue: "分组" })}
+            {t("common.group")}
           </label>
           <SegmentedControl.Root
             value={selectedGroup}
@@ -190,7 +189,7 @@ const NodeDisplay: React.FC<NodeDisplayProps> = ({ nodes, liveData }) => {
             size="1"
           >
             <SegmentedControl.Item value="all">
-              {t("common.all", { defaultValue: "所有" })}
+              {t("common.all")}
             </SegmentedControl.Item>
             {groups.map((group) => (
               <SegmentedControl.Item key={group} value={group}>
@@ -210,11 +209,6 @@ const NodeDisplay: React.FC<NodeDisplayProps> = ({ nodes, liveData }) => {
                 selectedGroup === "all"
                   ? nodes.length
                   : nodes.filter((n) => n.group === selectedGroup).length,
-              defaultValue: `找到 ${filteredNodes.length} 个服务器，共 ${
-                selectedGroup === "all"
-                  ? nodes.length
-                  : nodes.filter((n) => n.group === selectedGroup).length
-              } 个`,
             })}
           </Text>
         ) : (
@@ -223,23 +217,13 @@ const NodeDisplay: React.FC<NodeDisplayProps> = ({ nodes, liveData }) => {
               ? t("nodeCard.totalNodes", {
                   total: nodes.length,
                   online: liveData?.online?.length || 0,
-                  defaultValue: `共 ${nodes.length} 个节点，${
-                    liveData?.online?.length || 0
-                  } 个在线`,
                 })
               : t("nodeCard.groupNodes", {
                   group: selectedGroup,
                   total: filteredNodes.length,
                   online: filteredNodes.filter((n) =>
-                    liveData?.online?.includes(n.uuid),
+                    onlineSet.has(n.uuid),
                   ).length,
-                  defaultValue: `${selectedGroup} 分组：共 ${
-                    filteredNodes.length
-                  } 个节点，${
-                    filteredNodes.filter((n) =>
-                      liveData?.online?.includes(n.uuid),
-                    ).length
-                  } 个在线`,
                 })}
           </Text>
         )}
@@ -255,26 +239,32 @@ const NodeDisplay: React.FC<NodeDisplayProps> = ({ nodes, liveData }) => {
         >
           <Text size="4" color="gray" className="mb-2">
             {searchTerm.trim()
-              ? t("search.no_results", { defaultValue: "未找到匹配的节点" })
-              : t("nodes.empty", { defaultValue: "暂无节点数据" })}
+              ? t("search.no_results")
+              : t("nodes.empty")}
           </Text>
           {searchTerm.trim() && (
             <Text size="2" color="gray">
-              {t("search.try_different", {
-                defaultValue: "尝试不同的搜索关键词",
-              })}
+              {t("search.try_different")}
             </Text>
           )}
         </Flex>
       ) : (
         <>
           {viewMode === "grid" ? (
-            <NodeGrid nodes={filteredNodes} liveData={liveData} />
+            <NodeGrid
+              nodes={filteredNodes}
+              liveData={liveData}
+              onlineSet={onlineSet}
+            />
           ) : (
             <Suspense
               fallback={<div style={{ padding: 16 }}>Loading table…</div>}
             >
-              <NodeTable nodes={filteredNodes} liveData={liveData} />
+              <NodeTable
+                nodes={filteredNodes}
+                liveData={liveData}
+                onlineSet={onlineSet}
+              />
             </Suspense>
           )}
         </>

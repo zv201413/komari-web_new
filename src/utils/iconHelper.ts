@@ -2,6 +2,7 @@ import React from "react";
 import {
   Bolt,
   Home,
+  BarChart2,
   CircleArrowRight,
   MessageCircleMore,
   Ellipsis,
@@ -16,14 +17,20 @@ import {
   Server,
   Activity,
   Palette,
-  Code
+  Code,
+  Globe,
+  Terminal,
+  Database,
+  Store
 } from "lucide-react";
+
 
 // Map icon names defined in menuConfig.json to their components
 export const iconMap: Record<string, React.ComponentType<any>> = {
   Server,
   Bolt,
   Home,
+  BarChart2,
   CircleArrowRight,
   MessageCircleMore,
   Ellipsis,
@@ -38,4 +45,9 @@ export const iconMap: Record<string, React.ComponentType<any>> = {
   Activity,
   Palette,
   Code,
+  Globe,
+  Terminal,
+  Database,
+  Store,
 };
+

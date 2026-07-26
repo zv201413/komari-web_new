@@ -36,9 +36,26 @@
           "icon": "Ellipsis"
         },
         {
-          "labelKey": "settings.reverse_proxy.title",
-          "path": "/admin/settings/reverse-proxy",
-          "icon": "Globe"
+          "labelKey": "settings.xtermjs.title",
+          "path": "/admin/settings/xtermjs",
+          "icon": "Terminal"
+        },
+        {
+          "labelKey": "settings.metrics.title",
+          "path": "/admin/settings/metrics",
+          "icon": "Database"
+        }
+      ]
+    },
+    {
+      "labelKey": "market.title",
+      "path": "/admin/market",
+      "icon": "Store",
+      "children": [
+        {
+          "labelKey": "market.themes",
+          "path": "/admin/market/themes",
+          "icon": "Palette"
         }
       ]
     },
@@ -56,6 +73,11 @@
           "labelKey": "notification.load.title",
           "path": "/admin/notification/load",
           "icon": "TrendingUp"
+        },
+        {
+          "labelKey": "notification.traffic_report.title",
+          "path": "/admin/notification/traffic-report",
+          "icon": "BarChart2"
         },
         {
           "labelKey": "settings.general.title",

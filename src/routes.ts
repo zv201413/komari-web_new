@@ -8,6 +8,23 @@ const Admin = lazy(() => import("./pages/admin"));
 
 export const routes: RouteObject[] = [
   {
+    // 上游新增的功能路由（显式路由优先于末尾的 /* 通配，不影响 PurCarte 前台布局）
+    path: "/admin/update/1.2.7",
+    element: React.createElement(
+      lazy(() => import("./pages/admin/update_1_2_7"))
+    ),
+  },
+  {
+    path: "/install",
+    element: React.createElement(lazy(() => import("./pages/install"))),
+  },
+  {
+    path: "/database-recovery",
+    element: React.createElement(
+      lazy(() => import("./pages/database_recovery")),
+    ),
+  },
+  {
     path: "/admin",
     element: React.createElement(AdminLayout),
     children: [
@@ -16,6 +33,18 @@ export const routes: RouteObject[] = [
         path: "theme_managed",
         element: React.createElement(
           lazy(() => import("./pages/admin/theme_managed.tsx"))
+        ),
+      },
+      {
+        path: "theme_raw",
+        element: React.createElement(
+          lazy(() => import("./pages/admin/theme_raw.tsx"))
+        ),
+      },
+      {
+        path: "market/themes",
+        element: React.createElement(
+          lazy(() => import("./pages/admin/market/themes"))
         ),
       },
       {
@@ -73,9 +102,15 @@ export const routes: RouteObject[] = [
             ),
           },
           {
-            path: "reverse-proxy",
+            path: "xtermjs",
             element: React.createElement(
-              lazy(() => import("./pages/admin/settings/reverse-proxy"))
+              lazy(() => import("./pages/admin/settings/xtermjs"))
+            ),
+          },
+          {
+            path: "metrics",
+            element: React.createElement(
+              lazy(() => import("./pages/admin/settings/metrics"))
             ),
           },
         ],
@@ -99,6 +134,12 @@ export const routes: RouteObject[] = [
             path: "general",
             element: React.createElement(
               lazy(() => import("./pages/admin/notification/general"))
+            ),
+          },
+          {
+            path: "traffic-report",
+            element: React.createElement(
+              lazy(() => import("./pages/admin/notification/traffic_report"))
             ),
           },
         ],

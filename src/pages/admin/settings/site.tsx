@@ -138,11 +138,47 @@ export default function SiteSettings() {
         }}
       />
       <SettingCardSwitch
-        title={t("settings.site.cros")}
-        description={t("settings.site.cros_description")}
-        defaultChecked={settings.allow_cors}
+        title={t("settings.site.cors_origin_check_enabled")}
+        description={t("settings.site.cors_origin_check_enabled_description")}
+        defaultChecked={settings.cors_origin_check_enabled ?? true}
         onChange={async (checked) => {
-          await updateSettingsWithToast({ allow_cors: checked }, t);
+          await updateSettingsWithToast({ cors_origin_check_enabled: checked }, t);
+        }}
+      />
+      <SettingCardLongTextInput
+        title={t("settings.site.cors_allowed_origins", "API CORS 允许列表")}
+        description={t(
+          "settings.site.cors_allowed_origins_description",
+          "每行或用逗号分隔一个 Origin，例如 https://example.com",
+        )}
+        defaultValue={settings.cors_allowed_origins || ""}
+        OnSave={async (data) => {
+          await updateSettingsWithToast({ cors_allowed_origins: data }, t);
+        }}
+      />
+      <SettingCardSwitch
+        title={t("settings.site.ws_origin_check_enabled", "WebSocket Origin 校验")}
+        description={t(
+          "settings.site.ws_origin_check_enabled_description",
+          "开启后 WebSocket 请求只允许同源或允许列表中的 Origin",
+        )}
+        defaultChecked={settings.ws_origin_check_enabled ?? true}
+        onChange={async (checked) => {
+          await updateSettingsWithToast(
+            { ws_origin_check_enabled: checked },
+            t,
+          );
+        }}
+      />
+      <SettingCardLongTextInput
+        title={t("settings.site.ws_allowed_origins", "WebSocket Origin 允许列表")}
+        description={t(
+          "settings.site.ws_allowed_origins_description",
+          "每行或用逗号分隔一个 Origin，例如 https://example.com",
+        )}
+        defaultValue={settings.ws_allowed_origins || ""}
+        OnSave={async (data) => {
+          await updateSettingsWithToast({ ws_allowed_origins: data }, t);
         }}
       />
       <SettingCardSwitch
@@ -207,13 +243,9 @@ export default function SiteSettings() {
             value={shareHours}
             type="number"
             onChange={(e) => {
-              try {
-                const val = parseInt(e.target.value);
-                if (!isNaN(val)) {
-                  setShareHours(val);
-                }
-              } catch (err) {
-                // ignore
+              const val = Number.parseInt(e.target.value, 10);
+              if (!Number.isNaN(val)) {
+                setShareHours(val);
               }
             }}
           ></SettingCardShortTextInput>
@@ -340,15 +372,10 @@ export default function SiteSettings() {
                           })
                           .then((data) => {
                             if (data.status === "success") {
-                              toast.success(
-                                t(
-                                  "settings.custom.favicon_default_success",
-                                  "已恢复默认 Favicon",
-                                ),
-                              );
+                              toast.success(t("settings.custom.favicon_default_success"));
                             } else {
                               toast.error(
-                                data.message || "恢复默认 Favicon 失败",
+                                data.message || t("settings.custom.favicon_default_error"),
                               );
                             }
                           })
@@ -357,7 +384,7 @@ export default function SiteSettings() {
                           });
                       }}
                     >
-                      {t("settings.custom.favicon_confirm", "确认")}
+                      {t("settings.custom.favicon_confirm")}
                     </Button>
                   </Dialog.Trigger>
                 </Flex>
@@ -386,8 +413,7 @@ export default function SiteSettings() {
                       if (data.status === "success") {
                         toast.success(
                           t(
-                            "settings.custom.favicon_update_success",
-                            "已更新 Favicon",
+                            "settings.custom.favicon_update_success"
                           ),
                         );
                       } else {
@@ -401,7 +427,7 @@ export default function SiteSettings() {
                 input.click();
               }}
             >
-              {t("settings.custom.favicon_change", "更新 Favicon")}
+              {t("settings.custom.favicon_change")}
             </Button>
           </Flex>
         </Flex>

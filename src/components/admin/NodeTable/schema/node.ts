@@ -33,3 +33,5 @@ export const schema = z.object({
   public_remark: z.string().optional(),
   hidden: z.boolean().optional(),
 });
+
+export type NodeSchema = z.infer<typeof schema>;

@@ -381,6 +381,17 @@
                 "help": "设置延迟图表的最大渲染点数来优化图表渲染，0 表示不限制，推荐值为 2000 或更小的值"
             },
             {
+                "name": "图表设置",
+                "type": "title"
+            },
+            {
+                "key": "chartDashboardTemplate",
+                "name": "全局图表模板",
+                "type": "richtext",
+                "default": "[\n  {\n    \"id\": \"cpu\",\n    \"title\": \"CPU\",\n    \"metrics\": [\n      \"cpu.usage\",\n      \"load.average\"\n    ],\n    \"size\": \"small\"\n  },\n  {\n    \"id\": \"memory\",\n    \"title\": \"Memory\",\n    \"metrics\": [\n      \"memory.used\",\n      \"swap.used\"\n    ],\n    \"size\": \"small\"\n  },\n  {\n    \"id\": \"disk\",\n    \"title\": \"Disk\",\n    \"metrics\": [\n      \"disk.used\"\n    ],\n    \"size\": \"small\"\n  },\n  {\n    \"id\": \"network\",\n    \"title\": \"Network\",\n    \"metrics\": [\n      \"net.in.rate\",\n      \"net.out.rate\",\n      \"net.total.down\",\n      \"net.total.up\"\n    ],\n    \"size\": \"large\"\n  },\n  {\n    \"id\": \"ping\",\n    \"title\": \"Latency\",\n    \"metrics\": [\n      \"ping.latency_ms\"\n    ],\n    \"size\": \"large\"\n  }\n]",
+                "help": "请先在实例详情页排列图表并调整尺寸，然后点击“保存为全局模板”。保存后的 JSON 会在每次进入详情页时作为默认布局读取。"
+            },
+            {
                 "name": "UI 自定义",
                 "type": "title"
             },

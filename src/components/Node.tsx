@@ -34,19 +34,29 @@ interface NodeProps {
   basic: NodeBasicInfo;
   live: Record | undefined;
   online: boolean;
+  isMobile: boolean;
+  showIpTagsInCard: boolean;
 }
-const Node = React.memo(({ basic, live, online }: NodeProps) => {
-  const [t] = useTranslation();
-  const isMobile = useIsMobile();
-  const { publicInfo } = usePublicInfo();
-  const defaultLive = {
-    cpu: { usage: 0 },
-    ram: { used: 0 },
-    disk: { used: 0 },
-    network: { up: 0, down: 0, totalUp: 0, totalDown: 0 },
-  } as Record;
+const DEFAULT_NODE_LIVE = {
+  cpu: { usage: 0 },
+  ram: { used: 0 },
+  swap: { used: 0 },
+  load: { load1: 0, load5: 0, load15: 0 },
+  disk: { used: 0 },
+  network: { up: 0, down: 0, totalUp: 0, totalDown: 0 },
+  connections: { tcp: 0, udp: 0 },
+  uptime: 0,
+  process: 0,
+  message: "",
+  updated_at: "",
+} as Record;
 
-  const liveData = live || defaultLive;
+const Node = React.memo(
+  ({ basic, live, online, isMobile, showIpTagsInCard }: NodeProps) => {
+  const [t] = useTranslation();
+  const liveData = live || DEFAULT_NODE_LIVE;
+  const osImage = React.useMemo(() => getOSImage(basic.os), [basic.os]);
+  const osName = React.useMemo(() => getOSName(basic.os), [basic.os]);
 
   const memoryUsagePercent = basic.mem_total
     ? (liveData.ram.used / basic.mem_total) * 100
@@ -108,16 +118,8 @@ const Node = React.memo(({ basic, live, online }: NodeProps) => {
                   expired_at={basic.expired_at}
                   currency={basic.currency}
                   tags={basic.tags}
-                  ip4={
-                    publicInfo?.theme_settings?.showIpTagsInCard
-                      ? basic.ipv4
-                      : undefined
-                  }
-                  ip6={
-                    publicInfo?.theme_settings?.showIpTagsInCard
-                      ? basic.ipv6
-                      : undefined
-                  }
+                  ip4={showIpTagsInCard ? basic.ipv4 : undefined}
+                  ip6={showIpTagsInCard ? basic.ipv6 : undefined}
                 />
               </Flex>
             </Link>
@@ -153,12 +155,12 @@ const Node = React.memo(({ basic, live, online }: NodeProps) => {
             </Text>
             <Flex align="center">
               <img
-                src={getOSImage(basic.os)}
+                src={osImage}
                 alt={basic.os}
                 className="w-4 h-4 mr-1.5"
               />
               <Text size="1">
-                {getOSName(basic.os)} / {basic.arch}
+                {osName} / {basic.arch}
               </Text>
             </Flex>
           </Flex>
@@ -294,6 +296,7 @@ export default Node;
 type NodeGridProps = {
   nodes: NodeBasicInfo[];
   liveData: LiveData;
+  onlineSet: ReadonlySet<string>;
 };
 
 import { Box } from "@radix-ui/themes";
@@ -306,28 +309,29 @@ import { TrendingUp } from "lucide-react";
 import MiniPingChartFloat from "./MiniPingChartFloat";
 import { getOSImage, getOSName } from "@/utils";
 import { usePublicInfo } from "@/contexts/PublicInfoContext";
-export const NodeGrid = ({ nodes, liveData }: NodeGridProps) => {
+export const NodeGrid = ({ nodes, liveData, onlineSet }: NodeGridProps) => {
   const { publicInfo } = usePublicInfo();
+  const isMobile = useIsMobile();
+  const showIpTagsInCard = Boolean(
+    publicInfo?.theme_settings?.showIpTagsInCard,
+  );
   const offlineServerPosition =
     publicInfo?.theme_settings?.offlineServerPosition; // "First/Keep/Last"
-  // 确保liveData是有效的
-  const onlineNodes = liveData && liveData.online ? liveData.online : [];
 
   // 排序节点：先按权重排序，权重大的靠前，再根据用户设置排序
-  const sortedNodes = [...nodes].sort((a, b) => {
-    const aIsOnline = onlineNodes.includes(a.uuid);
-    const bIsOnline = onlineNodes.includes(b.uuid);
+  const sortedNodes = React.useMemo(() => [...nodes].sort((a, b) => {
+    const aIsOnline = onlineSet.has(a.uuid);
+    const bIsOnline = onlineSet.has(b.uuid);
 
     if (offlineServerPosition === "First") {
       if (!aIsOnline && bIsOnline) return -1;
       if (aIsOnline && !bIsOnline) return 1;
-    } else if (offlineServerPosition === "Keep") {
-    } else {
+    } else if (offlineServerPosition !== "Keep") {
       if (aIsOnline && !bIsOnline) return -1;
       if (!aIsOnline && bIsOnline) return 1;
     }
     return a.weight - b.weight;
-  });
+  }), [nodes, offlineServerPosition, onlineSet]);
 
   return (
     <Box
@@ -341,9 +345,8 @@ export const NodeGrid = ({ nodes, liveData }: NodeGridProps) => {
       }}
     >
       {sortedNodes.map((node) => {
-        const isOnline = onlineNodes.includes(node.uuid);
-        const nodeData =
-          liveData && liveData.data ? liveData.data[node.uuid] : undefined;
+        const isOnline = onlineSet.has(node.uuid);
+        const nodeData = liveData.data[node.uuid];
 
         return (
           <Node
@@ -351,6 +354,8 @@ export const NodeGrid = ({ nodes, liveData }: NodeGridProps) => {
             basic={node}
             live={nodeData}
             online={isOnline}
+            isMobile={isMobile}
+            showIpTagsInCard={showIpTagsInCard}
           />
         );
       })}

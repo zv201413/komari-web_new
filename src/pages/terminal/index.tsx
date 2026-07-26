@@ -1,17 +1,37 @@
-import { useEffect, useRef, useState, useCallback } from "react";
-import { Terminal } from "xterm";
-import { FitAddon } from "xterm-addon-fit";
-import { WebLinksAddon } from "xterm-addon-web-links";
-import { SearchAddon } from "xterm-addon-search";
-import "xterm/css/xterm.css";
+import { useEffect, useRef, useState, useCallback, useMemo } from "react";
+import type { CSSProperties } from "react";
+import { Terminal } from "@xterm/xterm";
+import type { ITerminalOptions } from "@xterm/xterm";
+import { FitAddon } from "@xterm/addon-fit";
+import { WebLinksAddon } from "@xterm/addon-web-links";
+import { SearchAddon } from "@xterm/addon-search";
+import "@xterm/xterm/css/xterm.css";
 import "./Terminal.css";
-import { AlertDialog, Button, Callout, Flex, IconButton, Select, TextField, Theme } from "@radix-ui/themes";
+import {
+  AlertDialog,
+  Button,
+  Callout,
+  Dialog,
+  Flex,
+  IconButton,
+  Select,
+  TextField,
+  Theme,
+} from "@radix-ui/themes";
+
+
 import { useTranslation } from "react-i18next";
 import { Cross1Icon } from "@radix-ui/react-icons";
 import { TablerAlertTriangleFilled } from "../../components/Icones/Tabler";
 import CommandClipboardPanel from "@/pages/terminal/CommandClipboard";
 import { Toaster } from "@/components/ui/sonner";
 import { TerminalContext } from "@/contexts/TerminalContext";
+import {
+  isTransparentBackground,
+  defaultXtermjsSettings,
+  type XtermjsSettings,
+  useXtermjsSettings,
+} from "@/hooks/useXtermjsSettings";
 import { motion } from "framer-motion";
 import throttle from "lodash/throttle";
 interface TerminalAreaProps {
@@ -19,18 +39,20 @@ interface TerminalAreaProps {
   toggleClipboard: () => void;
   width: number | string;
   isOpen: boolean;
+  appearance: CSSProperties;
 }
 const TerminalArea: React.FC<TerminalAreaProps> = ({
   terminalRef,
   toggleClipboard,
   width,
   isOpen,
+  appearance,
 }) => (
   <div
-    className="relative flex justify-center bg-black md:bg-accent-3 flex-col h-full min-w-128"
-    style={{ width }}
+    className="terminal-page relative flex justify-center flex-col h-full min-w-128"
+    style={{ width, ...appearance }}
   >
-    <div className="m-0 md:p-4 p-0 w-full h-full bg-black">
+    <div className="terminal-xterm-host m-0 w-full h-full">
       <div ref={terminalRef} className="h-full w-full" />
     </div>
     <div
@@ -176,24 +198,77 @@ const SudoAuthDialog: React.FC<SudoAuthDialogProps> = ({
 };
 
 const TerminalPage = () => {
+  const {
+    settings,
+    loading: settingsLoading,
+    error: settingsError,
+  } = useXtermjsSettings();
   const terminalRef = useRef<HTMLDivElement>(null);
   const terminalInstance = useRef<Terminal | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const heartbeatIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const stopHeartbeatRef = useRef<(() => void) | null>(null);
+  const resolvedSettingsRef = useRef<XtermjsSettings>(defaultXtermjsSettings);
+  const initializedUuidRef = useRef<string | null>(null);
   const params = new URLSearchParams(window.location.search);
   const uuid = params.get("uuid");
-  const [callout, setCallout] = useState(false);
-  const [showSudoDialog, setShowSudoDialog] = useState(false);
-  const [sudoVerified, setSudoVerified] = useState(false);
   const [t] = useTranslation();
+  const disconnectMessageRef = useRef(t("terminal.disconnect"));
   const firstBinary = useRef(false);
-  const onDataDisposeRef = useRef<(() => void) | null>(null);
   const [isClipboardOpen, setIsClipboardOpen] = useState(false);
   const [leftWidth, setLeftWidth] = useState<number>(window.innerWidth * 0.7);
   const draggingRef = useRef(false);
   const fitAddonRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [callout, setCallout] = useState(
+    window.location.protocol !== "https:"
+  );
+  const [settingsResolved, setSettingsResolved] = useState(false);
+  const [settingsResolutionError, setSettingsResolutionError] =
+    useState<Error | null>(null);
+  const [appearance, setAppearance] = useState<CSSProperties>({});
+  const [twoFaEnabled, setTwoFaEnabled] = useState(false);
+  const [twoFaResolved, setTwoFaResolved] = useState(false);
+  const [otpCode, setOtpCode] = useState<string | null>(null);
+  const [otpDialogOpen, setOtpDialogOpen] = useState(false);
+  const [otpInput, setOtpInput] = useState("");
+  const [showSudoDialog, setShowSudoDialog] = useState(false);
+  const [sudoVerified, setSudoVerified] = useState(false);
+
+
+  useEffect(() => {
+    fetch("/api/me")
+      .then((response) => response.json())
+      .then((data) => {
+        setTwoFaEnabled(Boolean(data?.["2fa_enabled"]));
+      })
+      .catch(() => {
+        setTwoFaEnabled(false);
+      })
+      .finally(() => {
+        setTwoFaResolved(true);
+      });
+  }, []);
+
+  useEffect(() => {
+    if (settingsLoading || settingsResolved) {
+      return;
+    }
+
+    const resolvedSettings = settingsError
+      ? defaultXtermjsSettings
+      : settings;
+
+    resolvedSettingsRef.current = resolvedSettings;
+    setAppearance({
+      "--xterm-padding": `${resolvedSettings.terminalPadding}px`,
+    } as CSSProperties);
+    setSettingsResolutionError(settingsError);
+    setSettingsResolved(true);
+  }, [settings, settingsError, settingsLoading, settingsResolved]);
+
+  useEffect(() => {
+    disconnectMessageRef.current = t("terminal.disconnect");
+  }, [t]);
 
   // 使用 useCallback 确保 resizeTerminal 引用稳定
   const resizeTerminal = useCallback(() => {
@@ -210,81 +285,6 @@ const TerminalPage = () => {
       );
     }
   }, []);
-
-  const connectWs = useCallback(() => {
-    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-    const host = window.location.host;
-    const baseUrl = `${protocol}//${host}`;
-
-    // Close old connection if any
-    stopHeartbeatRef.current?.();
-    const oldWs = wsRef.current;
-    if (oldWs) {
-      if (oldWs.readyState === WebSocket.OPEN || oldWs.readyState === WebSocket.CONNECTING) {
-        oldWs.close();
-      }
-    }
-
-    const ws = new WebSocket(`${baseUrl}/api/admin/client/${uuid}/terminal`);
-    ws.binaryType = "arraybuffer";
-    wsRef.current = ws;
-
-    const startHeartbeat = () => {
-      heartbeatIntervalRef.current = setInterval(() => {
-        if (ws.readyState === WebSocket.OPEN) {
-          ws.send(JSON.stringify({ type: "heartbeat", timestamp: new Date().toISOString() }));
-        }
-      }, 10000);
-    };
-
-    const stopHeartbeat = () => {
-      if (heartbeatIntervalRef.current) {
-        clearInterval(heartbeatIntervalRef.current);
-        heartbeatIntervalRef.current = null;
-      }
-    };
-    stopHeartbeatRef.current = stopHeartbeat;
-
-    ws.onopen = () => {
-      resizeTerminal();
-      startHeartbeat();
-    };
-
-    ws.onmessage = (event) => {
-      const term = terminalInstance.current;
-      if (!term) return;
-      if (event.data instanceof ArrayBuffer) {
-        term.write(new Uint8Array(event.data));
-      } else {
-        term.write(event.data);
-      }
-      if (!firstBinary.current && event.data instanceof ArrayBuffer) {
-        firstBinary.current = true;
-        setTimeout(() => {
-          const t = terminalInstance.current;
-          if (t) { t.resize(t.cols - 1, t.rows); }
-          resizeTerminal();
-        }, 200);
-      }
-    };
-
-    ws.onclose = () => {
-      stopHeartbeat();
-      const term = terminalInstance.current;
-      if (term) { term.write(`\n ${t("terminal.disconnect")}`); }
-      setSudoVerified(false);
-    };
-
-    // Data from terminal → send to ws
-    onDataDisposeRef.current?.();
-    const onDataHandler = (data: string) => {
-      if (ws.readyState === WebSocket.OPEN) {
-        ws.send(new TextEncoder().encode(data));
-      }
-    };
-    const onDataDispose = terminalInstance.current?.onData(onDataHandler);
-    onDataDisposeRef.current = () => onDataDispose?.dispose();
-  }, [t, uuid, resizeTerminal]);
 
   const startDragging = useCallback(
     (e: React.MouseEvent | React.TouchEvent) => {
@@ -304,27 +304,28 @@ const TerminalPage = () => {
   }, [resizeTerminal]);
 
   // 限制resize onMouseMove 调用频率
-  const onMouseMove = useCallback(
-    throttle((e: MouseEvent | TouchEvent) => {
-      if (!draggingRef.current || !containerRef.current) return;
+  const onMouseMove = useMemo(
+    () =>
+      throttle((e: MouseEvent | TouchEvent) => {
+        if (!draggingRef.current || !containerRef.current) return;
 
-      const containerRect = containerRef.current.getBoundingClientRect();
-      let clientX: number;
+        const containerRect = containerRef.current.getBoundingClientRect();
+        let clientX: number;
 
-      if (e instanceof MouseEvent) {
-        clientX = e.clientX;
-      } else {
-        clientX = e.touches[0].clientX;
-      }
+        if (e instanceof MouseEvent) {
+          clientX = e.clientX;
+        } else {
+          clientX = e.touches[0].clientX;
+        }
 
-      const newLeftWidth = clientX - containerRect.left;
-      const minWidth = 300;
-      const maxWidth = containerRect.width - 300;
+        const newLeftWidth = clientX - containerRect.left;
+        const minWidth = 300;
+        const maxWidth = containerRect.width - 300;
 
-      if (newLeftWidth >= minWidth && newLeftWidth <= maxWidth) {
-        setLeftWidth(newLeftWidth);
-      }
-    }, 1000 / 60), // （60fps）
+        if (newLeftWidth >= minWidth && newLeftWidth <= maxWidth) {
+          setLeftWidth(newLeftWidth);
+        }
+      }, 1000 / 60), // （60fps）
     []
   );
 
@@ -346,6 +347,7 @@ const TerminalPage = () => {
   useEffect(() => {
     if (uuid === null) {
       window.location.href = "/";
+      return;
     }
     fetch("./api/admin/client/list")
       .then((res) => res.json())
@@ -362,19 +364,52 @@ const TerminalPage = () => {
       });
   }, [t, uuid]);
 
+  // Sudo preflight（fork 特性）：登录时验过 2FA 的用户凭 sudo_token 免重输；
+  // 无有效 token 时弹出 SudoAuthDialog，替代上游"每次打开终端都要 OTP"的流程
   useEffect(() => {
-    setCallout(window.location.protocol !== "https:");
-    if (!terminalRef.current) return;
+    fetch("/api/admin/sudo-check", { cache: "no-store" })
+      .then((r) => {
+        if (r.ok) {
+          setSudoVerified(true);
+        } else {
+          setShowSudoDialog(true);
+        }
+      })
+      .catch(() => setShowSudoDialog(true));
+  }, []);
 
-    const term = new Terminal({
-      cursorBlink: true,
-      macOptionIsMeta: true,
-      scrollback: 5000,
-      convertEol: true,
-      fontFamily: "'Cascadia Mono', 'Noto Sans SC', monospace",
-      fontSize: 16,
-    });
+  // Connection effect - waits for OTP if 2FA is enabled
+  useEffect(() => {
+    if (!settingsResolved || !twoFaResolved || uuid === null || !terminalRef.current) return;
+    if (initializedUuidRef.current === uuid) return;
+    if (!sudoVerified) return; // 等待 sudo 2FA 验证通过
 
+    initializedUuidRef.current = uuid;
+    firstBinary.current = false;
+    const otpQuery = twoFaEnabled && otpCode ? `?2fa_code=${encodeURIComponent(otpCode)}` : "";
+
+
+    const snapshot = resolvedSettingsRef.current;
+    const terminalOptions: Partial<ITerminalOptions> = {
+      cursorBlink: snapshot.terminalOptions.cursorBlink,
+      convertEol: snapshot.terminalOptions.convertEol,
+      fontFamily: snapshot.terminalOptions.fontFamily,
+      fontSize: snapshot.terminalOptions.fontSize,
+      macOptionIsMeta: snapshot.terminalOptions.macOptionIsMeta,
+      scrollback: snapshot.terminalOptions.scrollback,
+    };
+
+    if (snapshot.terminalOptions.theme !== undefined) {
+      terminalOptions.theme = snapshot.terminalOptions.theme;
+    }
+    if (
+      snapshot.transparentBackground ||
+      isTransparentBackground(snapshot.terminalOptions.theme?.background)
+    ) {
+      terminalOptions.allowTransparency = true;
+    }
+
+    const term = new Terminal(terminalOptions);
     const fitAddon = new FitAddon();
     fitAddonRef.current = fitAddon;
     const webLinksAddon = new WebLinksAddon();
@@ -387,68 +422,204 @@ const TerminalPage = () => {
     term.open(terminalRef.current);
     terminalInstance.current = term;
 
-    // Sudo preflight: check sudo token, then connect or show dialog
-    fetch("/api/admin/sudo-check", { cache: "no-store" })
-      .then((r) => {
-        if (r.ok) {
-          connectWs();
-        } else {
-          setShowSudoDialog(true);
-        }
-      })
-      .catch(() => setShowSudoDialog(true));
+    const customCssStyle = document.createElement("style");
+    customCssStyle.id = "xtermjs-custom-css";
+    customCssStyle.textContent = snapshot.customCss;
+    document.head.appendChild(customCssStyle);
 
-    const handleResize = () => resizeTerminal();
+    const resizeObserver =
+      typeof ResizeObserver !== "undefined"
+        ? new ResizeObserver(() => {
+            resizeTerminal();
+          })
+        : null;
+
+    if (resizeObserver && terminalRef.current) {
+      resizeObserver.observe(terminalRef.current);
+    }
+
+    let isMounted = true;
+    let disposed = false;
+    let firstBinaryTimeout: ReturnType<typeof setTimeout> | null = null;
+
+    document.fonts?.ready?.then(() => {
+      if (isMounted && !disposed) {
+        resizeTerminal();
+      }
+    });
+
+    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    const host = window.location.host;
+    const baseUrl = `${protocol}//${host}`;
+    const ws = new WebSocket(`${baseUrl}/api/admin/client/${uuid}/terminal${otpQuery}`);
+    ws.binaryType = "arraybuffer";
+    wsRef.current = ws;
+
+    ws.onopen = () => {
+      if (disposed) {
+        return;
+      }
+      resizeTerminal();
+      startHeartbeat();
+    };
+
+    const startHeartbeat = () => {
+      if (disposed) {
+        return;
+      }
+      if (heartbeatIntervalRef.current) {
+        clearInterval(heartbeatIntervalRef.current);
+        heartbeatIntervalRef.current = null;
+      }
+      heartbeatIntervalRef.current = setInterval(() => {
+        if (ws.readyState === WebSocket.OPEN) {
+          ws.send(
+            JSON.stringify({
+              type: "heartbeat",
+              timestamp: new Date().toISOString(),
+            })
+          );
+        }
+      }, 10000);
+    };
+
+    const stopHeartbeat = () => {
+      if (heartbeatIntervalRef.current) {
+        clearInterval(heartbeatIntervalRef.current);
+        heartbeatIntervalRef.current = null;
+      }
+    };
+
+    ws.onmessage = (event) => {
+      if (disposed) {
+        return;
+      }
+      if (event.data instanceof ArrayBuffer) {
+        const uint8Array = new Uint8Array(event.data);
+        term.write(uint8Array);
+      } else {
+        term.write(event.data);
+      }
+      if (!firstBinary.current && event.data instanceof ArrayBuffer) {
+        firstBinary.current = true;
+        firstBinaryTimeout = setTimeout(() => {
+          if (disposed) return;
+          const term = terminalInstance.current;
+          if (term) {
+            term.resize(term.cols - 1, term.rows);
+          }
+          resizeTerminal();
+        }, 200);
+      }
+    };
+
+    ws.onclose = () => {
+      if (disposed) {
+        return;
+      }
+      stopHeartbeat();
+      term.write(`\n ${disconnectMessageRef.current}`);
+    };
+
+    const termDataDisposable = term.onData((data) => {
+      if (disposed) {
+        return;
+      }
+      if (ws.readyState === WebSocket.OPEN) {
+        const encoder = new TextEncoder();
+        const uint8Array = encoder.encode(data);
+        ws.send(uint8Array);
+      }
+    });
+
+    const handleResize = () => {
+      resizeTerminal();
+    };
     window.addEventListener("resize", handleResize);
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.ctrlKey && (e.key === "f" || e.key === "d")) {
-        searchAddon.findNext("");
-        e.preventDefault();
+      if (e.ctrlKey) {
+        if (e.key === "f" || e.key === "d") {
+          searchAddon.findNext("");
+          e.preventDefault();
+        }
       }
     };
     document.addEventListener("keydown", handleKeyDown);
 
     const handleContextMenu = (e: MouseEvent) => {
-      const ws = wsRef.current;
-      if (!ws || e.ctrlKey || ws.readyState !== WebSocket.OPEN) return;
-      const sel = window.getSelection();
-      if (sel && sel.toString().length > 0) {
+      if (e.ctrlKey || ws.readyState !== WebSocket.OPEN) {
+        return;
+      }
+      const selection = window.getSelection();
+      const hasSelection = selection && selection.toString().length > 0;
+      if (hasSelection) {
         e.preventDefault();
-        navigator.clipboard.writeText(sel.toString()).finally(() => {
+        const selectedText = selection.toString();
+        navigator.clipboard.writeText(selectedText).finally(() => {
+          if (disposed) {
+            return;
+          }
           term.focus();
-          (sel as any).empty?.();
+          term.clearSelection();
         });
       } else {
         e.preventDefault();
         term.focus();
         navigator.clipboard.readText().then((text) => {
-          ws.send(new TextEncoder().encode(text.replace(/\r?\n/g, "\r")));
+          if (disposed || ws.readyState !== WebSocket.OPEN) {
+            return;
+          }
+          const encoder = new TextEncoder();
+          const uint8Array = encoder.encode(text.replace(/\r?\n/g, "\r"));
+          ws.send(uint8Array);
         });
       }
     };
+
     document.addEventListener("contextmenu", handleContextMenu);
 
     return () => {
-      stopHeartbeatRef.current?.();
-      onDataDisposeRef.current?.();
+      disposed = true;
+      isMounted = false;
+      stopHeartbeat();
+      ws.onopen = null;
+      ws.onmessage = null;
+      ws.onclose = null;
+      ws.onerror = null;
+      resizeObserver?.disconnect();
+      if (firstBinaryTimeout !== null) {
+        clearTimeout(firstBinaryTimeout);
+      }
+      termDataDisposable.dispose();
       term.dispose();
-      const ws = wsRef.current;
-      if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) {
+      if (customCssStyle.parentNode) {
+        customCssStyle.parentNode.removeChild(customCssStyle);
+      }
+      if (
+        ws.readyState === WebSocket.OPEN ||
+        ws.readyState === WebSocket.CONNECTING
+      ) {
         ws.close();
       }
+      if (initializedUuidRef.current === uuid) {
+        initializedUuidRef.current = null;
+      }
+      terminalInstance.current = null;
+      wsRef.current = null;
+      fitAddonRef.current = null;
       window.removeEventListener("resize", handleResize);
       document.removeEventListener("keydown", handleKeyDown);
       document.removeEventListener("contextmenu", handleContextMenu);
     };
-  }, [t, uuid, resizeTerminal, connectWs]);
+  }, [settingsResolved, twoFaEnabled, twoFaResolved, otpCode, sudoVerified, uuid, resizeTerminal, t]);
 
-  // When sudo is verified (after 2FA auth), connect WebSocket
-  useEffect(() => {
-    if (sudoVerified && terminalInstance.current) {
-      connectWs();
-    }
-  }, [sudoVerified, connectWs]);
+  const submitOtp = useCallback(() => {
+    if (!otpInput) return;
+    setOtpCode(otpInput);
+    setOtpDialogOpen(false);
+  }, [otpInput]);
+
 
   // 移除对 leftWidth 的直接依赖，改用防抖
   useEffect(() => {
@@ -473,6 +644,26 @@ const TerminalPage = () => {
     >
       <Theme appearance="dark">
         <Toaster theme="dark" />
+        {settingsResolutionError ? (
+          <div className="absolute left-4 top-4 z-30 max-w-[32rem]">
+            <Callout.Root
+              color="red"
+              size="2"
+              className="bg-red-50 backdrop-blur-sm border-2 border-red-800 rounded-lg"
+            >
+              <Callout.Icon>
+                <TablerAlertTriangleFilled className="text-red-700" />
+              </Callout.Icon>
+              <Callout.Text className="text-red-400 font-medium">
+                <Flex align="center" justify="between" gap="3">
+                  <span>
+                    xterm settings fallback: {settingsResolutionError.message}
+                  </span>
+                </Flex>
+              </Callout.Text>
+            </Callout.Root>
+          </div>
+        ) : null}
         <div className="absolute inset-x-0 top-4 flex justify-center items-center z-30">
           <motion.div
             initial={{ opacity: 0, y: -20, scale: 0.95 }}
@@ -512,16 +703,66 @@ const TerminalPage = () => {
             toggleClipboard={() => setIsClipboardOpen(!isClipboardOpen)}
             width={isClipboardOpen ? `${leftWidth}px` : "100%"}
             isOpen={isClipboardOpen}
+            appearance={appearance}
           />
           {isClipboardOpen && <Divider onMouseDown={startDragging} />}
           {isClipboardOpen && <ClipboardPanel />}
         </Flex>
+        <Dialog.Root
+          open={otpDialogOpen}
+          onOpenChange={(open) => {
+            // 阻止在未输入验证码时关闭
+            if (!open && otpCode === null) {
+              return;
+            }
+            setOtpDialogOpen(open);
+          }}
+        >
+          <Dialog.Content maxWidth="400px">
+            <Dialog.Title>{t("login.two_factor")}</Dialog.Title>
+            <Dialog.Description size="2" mb="3">
+              {t("account.2fa_otp_input_prompt")}
+            </Dialog.Description>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                submitOtp();
+              }}
+            >
+              <Flex direction="column" gap="3">
+                <TextField.Root
+                  type="number"
+                  autoFocus
+                  value={otpInput}
+                  placeholder="123456"
+                  onChange={(e) => setOtpInput(e.target.value)}
+                />
+                <Flex gap="3" justify="end">
+                  <Button
+                    variant="soft"
+                    color="gray"
+                    type="button"
+                    onClick={() => {
+                      window.location.href = "/";
+                    }}
+                  >
+                    {t("common.cancel")}
+                  </Button>
+                  <Button type="submit" disabled={!otpInput}>
+                    {t("common.confirm")}
+                  </Button>
+                </Flex>
+              </Flex>
+            </form>
+          </Dialog.Content>
+        </Dialog.Root>
+        <SudoAuthDialog
+          open={showSudoDialog}
+          onOpenChange={setShowSudoDialog}
+          onVerified={() => setSudoVerified(true)}
+        />
       </Theme>
-      <SudoAuthDialog
-        open={showSudoDialog}
-        onOpenChange={setShowSudoDialog}
-        onVerified={() => setSudoVerified(true)}
-      />
+
     </TerminalContext.Provider>
   );
 };

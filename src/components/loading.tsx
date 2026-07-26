@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import "./Loading.css"
 
 type LoadingProps = {
@@ -8,6 +9,9 @@ type LoadingProps = {
 };
 
 const Loading = ({ text, children, size, className }: LoadingProps) => {
+  const { t } = useTranslation();
+
+
   return (
     <div className={`flex items-center justify-center flex-col ${className || ""}`}>
       <div
@@ -31,7 +35,7 @@ const Loading = ({ text, children, size, className }: LoadingProps) => {
           </svg>
         </div>
       </div>
-      <p className="text-lg font-bold">Loading...</p>
+      <p className="text-lg font-bold">{t("loading")}</p>
       <p className="text-sm text-muted-foreground mb-4">
         {text}
       </p>

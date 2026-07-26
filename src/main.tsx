@@ -24,6 +24,8 @@ import { Theme } from "@radix-ui/themes";
 import { Toaster } from "./components/ui/sonner";
 
 const App = () => {
+	const isUpgradeRoute = window.location.pathname.replace(/\/$/, "") === "/admin/update/1.2.7";
+	const isRestrictedGuideRoute = isUpgradeRoute || window.location.pathname.replace(/\/$/, "") === "/install" || window.location.pathname.replace(/\/$/, "") === "/database-recovery";
   React.useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const tempKey = params.get("temp_key");
@@ -41,31 +43,47 @@ const App = () => {
 
   const themeManager = useThemeManager();
   const routing = useRoutes(routes);
+  // install / database-recovery / update 引导页需在后端不可用时渲染，
+  // 跳过依赖服务端的 Provider（RPC2 / PublicInfo / Account / Config）
   return (
     <Suspense fallback={<Loading />}>
-      <RPC2Provider>
-        <PublicInfoProvider>
-          <AccountProvider>
-            <ConfigProvider>
-              <ThemeProvider value={themeManager}>
-              <Theme
-                appearance={themeManager.appearance}
-                accentColor={themeManager.color}
-                scaling="110%"
-                style={{ backgroundColor: "transparent" }}
-              >
-                <AppearanceRuntime />
-                <OfflineIndicator />
-                <Toaster />
-                {routing}
-                <PWAInstallPrompt />
-                <PWAUpdatePrompt />
-              </Theme>
-            </ThemeProvider>
-          </ConfigProvider>
-          </AccountProvider>
-        </PublicInfoProvider>
-      </RPC2Provider>
+      {isRestrictedGuideRoute ? (
+        <ThemeProvider value={themeManager}>
+          <Theme
+            appearance={themeManager.appearance}
+            accentColor={themeManager.color}
+            scaling="110%"
+            style={{ backgroundColor: "transparent" }}
+          >
+            <Toaster />
+            {routing}
+          </Theme>
+        </ThemeProvider>
+      ) : (
+        <RPC2Provider>
+          <PublicInfoProvider>
+            <AccountProvider>
+              <ConfigProvider>
+                <ThemeProvider value={themeManager}>
+                  <Theme
+                    appearance={themeManager.appearance}
+                    accentColor={themeManager.color}
+                    scaling="110%"
+                    style={{ backgroundColor: "transparent" }}
+                  >
+                    <AppearanceRuntime />
+                    <OfflineIndicator />
+                    <Toaster />
+                    {routing}
+                    <PWAInstallPrompt />
+                    <PWAUpdatePrompt />
+                  </Theme>
+                </ThemeProvider>
+              </ConfigProvider>
+            </AccountProvider>
+          </PublicInfoProvider>
+        </RPC2Provider>
+      )}
     </Suspense>
   );
 };

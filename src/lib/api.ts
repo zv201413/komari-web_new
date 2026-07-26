@@ -8,9 +8,10 @@ import { toast } from "sonner";
 export interface SettingsResponse {
   sitename: string;
   description: string;
-  allow_cors: boolean;
+  cors_origin_check_enabled: boolean;
   geo_ip_enabled: boolean;
   geo_ip_provider: string;
+  low_resource_mode: boolean;
   o_auth_provider: string;
   o_auth_enabled: boolean;
   custom_head: string;
@@ -32,9 +33,22 @@ export async function getSettings(): Promise<SettingsResponse> {
     }
 
     const data = await response.json();
+    const settingsPayload = data["data"];
+
+    if (
+      typeof settingsPayload !== "object" ||
+      settingsPayload === null ||
+      Array.isArray(settingsPayload)
+    ) {
+      throw new Error("Invalid settings response payload");
+    }
 
     // Remove database metadata fields that are not needed for UI
-    const { CreatedAt, UpdatedAt, id, ...settings } = data["data"];
+    const settings = Object.fromEntries(
+      Object.entries(settingsPayload).filter(
+        ([key]) => !["CreatedAt", "UpdatedAt", "id"].includes(key),
+      ),
+    );
 
     return settings as SettingsResponse;
   } catch (error) {
@@ -51,29 +65,28 @@ export async function getSettings(): Promise<SettingsResponse> {
 export async function updateSettings(
   settings: Partial<SettingsResponse>
 ): Promise<void> {
-  try {
-    const response = await fetch("/api/admin/settings", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(settings),
-    });
+  const response = await fetch("/api/admin/settings", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(settings),
+  });
 
-    if (!response.ok) {
-      try {
-        const errorData = await response.json();
-        console.log("Error response data:", errorData.message);
-        throw new Error(
-          `${errorData['message']}`
-        );
-      } catch (jsonError) {
-        throw jsonError
+  if (!response.ok) {
+    let message = `HTTP error! status: ${response.status}`;
+
+    try {
+      const errorData = await response.json();
+      if (errorData?.message) {
+        message = String(errorData.message);
       }
+    } catch {
+      // Keep the fallback HTTP status message.
     }
-  } catch (error) {
-    console.error("Failed to update settings:", error);
-    throw error;
+
+    console.error("Failed to update settings:", message);
+    throw new Error(message);
   }
 }
 export async function updateSettingsWithToast(
@@ -112,9 +125,10 @@ export function useSettings() {
   const [settings, setSettings] = React.useState<SettingsResponse>({
     sitename: "",
     description: "",
-    allow_cors: false,
+    cors_origin_check_enabled: true,
     geo_ip_enabled: false,
     geo_ip_provider: "",
+    low_resource_mode: false,
     o_auth_provider: "",
     o_auth_enabled: false,
     custom_head: "",
@@ -122,7 +136,7 @@ export function useSettings() {
     UpdatedAt: "",
   });
 
-  const [loading, setLoading] = React.useState(false);
+  const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
 
   // Fetch settings on mount

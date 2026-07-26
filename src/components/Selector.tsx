@@ -1,6 +1,7 @@
-import React, { useEffect, useRef } from "react";
+import React from "react";
 import { Checkbox, TextField } from "@radix-ui/themes";
 import { Search } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import {
   Table,
   TableBody,
@@ -50,10 +51,11 @@ function SelectorInner<T>(props: SelectorProps<T>) {
     getLabel,
     sortItems,
     filterItem,
-    searchPlaceholder = "Search…",
-    headerLabel = "Items",
+    searchPlaceholder,
+    headerLabel,
     transparent = false,
   } = props;
+  const { t } = useTranslation();
 
   const value = externalValue ?? [];
   const [search, setSearch] = React.useState("");
@@ -80,17 +82,14 @@ function SelectorInner<T>(props: SelectorProps<T>) {
     allIds.length > 0 && allIds.every((id) => value.includes(id));
   const isIndeterminate =
     value.length > 0 && value.some((id) => allIds.includes(id)) && !allChecked;
+  const checkAllState = allChecked ? true : isIndeterminate ? "indeterminate" : false;
 
   // 孤立（value 中但 items 不再存在）
   const orphanIds = value.filter((id) => !items.some((it) => getId(it) === id));
 
-  const checkAllRef = useRef<HTMLButtonElement>(null);
-  useEffect(() => {
-    if (checkAllRef.current) {
-      // @ts-ignore - set indeterminate
-      checkAllRef.current.indeterminate = isIndeterminate;
-    }
-  }, [isIndeterminate]);
+  const resolvedSearchPlaceholder =
+    searchPlaceholder ?? t("common.search");
+  const resolvedHeaderLabel = headerLabel ?? t("common.content");
 
   const handleCheckAll = (checked: boolean) => {
     if (checked) {
@@ -112,7 +111,7 @@ function SelectorInner<T>(props: SelectorProps<T>) {
     <div className={`flex flex-col ${className}`}>
       <TextField.Root
         className="mb-2 flex items-center gap-1"
-        placeholder={searchPlaceholder}
+        placeholder={resolvedSearchPlaceholder}
         value={search}
         onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
           setSearch(e.target.value)
@@ -127,13 +126,12 @@ function SelectorInner<T>(props: SelectorProps<T>) {
           <TableHeader>
             <TableHead>
               <Checkbox
-                ref={checkAllRef}
-                checked={allChecked}
+                checked={checkAllState}
                 onCheckedChange={(checked) => handleCheckAll(!!checked)}
-                aria-label="Select all"
+                aria-label={t("common.select_all")}
               />
             </TableHead>
-            <TableHead>{headerLabel}</TableHead>
+            <TableHead>{resolvedHeaderLabel}</TableHead>
           </TableHeader>
           <TableBody>
             {processed.map((it) => {
@@ -149,7 +147,7 @@ function SelectorInner<T>(props: SelectorProps<T>) {
                     <Checkbox
                       checked={value.includes(id)}
                       onCheckedChange={(checked) => handleCheck(id, !!checked)}
-                      aria-label={`Select ${id}`}
+                      aria-label={`${t("common.select")} ${id}`}
                     />
                   </TableCell>
                   <TableCell>{getLabel(it)}</TableCell>
@@ -167,7 +165,7 @@ function SelectorInner<T>(props: SelectorProps<T>) {
                   <Checkbox
                     checked={value.includes(id)}
                     onCheckedChange={(checked) => handleCheck(id, !!checked)}
-                    aria-label={`Select ${id}`}
+                    aria-label={`${t("common.select")} ${id}`}
                   />
                 </TableCell>
                 <TableCell>{id}</TableCell>
@@ -177,7 +175,9 @@ function SelectorInner<T>(props: SelectorProps<T>) {
         </Table>
       </div>
       {!hiddenDescription && (
-        <label className="text-sm text-gray-500">已选择 {value.length}</label>
+        <label className="text-sm text-gray-500">
+          {t("common.selected", { count: value.length })}
+        </label>
       )}
     </div>
   );

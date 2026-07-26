@@ -15,6 +15,11 @@ import { useTranslation } from "react-i18next";
 import { resolveI18nText, type I18nText } from "@/utils/i18nText";
 import { BackgroundImageItem } from "@/components/admin/BackgroundImageItem";
 import { parseBackgroundImages, type BackgroundImageEntry } from "@/config/parse";
+import {
+  getThemeConfigurationType,
+  THEME_CONFIGURATION_MANAGED,
+  type ThemeConfiguration,
+} from "@/utils/themeConfiguration";
 
 interface ThemeFieldBase {
   name?: I18nText; // 显示名（字符串或多语言字典）
@@ -27,9 +32,7 @@ interface ThemeFieldBase {
 }
 
 interface ThemeConfigResponse {
-  configuration?: {
-    data?: ThemeFieldBase[];
-  };
+  configuration?: ThemeConfiguration;
   [k: string]: any;
 }
 
@@ -97,12 +100,17 @@ const ThemeManaged: React.FC = () => {
         });
         if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
         const data: ThemeConfigResponse = await resp.json();
-        if (!data.configuration?.data) {
+        const configuration = data.configuration;
+        if (
+          getThemeConfigurationType(configuration) !==
+            THEME_CONFIGURATION_MANAGED ||
+          !Array.isArray(configuration?.data)
+        ) {
           setFields([]);
           setValues({});
           return;
         }
-        const ds = data.configuration.data;
+        const ds = configuration.data;
         setFields(ds);
         // 初始值：优先 publicInfo.theme_settings，其次 default
         const init: Record<string, any> = {};
@@ -116,14 +124,14 @@ const ThemeManaged: React.FC = () => {
         });
         setValues(init);
       } catch (e: any) {
-        setError(e.message || "加载主题配置失败");
+        setError(e.message || t("theme.load_config_failed"));
       } finally {
         setLoading(false);
         setFirstLoading(false);
       }
     }
     load();
-  }, [theme, themeSettings]);
+  }, [theme, themeSettings, t]);
 
   const handleValueChange = (key: string, val: any) => {
     setValues((v) => ({ ...v, [key]: val }));
@@ -165,11 +173,11 @@ const ThemeManaged: React.FC = () => {
         const d = await resp.json().catch(() => ({ message: "unknown" }));
         throw new Error(d.message || `HTTP ${resp.status}`);
       }
-      toast.success("保存成功");
+      toast.success(t("settings.settings_saved"));
       // 刷新 publicInfo 以反映最新设置
       refresh();
     } catch (e: any) {
-      toast.error(`保存失败: ${e.message || e}`);
+      toast.error(`${t("settings.settings_save_failed")}: ${e.message || e}`);
     } finally {
       setSaving(false);
     }
@@ -210,7 +218,7 @@ const ThemeManaged: React.FC = () => {
           if (f.type === "title") {
             return (
               <Heading key={idx} size="3" className="mt-4">
-                {resolveI18nText(f.name, currentLanguage) || "标题"}
+                {resolveI18nText(f.name, currentLanguage) || t("common.title")}
               </Heading>
             );
           }

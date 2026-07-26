@@ -23,6 +23,7 @@ const AccountContent = () => {
   const { account, loading, error, refresh } = useAccount();
   const [usernameSaving, setUsernameSaving] = React.useState(false);
   const [passwordSaving, setPasswordSaving] = React.useState(false);
+  const [passwordTwoFa, setPasswordTwoFa] = React.useState("");
   if (loading) {
     return <Loading />;
   }
@@ -80,6 +81,10 @@ const AccountContent = () => {
       toast.error(t("account.password_strength_error"));
       return;
     }
+    if (account?.["2fa_enabled"] && !passwordTwoFa) {
+      toast.error(t("account.otp_empty_error"));
+      return;
+    }
     setPasswordSaving(true);
     fetch("/api/admin/update/user", {
       method: "POST",
@@ -89,6 +94,7 @@ const AccountContent = () => {
       body: JSON.stringify({
         uuid: account?.uuid,
         password: password,
+        "2fa_code": passwordTwoFa,
       }),
     })
       .then(async (response) => {
@@ -100,6 +106,7 @@ const AccountContent = () => {
       })
       .then(() => {
         toast.success(t("common.updated_successfully"));
+        setPasswordTwoFa("");
         setTimeout(() => {
           window.location.href = "/";
         }, 2000);
@@ -225,6 +232,24 @@ const AccountContent = () => {
               name="password_repeat"
               type="password"
             ></TextField.Root>
+            {account?.["2fa_enabled"] ? (
+              <>
+                <label htmlFor="password_2fa">
+                  {t("account.2fa_otp_input_prompt")}
+                </label>
+                <TextField.Root
+                  className="max-w-128"
+                  id="password_2fa"
+                  name="password_2fa"
+                  type="number"
+                  placeholder="000000"
+                  value={passwordTwoFa}
+                  onChange={(e) =>
+                    setPasswordTwoFa((e.target as HTMLInputElement).value)
+                  }
+                />
+              </>
+            ) : null}
             <div>
               <Button disabled={passwordSaving} type="submit">
                 {t("account.change_password_button")}
@@ -422,10 +447,15 @@ const TwoFactorEnabled = () => {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = React.useState(false);
   const [saving, setSaving] = React.useState(false);
+  const [code, setCode] = React.useState("");
   const { refresh } = useAccount();
   const disable2fa = () => {
+    if (!code) {
+      toast.error(t("account.otp_empty_error"));
+      return;
+    }
     setSaving(true);
-    fetch("/api/admin/2fa/disable", {
+    fetch(`/api/admin/2fa/disable?2fa_code=${encodeURIComponent(code)}`, {
       method: "POST",
     })
       .then(async (response) => {
@@ -438,6 +468,7 @@ const TwoFactorEnabled = () => {
       .then(() => {
         toast.success(t("common.updated_successfully"));
         setIsOpen(false);
+        setCode("");
         refresh();
       })
       .catch((error) => {
@@ -462,6 +493,18 @@ const TwoFactorEnabled = () => {
             <Dialog.Description>
               {t("account.disable_2fa_confirmation")}
             </Dialog.Description>
+            <Flex direction="column" gap="2" className="mt-4">
+              <label htmlFor="disable_2fa_code">
+                {t("account.2fa_otp_input_prompt")}
+              </label>
+              <TextField.Root
+                id="disable_2fa_code"
+                type="number"
+                placeholder="000000"
+                value={code}
+                onChange={(e) => setCode((e.target as HTMLInputElement).value)}
+              />
+            </Flex>
             <Flex gap="2" justify="end" className="mt-4">
               <Button variant="soft" onClick={() => setIsOpen(false)}>
                 {t("common.cancel")}
