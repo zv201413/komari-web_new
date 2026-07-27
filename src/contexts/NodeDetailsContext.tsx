@@ -33,7 +33,7 @@ interface NodeDetailsContextType {
   nodeDetail: NodeDetail[] | [];
   isLoading: boolean;
   error: string | null;
-  refresh: () => void;
+  refresh: () => Promise<void>;
   updateNode: (uuid: string, patch: Partial<NodeDetail>) => void;
 }
 const NodeDetailsContext = React.createContext<NodeDetailsContextType | undefined>(undefined);
@@ -42,8 +42,8 @@ export const NodeDetailsProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [error, setError] = React.useState<string | null>(null);
 
-  const refresh = () => {
-    fetch("/api/admin/client/list")
+  const refresh = (): Promise<void> => {
+    return fetch("/api/admin/client/list")
       .then((response) => response.json())
       .then((data: NodeDetail[]) => {
         setNodeDetail(data);

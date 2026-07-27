@@ -1404,7 +1404,7 @@ function DeleteButton({ node }: { node: NodeDetail }) {
 
 function SignInButton({ node }: { node: NodeDetail }) {
   const { t } = useTranslation();
-  const { refresh } = useNodeDetails();
+  const { refresh, updateNode } = useNodeDetails();
   const [open, setOpen] = React.useState(false);
   const [signingIn, setSigningIn] = React.useState(false);
 
@@ -1418,6 +1418,10 @@ function SignInButton({ node }: { node: NodeDetail }) {
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
         throw new Error(data.message || `HTTP ${res.status}`);
+      }
+      // 即时更新：接口返回新 expired_at，直接 patch context，无需等待 refresh 网络往返。
+      if (data.expired_at) {
+        updateNode(node.uuid, { expired_at: data.expired_at });
       }
       toast.success(t("admin.nodeTable.signInSuccess", "签到成功"));
       setOpen(false);
@@ -2847,7 +2851,7 @@ function toLocalDateTimeString(dateStr: string | null | undefined): string {
 
 function BillingButton({ node }: { node: NodeDetail }) {
   const { t } = useTranslation();
-  const { refresh, updateNode } = useNodeDetails();
+  const { refresh } = useNodeDetails();
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [billingCycle, setBillingCycle] = React.useState<string>(
@@ -2950,15 +2954,9 @@ function BillingButton({ node }: { node: NodeDetail }) {
           "Content-Type": "application/json",
         },
       });
-      // 乐观更新：保存成功后立即 patch context 里的 node，卡片无需等待 refresh 网络往返即可即时反映。
-      updateNode(node.uuid, {
-        expired_at: expiredAt ?? "",
-        require_sign_in: requireSignIn,
-        sign_in_target_date: targetDateISO ?? undefined,
-        billing_cycle: billingCycleValue,
-      });
+      // await refresh() 确保 context 数据（含 localNodes）更新完毕再关对话框，实现即时显示。
+      await refresh();
       setOpen(false);
-      refresh();
     } catch (error) {
       toast.error("Failed to save billing information:" + error);
     } finally {
