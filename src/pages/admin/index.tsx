@@ -1451,7 +1451,7 @@ function SignInButton({ node }: { node: NodeDetail }) {
         <AlertDialog.Title>{t("admin.nodeTable.signInBadge", "签到")}</AlertDialog.Title>
         <AlertDialog.Description size="2">
           {t("admin.nodeTable.signInConfirm", "确认签到？下次截止时间将更新为 {{date}}", {
-            date: nextDate.toISOString().slice(0, 10)
+            date: nextDate.toLocaleDateString(undefined, { year: "numeric", month: "2-digit", day: "2-digit" })
           })}
         </AlertDialog.Description>
         <Flex gap="3" mt="4" justify="end">
