@@ -2912,13 +2912,20 @@ function BillingButton({ node }: { node: NodeDetail }) {
       );
       const expiredAtValue = (formData.get("expiredAt") as string) || "";
       // datetime-local 输入值已带 "T HH:mm"；纯日期值才补 T00:00:00
-      const expiredAt = expiredAtValue
+      let expiredAt = expiredAtValue
         ? new Date(
             expiredAtValue.includes("T")
               ? expiredAtValue
               : `${expiredAtValue}T00:00:00`
           ).toISOString()
         : null;
+      // target 模式：目标日期即真实到期日。前台展示/天数/通知均以 expired_at 为唯一真值源，
+      // 故同步写入 expired_at，否则保存后前台读旧值表现为「不变」。
+      const targetDateISO =
+        signInMode === "target" && signInTargetDate
+          ? new Date(`${signInTargetDate}T00:00:00`).toISOString()
+          : null;
+      if (targetDateISO) expiredAt = targetDateISO;
       const currencyValue = (formData.get("currency") as string) || "$";
 
       await fetch(`/api/admin/client/${node.uuid}/edit`, {
@@ -2933,7 +2940,7 @@ function BillingButton({ node }: { node: NodeDetail }) {
           sign_in_interval_days: parseInt(signInIntervalDays) || 30,
           sign_in_alert_days_before: parseInt(signInAlertDaysBefore) || 3,
           sign_in_alert_interval_hours: parseInt(signInAlertIntervalHours) || 12,
-          sign_in_target_date: signInMode === "target" && signInTargetDate ? new Date(signInTargetDate).toISOString() : null,
+          sign_in_target_date: targetDateISO,
         }),
         headers: {
           "Content-Type": "application/json",
