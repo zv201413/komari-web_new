@@ -2847,7 +2847,7 @@ function toLocalDateTimeString(dateStr: string | null | undefined): string {
 
 function BillingButton({ node }: { node: NodeDetail }) {
   const { t } = useTranslation();
-  const { refresh } = useNodeDetails();
+  const { refresh, updateNode } = useNodeDetails();
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [billingCycle, setBillingCycle] = React.useState<string>(
@@ -2921,10 +2921,14 @@ function BillingButton({ node }: { node: NodeDetail }) {
         : null;
       // target 模式：目标日期即真实到期日。前台展示/天数/通知均以 expired_at 为唯一真值源，
       // 故同步写入 expired_at，否则保存后前台读旧值表现为「不变」。
-      const targetDateISO =
-        signInMode === "target" && signInTargetDate
-          ? new Date(`${signInTargetDate}T00:00:00`).toISOString()
-          : null;
+      // 时分秒取当前时刻，避免归零到 0 点（与快捷签到行为一致）。
+      const targetDateISO = (() => {
+        if (signInMode !== "target" || !signInTargetDate) return null;
+        const now = new Date();
+        const d = new Date(`${signInTargetDate}T00:00:00`);
+        d.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), 0);
+        return d.toISOString();
+      })();
       if (targetDateISO) expiredAt = targetDateISO;
       const currencyValue = (formData.get("currency") as string) || "$";
 
@@ -2946,8 +2950,15 @@ function BillingButton({ node }: { node: NodeDetail }) {
           "Content-Type": "application/json",
         },
       });
-      refresh();
+      // 乐观更新：保存成功后立即 patch context 里的 node，卡片无需等待 refresh 网络往返即可即时反映。
+      updateNode(node.uuid, {
+        expired_at: expiredAt ?? "",
+        require_sign_in: requireSignIn,
+        sign_in_target_date: targetDateISO ?? undefined,
+        billing_cycle: billingCycleValue,
+      });
       setOpen(false);
+      refresh();
     } catch (error) {
       toast.error("Failed to save billing information:" + error);
     } finally {

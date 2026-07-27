@@ -34,6 +34,7 @@ interface NodeDetailsContextType {
   isLoading: boolean;
   error: string | null;
   refresh: () => void;
+  updateNode: (uuid: string, patch: Partial<NodeDetail>) => void;
 }
 const NodeDetailsContext = React.createContext<NodeDetailsContextType | undefined>(undefined);
 export const NodeDetailsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -53,12 +54,19 @@ export const NodeDetailsProvider: React.FC<{ children: React.ReactNode }> = ({ c
         setIsLoading(false);
       });
   };
+
+  // 乐观更新：保存成功后立即 patch 本地数组，无需等待 refresh 网络往返。
+  const updateNode = (uuid: string, patch: Partial<NodeDetail>) => {
+    setNodeDetail((prev) =>
+      (prev as NodeDetail[]).map((n) => (n.uuid === uuid ? { ...n, ...patch } : n))
+    );
+  };
     React.useEffect(() => {
         setIsLoading(true);
         refresh();
     }, []);
   return (
-    <NodeDetailsContext.Provider value={{ nodeDetail, isLoading, error, refresh }}>
+    <NodeDetailsContext.Provider value={{ nodeDetail, isLoading, error, refresh, updateNode }}>
       {children}
     </NodeDetailsContext.Provider>
   );
