@@ -1438,8 +1438,17 @@ function SignInButton({ node }: { node: NodeDetail }) {
     }
   };
 
-  const nextDate = new Date();
-  nextDate.setDate(nextDate.getDate() + (node.sign_in_interval_days || 30));
+  const nextDate = (() => {
+    const now = new Date();
+    const base =
+      node.expired_at &&
+      now.getTime() - new Date(node.expired_at).getTime() < 30 * 86400 * 1000
+        ? new Date(node.expired_at)
+        : now;
+    const d = new Date(base);
+    d.setDate(d.getDate() + (node.sign_in_interval_days || 30));
+    return d;
+  })();
 
   return (
     <AlertDialog.Root open={open} onOpenChange={setOpen}>
