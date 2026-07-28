@@ -1,4 +1,5 @@
 import { Checkbox } from "@/components/ui/checkbox";
+import { formatDate } from "@/utils/timezone";
 import {
   Table,
   TableBody,
@@ -346,7 +347,7 @@ const OfflineNotificationTable = ({
                   const date = new Date(lastNotified);
                   if (date.getFullYear() < 3)
                     return t("notification.offline.never_triggered");
-                  return date.toLocaleString();
+                  return formatDate(date, {});
                 })()}
               </TableCell>
               <TableCell>

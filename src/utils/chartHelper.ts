@@ -1,4 +1,5 @@
 import type { PingTask } from "@/types/node";
+import { formatDate } from "@/utils/timezone";
 
 /**
  * 根据任务名称和任务列表生成颜色
@@ -40,13 +41,13 @@ export const generateColor = (taskName: string, sortedTasks: PingTask[]) => {
 export const lableFormatter = (value: any, hours: number) => {
   const date = new Date(value);
   if (hours === 0) {
-    return date.toLocaleTimeString([], {
+    return formatDate(date, {
       hour: "2-digit",
       minute: "2-digit",
       second: "2-digit",
     });
   }
-  return date.toLocaleString([], {
+  return formatDate(date, {
     month: "2-digit",
     day: "2-digit",
     hour: "2-digit",
@@ -68,7 +69,7 @@ export const loadChartTimeFormatter = (
 ) => {
   if (dataLength === 0) return "";
   if (index === 0 || index === dataLength - 1) {
-    return new Date(value).toLocaleTimeString([], {
+    return formatDate(new Date(value), {
       hour: "2-digit",
       minute: "2-digit",
     });

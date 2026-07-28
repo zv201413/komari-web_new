@@ -1,6 +1,7 @@
 import { memo, type ReactNode, useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { formatDate } from "@/utils/timezone";
 import {
   Card,
   Flex,
@@ -864,18 +865,9 @@ const labelFormatter = (hours: number | undefined) => {
   return (value: any) => {
     const date = new Date(value);
     if (!hours || hours < 24) {
-      return date.toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-      });
+      return formatDate(date, { hour: "2-digit", minute: "2-digit", second: "2-digit" });
     }
-    return date.toLocaleString([], {
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    return formatDate(date, { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" });
   };
 };
 

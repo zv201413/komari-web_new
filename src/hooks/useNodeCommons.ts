@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { formatPrice } from "@/utils";
+import { formatDate } from "@/utils/timezone";
 import type { NodeData } from "@/types/node";
 import type { RpcNodeStatus } from "@/types/rpc";
 import { useNodeData } from "@/contexts/NodeDataContext";
@@ -183,11 +184,7 @@ export const useNodeCommons = (node: NodeData & { stats?: any }) => {
     daysLeft !== null && daysLeft > 36500
       ? t("node.longTerm")
       : node.expired_at && new Date(node.expired_at).getTime() > 0
-      ? new Date(node.expired_at).toLocaleDateString(undefined, {
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
-        })
+      ? formatDate(new Date(node.expired_at), { year: "numeric", month: "2-digit", day: "2-digit" })
       : t("node.notSet");
 
   const tagList = [
@@ -232,7 +229,7 @@ export const useNodeCommons = (node: NodeData & { stats?: any }) => {
 
   const deadline = node.expired_at;
   const expiredAtStr = deadline && new Date(deadline).getTime() > 0
-    ? new Date(deadline).toLocaleDateString(undefined, { year: "numeric", month: "2-digit", day: "2-digit" })
+    ? formatDate(new Date(deadline), { year: "numeric", month: "2-digit", day: "2-digit" })
     : t("node.notSet");
 
   let expired_at_value = expiredAtStr;

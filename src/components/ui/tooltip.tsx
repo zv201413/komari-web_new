@@ -1,4 +1,5 @@
 import { useCallback } from "react";
+import { formatDate } from "@/utils/timezone";
 
 interface CustomTooltipProps {
   active?: boolean;
@@ -17,7 +18,7 @@ export const CustomTooltip = ({
 }: CustomTooltipProps) => {
   const defaultLabelFormatter = useCallback((value: any) => {
     const date = new Date(value);
-    return date.toLocaleString([], {
+    return formatDate(date, {
       month: "2-digit",
       day: "2-digit",
       hour: "2-digit",

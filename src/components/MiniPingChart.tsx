@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Card, Switch } from "@radix-ui/themes";
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 import { useTranslation } from "react-i18next";
+import { formatDate } from "@/utils/timezone";
 import Loading from "@/components/loading";
 import MetricBoundaryAxisTick from "@/components/MetricBoundaryAxisTick";
 import PingMetricStatContent from "@/components/PingMetricStatContent";
@@ -220,7 +221,7 @@ const MiniPingChart = ({
   );
 
   const labelFormatter = (value: string | number) =>
-    new Date(value).toLocaleString([], {
+    formatDate(new Date(value), {
       month: "2-digit",
       day: "2-digit",
       hour: "2-digit",

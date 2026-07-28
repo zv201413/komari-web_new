@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { schema } from "@/components/admin/NodeTable/schema/node";
+import { formatDate } from "@/utils/timezone";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Drawer,
@@ -226,7 +227,7 @@ export function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
                   className="bg-muted px-3 py-2 rounded border select-text"
                 >
                   {item.created_at ? (
-                    new Date(item.created_at).toLocaleString()
+                    formatDate(new Date(item.created_at), {})
                   ) : (
                     <span className="text-muted-foreground">-</span>
                   )}
@@ -241,7 +242,7 @@ export function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
                   className="bg-muted px-3 py-2 rounded border select-text"
                 >
                   {item.updated_at ? (
-                    new Date(item.updated_at).toLocaleString()
+                    formatDate(new Date(item.updated_at), {})
                   ) : (
                     <span className="text-muted-foreground">-</span>
                   )}

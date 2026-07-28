@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { Button, Dialog, Flex, Text } from "@radix-ui/themes";
+import { formatDate } from "@/utils/timezone";
 import { updateSettingsWithToast, useSettings } from "@/lib/api";
 import {
   SettingCardButton,
@@ -137,6 +138,14 @@ export default function SiteSettings() {
           await updateSettingsWithToast({ description: data }, t);
         }}
       />
+      <SettingCardShortTextInput
+        title={t("settings.site.timezone", "全局时区")}
+        description={t("settings.site.timezone_description", "IANA 时区字符串（如 Asia/Shanghai），留空则使用浏览器本地时区")}
+        defaultValue={settings.timezone || ""}
+        OnSave={async (data) => {
+          await updateSettingsWithToast({ timezone: data }, t);
+        }}
+      />
       <SettingCardSwitch
         title={t("settings.site.cors_origin_check_enabled")}
         description={t("settings.site.cors_origin_check_enabled_description")}
@@ -220,7 +229,7 @@ export default function SiteSettings() {
                 : ""
             }
             showSaveButton={false}
-            description={`${t("admin.nodeTable.expiredAt")}: ${new Date((settings.tempory_share_token_expire_at || 0) * 1000).toLocaleString()}`}
+            description={`${t("admin.nodeTable.expiredAt")}: ${formatDate(new Date((settings.tempory_share_token_expire_at || 0) * 1000), {})}`}
             disabled
             bordless
           >

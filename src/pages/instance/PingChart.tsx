@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Flex, SegmentedControl, Card, Switch, Button } from "@radix-ui/themes";
 import { usePublicInfo } from "@/contexts/PublicInfoContext";
+import { formatDate } from "@/utils/timezone";
 import Loading from "@/components/loading";
 import {
   ChartContainer,
@@ -253,35 +254,18 @@ const PingChart = ({ uuid }: { uuid: string }) => {
     if (!chartData.length) return "";
     if (index === 0 || index === chartData.length - 1) {
       if (hours < 24) {
-        // Use hours for conditional formatting
-        return new Date(value).toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        });
+        return formatDate(new Date(value), { hour: "2-digit", minute: "2-digit" });
       }
-      return new Date(value).toLocaleDateString([], {
-        month: "2-digit",
-        day: "2-digit",
-      });
+      return formatDate(new Date(value), { month: "2-digit", day: "2-digit" });
     }
     return "";
   };
   const lableFormatter = (value: any) => {
     const date = new Date(value);
     if (hours < 24) {
-      // Use hours for conditional formatting
-      return date.toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-      });
+      return formatDate(date, { hour: "2-digit", minute: "2-digit", second: "2-digit" });
     }
-    return date.toLocaleString([], {
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    return formatDate(date, { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" });
   };
 
   // 颜色配置

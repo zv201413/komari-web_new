@@ -1,4 +1,5 @@
 import React from "react";
+import { formatDate } from "@/utils/timezone";
 import {
   Table,
   TableHeader,
@@ -131,7 +132,7 @@ const LogPage = () => {
                         <label className="text-sm">{log.message}</label>
                         <label className="font-bold">Time</label>
                         <label className="text-sm">
-                          {new Date(log.time).toLocaleString()}
+                          {formatDate(new Date(log.time), {})}
                         </label>
                       </Flex>
                       <Flex justify={"end"}>
@@ -149,7 +150,7 @@ const LogPage = () => {
                     ? `${log.message.slice(0, 75)}...`
                     : log.message}
                 </TableCell>
-                <TableCell>{new Date(log.time).toLocaleString()}</TableCell>
+                <TableCell>{formatDate(new Date(log.time), {})}
               </TableRow>
             ))}
           </TableBody>

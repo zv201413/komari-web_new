@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { formatDate } from "@/utils/timezone";
 import { UpDownStack } from "./UpDownStack";
 import {
   useNodeList,
@@ -122,10 +123,10 @@ export const DetailsGrid = ({
             </Text>
             <Text size="2">
               {node?.updated_at
-                ? new Date(
-                  currentRecord?.updated_at ||
-                  node.updated_at
-                ).toLocaleString()
+                ? formatDate(
+                  new Date(currentRecord?.updated_at || node.updated_at),
+                  {}
+                )
                 : "-"}
             </Text>
           </Flex>

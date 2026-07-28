@@ -4,6 +4,7 @@ import {
   quoteShellArgs,
 } from "@/utils/shellQuote";
 import React, { useEffect, useState } from "react";
+import { formatDate } from "@/utils/timezone";
 import {
   NodeDetailsProvider,
   useNodeDetails,
@@ -1455,7 +1456,7 @@ function SignInButton({ node }: { node: NodeDetail }) {
         <AlertDialog.Title>{t("admin.nodeTable.signInBadge", "签到")}</AlertDialog.Title>
         <AlertDialog.Description size="2">
           {t("admin.nodeTable.signInConfirm", "确认签到？下次截止时间将更新为 {{date}}", {
-            date: nextDate.toLocaleDateString(undefined, { year: "numeric", month: "2-digit", day: "2-digit" })
+            date: formatDate(nextDate, { year: "numeric", month: "2-digit", day: "2-digit" })
           })}
         </AlertDialog.Description>
         <Flex gap="3" mt="4" justify="end">
@@ -2800,7 +2801,7 @@ function DetailView({ node }: { node: NodeDetail }) {
                   className="bg-muted px-3 py-2 rounded border select-text"
                 >
                   {node.created_at ? (
-                    new Date(node.created_at).toLocaleString()
+                    formatDate(new Date(node.created_at), {})
                   ) : (
                     <span className="text-muted-foreground">-</span>
                   )}
@@ -2815,7 +2816,7 @@ function DetailView({ node }: { node: NodeDetail }) {
                   className="bg-muted px-3 py-2 rounded border select-text"
                 >
                   {node.updated_at ? (
-                    new Date(node.updated_at).toLocaleString()
+                    formatDate(new Date(node.updated_at), {})
                   ) : (
                     <span className="text-muted-foreground">-</span>
                   )}

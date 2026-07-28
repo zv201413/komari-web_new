@@ -9,6 +9,7 @@ import {
 } from "@radix-ui/themes";
 import { useTranslation } from "react-i18next";
 import React, { useCallback, useEffect, useMemo, Suspense } from "react";
+import { formatDate } from "@/utils/timezone";
 const NodeDisplay = React.lazy(() => import("../components/NodeDisplay"));
 import { formatBytes } from "@/utils/unitHelper";
 import { useLiveData } from "../contexts/LiveDataContext";
@@ -303,12 +304,12 @@ const TopCard: React.FC<TopCardProps> = React.memo(
 
 const CurrentTimeValue = React.memo(() => {
   const [currentTime, setCurrentTime] = React.useState(() =>
-    new Date().toLocaleTimeString(),
+    formatDate(new Date(), { hour: "2-digit", minute: "2-digit", second: "2-digit" }),
   );
 
   React.useEffect(() => {
     const timer = window.setInterval(() => {
-      setCurrentTime(new Date().toLocaleTimeString());
+      setCurrentTime(formatDate(new Date(), { hour: "2-digit", minute: "2-digit", second: "2-digit" }));
     }, 1000);
     return () => window.clearInterval(timer);
   }, []);

@@ -30,6 +30,7 @@ const LoginDialog = ({ trigger, autoOpen = false, showSettings = true, info, onL
     const [password, setPassword] = React.useState("");
     const [twoFac, setTwoFac] = React.useState("");
     const [remember, setRemember] = React.useState(false);
+    const [rememberDays, setRememberDays] = React.useState(30);
     const [errorMsg, setErrorMsg] = React.useState("");
     const [isLoading, setIsLoading] = React.useState(false);
     const [require2FA, setRequire2FA] = React.useState(false);
@@ -66,6 +67,7 @@ const LoginDialog = ({ trigger, autoOpen = false, showSettings = true, info, onL
             username,
             password,
             remember,
+            remember_days: rememberDays,
             ...(twoFac && !account?.["2fa_enabled"] ? { "2fa_code": twoFac } : {}),
           }),
         });
@@ -202,13 +204,25 @@ const LoginDialog = ({ trigger, autoOpen = false, showSettings = true, info, onL
                     />
                   </label>
                   <Text as="label" size="2">
-                    <Flex gap="2">
-                      <Checkbox 
-                        checked={remember} 
-                        onCheckedChange={(checked) => setRemember(checked === true)} 
+                    <Flex gap="2" align="center">
+                      <Checkbox
+                        checked={remember}
+                        onCheckedChange={(checked) => setRemember(checked === true)}
                         disabled={isLoading}
-                      /> 
+                      />
                       {t("login.remember_me", "记住我 (Remember me)")}
+                      {remember && (
+                        <input
+                          type="number"
+                          min={1}
+                          max={365}
+                          value={rememberDays}
+                          onChange={(e) => setRememberDays(Math.max(1, parseInt(e.target.value) || 30))}
+                          disabled={isLoading}
+                          style={{ width: "4em", marginLeft: "4px" }}
+                        />
+                      )}
+                      {remember && <span>{t("login.days", "天")}</span>}
                     </Flex>
                   </Text>
                   <label hidden={!require2FA}>

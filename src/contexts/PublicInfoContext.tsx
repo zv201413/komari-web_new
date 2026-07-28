@@ -1,5 +1,6 @@
 import React from "react";
 import defaultTheme from "../../komari-theme.json";
+import { setTimezone } from "@/utils/timezone";
 //import { useRPC2Call } from "./RPC2Context";
 
 type ThemeField = {
@@ -46,6 +47,7 @@ export interface PublicInfo {
   private_site: boolean;
   theme: string;
   theme_settings: any;
+  timezone?: string;
   [property: string]: any;
 }
 
@@ -87,7 +89,9 @@ export const PublicInfoProvider: React.FC<{ children: React.ReactNode }> = ({
       })
       .then((resp: Response) => {
         if (resp && resp.data) {
-          setPublicInfo(withThemeDefaults(resp.data));
+          const info = withThemeDefaults(resp.data);
+          setTimezone(info.timezone);
+          setPublicInfo(info);
         } else {
           setPublicInfo(null);
         }
