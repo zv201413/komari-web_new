@@ -150,7 +150,7 @@ const LogPage = () => {
                     ? `${log.message.slice(0, 75)}...`
                     : log.message}
                 </TableCell>
-                <TableCell>{formatDate(new Date(log.time), {})}
+                <TableCell>{formatDate(new Date(log.time), {})}</TableCell>
               </TableRow>
             ))}
           </TableBody>

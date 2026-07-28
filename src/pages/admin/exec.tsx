@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect, useLayoutEffect, useMemo, type CSSProperties, type KeyboardEvent } from "react";
 import Loading from "@/components/loading";
-import { formatDate } from "@/utils/timezone";
 import { NodeDetailsProvider, useNodeDetails } from "@/contexts/NodeDetailsContext";
 import { useTranslation } from "react-i18next";
 import {

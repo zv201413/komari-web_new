@@ -1,7 +1,6 @@
 import React from "react";
 import { toast } from "sonner";
 import { formatDate } from "@/utils/timezone";
-import { formatDate } from "@/utils/timezone";
 import {
   Table,
   TableHeader,
