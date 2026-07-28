@@ -21,6 +21,7 @@ export interface NodeData {
   auto_renewal: boolean;
   require_sign_in?: boolean;
   sign_in_interval_days?: number;
+  sign_in_offset_days?: number;
   sign_in_alert_days_before?: number;
   sign_in_alert_interval_hours?: number;
   last_sign_in_alert_at?: string;

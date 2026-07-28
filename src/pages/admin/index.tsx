@@ -1439,14 +1439,12 @@ function SignInButton({ node }: { node: NodeDetail }) {
   };
 
   const nextDate = (() => {
-    const now = new Date();
-    const base =
-      node.expired_at &&
-      now.getTime() - new Date(node.expired_at).getTime() < 30 * 86400 * 1000
-        ? new Date(node.expired_at)
-        : now;
-    const d = new Date(base);
-    d.setDate(d.getDate() + (node.sign_in_interval_days || 30));
+    const d = new Date();
+    d.setDate(
+      d.getDate() +
+        (node.sign_in_interval_days || 30) +
+        (node.sign_in_offset_days || 0)
+    );
     return d;
   })();
 
@@ -2905,8 +2903,44 @@ function BillingButton({ node }: { node: NodeDetail }) {
     toLocalDateString(node.sign_in_target_date)
   );
   const [signInIntervalDays, setSignInIntervalDays] = useState<string>(node.sign_in_interval_days?.toString() || "30");
+  const [signInOffsetDays, setSignInOffsetDays] = useState<string>(node.sign_in_offset_days?.toString() || "0");
   const [signInAlertDaysBefore, setSignInAlertDaysBefore] = useState<string>(node.sign_in_alert_days_before?.toString() || "3");
   const [signInAlertIntervalHours, setSignInAlertIntervalHours] = useState<string>(node.sign_in_alert_interval_hours?.toString() || "12");
+  const [signingInBilling, setSigningInBilling] = useState(false);
+
+  // 保存并立即签到：先部分更新顺延/偏移配置（不影响价格等其它字段），
+  // 再触发快捷签到，确保签到用的是当前表单里的最新值。
+  const saveAndSignIn = async () => {
+    setSigningInBilling(true);
+    try {
+      await fetch(`/api/admin/client/${node.uuid}/edit`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          require_sign_in: true,
+          sign_in_interval_days: parseInt(signInIntervalDays) || 30,
+          sign_in_offset_days: parseInt(signInOffsetDays) || 0,
+        }),
+      });
+      const res = await fetch(`/api/admin/client/${node.uuid}/sign-in`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.message || `HTTP ${res.status}`);
+      toast.success(t("admin.nodeTable.signInSuccess", "签到成功"));
+      await refresh();
+      setOpen(false);
+    } catch (error) {
+      toast.error(
+        `${t("admin.nodeTable.signInFailed", "签到失败")}: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    } finally {
+      setSigningInBilling(false);
+    }
+  };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -2956,6 +2990,7 @@ function BillingButton({ node }: { node: NodeDetail }) {
           auto_renewal: autoRenewal,
           require_sign_in: requireSignIn,
           sign_in_interval_days: parseInt(signInIntervalDays) || 30,
+          sign_in_offset_days: parseInt(signInOffsetDays) || 0,
           sign_in_alert_days_before: parseInt(signInAlertDaysBefore) || 3,
           sign_in_alert_interval_hours: parseInt(signInAlertIntervalHours) || 12,
           sign_in_target_date: targetDateISO,
@@ -3101,6 +3136,53 @@ function BillingButton({ node }: { node: NodeDetail }) {
                         value={signInIntervalDays}
                         onChange={setSignInIntervalDays}
                       />
+                      <label className="font-bold mt-2">{t("admin.nodeTable.signInOffset", "偏移值 (天)")}</label>
+                      <TextField.Root
+                        name="signInOffsetDays"
+                        type="number"
+                        value={signInOffsetDays}
+                        onChange={(e) => setSignInOffsetDays(e.target.value)}
+                      />
+                      <label className="text-muted-foreground text-xs">
+                        {t(
+                          "admin.nodeTable.signInOffsetTips",
+                          "在「今天 + 顺延天数」基础上再加减的天数，可为负数，用于微调签到后的到期日"
+                        )}
+                      </label>
+                      {(() => {
+                        const d = new Date();
+                        d.setDate(
+                          d.getDate() +
+                            (parseInt(signInIntervalDays) || 30) +
+                            (parseInt(signInOffsetDays) || 0)
+                        );
+                        return (
+                          <label className="text-violet-500 text-xs font-medium">
+                            {t(
+                              "admin.nodeTable.signInPreviewDate",
+                              "现在签到，到期日将更新为 {{date}}",
+                              {
+                                date: formatDate(d, {
+                                  year: "numeric",
+                                  month: "2-digit",
+                                  day: "2-digit",
+                                }),
+                              }
+                            )}
+                          </label>
+                        );
+                      })()}
+                      <Button
+                        type="button"
+                        variant="soft"
+                        color="violet"
+                        loading={signingInBilling}
+                        onClick={saveAndSignIn}
+                        className="mt-1 self-start"
+                      >
+                        <ClipboardCheck size="16" />
+                        {t("admin.nodeTable.signInNow", "保存并立即签到")}
+                      </Button>
                     </>
                   ) : (
                     <>
