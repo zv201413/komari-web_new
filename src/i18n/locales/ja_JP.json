@@ -351,7 +351,8 @@
     "update": "更新",
     "update_available": "新しいバージョンがあります",
     "updated_successfully": "更新されました",
-    "weight": "重み"
+    "weight": "重み",
+    "loading": "読み込み中..."
   },
   "copy": "コピー",
   "copy_success": "クリップボードにコピーされました",
@@ -1041,6 +1042,19 @@
       "transparent_background": "透明背景",
       "transparent_hint": "コンテナ背景も透明な場合にのみ透明化を有効にしてください。",
       "transparent_theme_hint": "テーマ背景はまだ不透明です。rgba(...) または hsla(...) を使用してください。"
+    },
+    "trusted_ips": {
+      "title": "信頼済み IP",
+      "description": "ホワイトリスト内の IP でログイン時に 2FA をスキップできます。追加・削除には 2FA が必要です。ターミナルは影響を受けません。",
+      "placeholder": "192.168.1.100",
+      "add": "追加",
+      "remove": "削除",
+      "empty": "信頼済み IP はありません",
+      "load_failed": "信頼済み IP の読み込みに失敗しました",
+      "add_success": "IP をホワイトリストに追加しました",
+      "remove_success": "IP をホワイトリストから削除しました",
+      "ip_required": "IP アドレスを入力してください",
+      "confirm_target": "IP に対する操作を確認: {{ip}}"
     }
   },
   "status_settings": "ステータス表示設定",

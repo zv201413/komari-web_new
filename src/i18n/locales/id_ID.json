@@ -351,7 +351,8 @@
     "update": "Perbarui",
     "update_available": "Versi baru tersedia",
     "updated_successfully": "Berhasil diperbarui",
-    "weight": "Bobot"
+    "weight": "Bobot",
+    "loading": "Memuat..."
   },
   "copy": "Salin",
   "copy_success": "Berhasil disalin!",
@@ -1040,6 +1041,19 @@
       "transparent_background": "Latar Transparan",
       "transparent_hint": "Aktifkan transparansi hanya jika latar kontainer juga transparan.",
       "transparent_theme_hint": "Latar tema masih opak. Gunakan rgba(...) atau hsla(...)."
+    },
+    "trusted_ips": {
+      "title": "IP Terpercaya",
+      "description": "IP dalam daftar putih melewati 2FA saat login. Menambah/menghapus memerlukan 2FA. Terminal tidak terpengaruh.",
+      "placeholder": "192.168.1.100",
+      "add": "Tambah",
+      "remove": "Hapus",
+      "empty": "Tidak ada IP terpercaya",
+      "load_failed": "Gagal memuat IP terpercaya",
+      "add_success": "IP ditambahkan ke daftar putih",
+      "remove_success": "IP dihapus dari daftar putih",
+      "ip_required": "Alamat IP diperlukan",
+      "confirm_target": "Konfirmasi operasi pada IP: {{ip}}"
     }
   },
   "status_settings": "Pengaturan Status",

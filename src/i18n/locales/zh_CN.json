@@ -365,7 +365,8 @@
     "update": "更新",
     "update_available": "有新版本",
     "updated_successfully": "成功更新",
-    "weight": "权重"
+    "weight": "权重",
+    "loading": "加载中..."
   },
   "copy": "复制",
   "copy_success": "已复制到剪贴板",
@@ -1154,6 +1155,19 @@
       "transparent_background": "透明背景",
       "transparent_hint": "仅在容器背景也透明时启用透明效果。",
       "transparent_theme_hint": "主题背景仍然不透明，请改用 rgba(...) 或 hsla(...)。"
+    },
+    "trusted_ips": {
+      "title": "IP 白名单",
+      "description": "白名单内的 IP 登录时免输 2FA 动态码。增删白名单本身强制 2FA 验证，终端不受白名单影响。",
+      "placeholder": "192.168.1.100",
+      "add": "添加",
+      "remove": "删除",
+      "empty": "暂无白名单 IP",
+      "load_failed": "加载白名单失败",
+      "add_success": "IP 已加入白名单",
+      "remove_success": "IP 已从白名单移除",
+      "ip_required": "请输入 IP 地址",
+      "confirm_target": "确认操作 IP: {{ip}}"
     }
   },
   "status_settings": "状态显示设置",

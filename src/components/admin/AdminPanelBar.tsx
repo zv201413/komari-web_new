@@ -367,7 +367,7 @@ const AdminPanelBar = ({ content }: AdminPanelBarProps) => {
       >
         {/* Navbar */}
         <motion.nav
-          className="col-span-2"
+          className={`col-span-2 ${glassEnabled ? "purcarte-blur" : ""}`}
           initial={{ y: 0 }}
           animate={{ y: 0 }}
           transition={{ duration: 0.5, ease: "easeOut" }}

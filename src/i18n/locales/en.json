@@ -354,7 +354,8 @@
     "update": "Update",
     "update_available": "New version available",
     "updated_successfully": "Updated successfully",
-    "weight": "Weight"
+    "weight": "Weight",
+    "loading": "Loading..."
   },
   "copy": "Copy",
   "copy_success": "Copied!",
@@ -1042,6 +1043,19 @@
       "transparent_background": "Transparent Background",
       "transparent_hint": "Enable transparency only if the container background is also transparent.",
       "transparent_theme_hint": "Theme background is still opaque. Use rgba(...) or hsla(...)."
+    },
+    "trusted_ips": {
+      "title": "Trusted IPs",
+      "description": "IPs in the whitelist skip 2FA when logging in. Adding/removing requires 2FA. Terminal access is unaffected.",
+      "placeholder": "192.168.1.100",
+      "add": "Add",
+      "remove": "Remove",
+      "empty": "No trusted IPs",
+      "load_failed": "Failed to load trusted IPs",
+      "add_success": "IP added to whitelist",
+      "remove_success": "IP removed from whitelist",
+      "ip_required": "IP address is required",
+      "confirm_target": "Confirm operation on IP: {{ip}}"
     }
   },
   "status_settings": "Status Settings",

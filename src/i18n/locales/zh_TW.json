@@ -351,7 +351,8 @@
     "update": "更新",
     "update_available": "有新版本",
     "updated_successfully": "成功更新",
-    "weight": "權重"
+    "weight": "權重",
+    "loading": "載入中..."
   },
   "copy": "複製",
   "copy_success": "已複製到剪貼板",
@@ -1039,6 +1040,19 @@
       "transparent_background": "透明背景",
       "transparent_hint": "僅在容器背景也透明時啟用透明效果。",
       "transparent_theme_hint": "主題背景仍然不透明，請改用 rgba(...) 或 hsla(...)。"
+    },
+    "trusted_ips": {
+      "title": "IP 白名單",
+      "description": "白名單內的 IP 登入時免輸 2FA 動態碼。增刪白名單本身強制 2FA 驗證，終端不受白名單影響。",
+      "placeholder": "192.168.1.100",
+      "add": "新增",
+      "remove": "刪除",
+      "empty": "暫無白名單 IP",
+      "load_failed": "載入白名單失敗",
+      "add_success": "IP 已加入白名單",
+      "remove_success": "IP 已從白名單移除",
+      "ip_required": "請輸入 IP 位址",
+      "confirm_target": "確認操作 IP: {{ip}}"
     }
   },
   "status_settings": "狀態顯示設置",

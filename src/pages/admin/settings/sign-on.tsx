@@ -11,6 +11,7 @@ import Loading from "@/components/loading";
 import React from "react";
 import { renderProviderInputs } from "@/utils/renderProviders";
 import { toast } from "sonner";
+import TrustedIPs from "@/components/admin/TrustedIPs";
 
 export default function SignOnSettings() {
   const { t } = useTranslation();
@@ -116,6 +117,7 @@ export default function SignOnSettings() {
           await updateSettingsWithToast({ disable_password_login: checked }, t);
         }}
       />
+      <TrustedIPs />
       <SettingCardLabel>{t("settings.sso.title")}</SettingCardLabel>
       <SettingCardSwitch
         title={t("settings.sso.enable")}
