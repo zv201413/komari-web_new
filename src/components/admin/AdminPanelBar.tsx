@@ -37,18 +37,19 @@ import {
   THEME_CONFIGURATION_REDIRECT,
 } from "@/utils/themeConfiguration";
 
-function useGlassToggle(pathname: string) {
-  const [glassEnabled, setGlassEnabled] = useState(false);
+// 毛玻璃开关是**全站一个**设置，不按路由分开存。
+// 早期实现用 `glass-toggle-${pathname}` 逐页存储，导致开关只对开启时所在的那个
+// 页面生效，其余 admin 页面各自读到不存在的键 → 默认 false → 无毛玻璃。
+const GLASS_TOGGLE_KEY = "glass-toggle";
 
-  useEffect(() => {
-    const storageKey = `glass-toggle-${pathname}`;
-    setGlassEnabled(localStorage.getItem(storageKey) === "true");
-  }, [pathname]);
+function useGlassToggle() {
+  const [glassEnabled, setGlassEnabled] = useState(
+    () => localStorage.getItem(GLASS_TOGGLE_KEY) === "true",
+  );
 
   const toggle = (val: boolean) => {
     setGlassEnabled(val);
-    const storageKey = `glass-toggle-${pathname}`;
-    localStorage.setItem(storageKey, val.toString());
+    localStorage.setItem(GLASS_TOGGLE_KEY, val.toString());
   };
 
   return [glassEnabled, toggle] as const;
@@ -106,7 +107,7 @@ const AdminPanelBar = ({ content }: AdminPanelBarProps) => {
   const [releasesSince, setReleasesSince] = useState<GithubReleaseInfo[]>([]);
 
   const currentTheme = publicInfo?.theme;
-  const [glassEnabled, setGlassEnabled] = useGlassToggle(location.pathname);
+  const [glassEnabled, setGlassEnabled] = useGlassToggle();
 
   // 动态扩展菜单
   const [extraMenuItems, setExtraMenuItems] = useState<ExtendedMenuItem[]>([]);
@@ -150,15 +151,26 @@ const AdminPanelBar = ({ content }: AdminPanelBarProps) => {
           setExtraMenuItems([]);
           return;
         }
-        const rawLabel: string =
-          resolveI18nText(cfg.name, currentLanguage) ??
-          t("theme.manage_with_name", {
+        // 归一化主题包菜单名：主题包可能硬编码英文字面量（不走 i18n），
+        // 这会导致用户切换语言时菜单不跟随。此处映射常见英文字面量到 i18n key。
+        let finalLabel: string;
+        const rawFromTheme = resolveI18nText(cfg.name, currentLanguage);
+        if (rawFromTheme === "Theme Setting" || rawFromTheme === "Theme Settings") {
+          // 英文字面量 → 走本地 i18n
+          finalLabel = t("theme.setting");
+        } else if (rawFromTheme) {
+          // 主题包自己提供的名字（可能是 i18n 对象，也可能是其他语言的字面量）
+          finalLabel = rawFromTheme;
+        } else {
+          // fallback：用主题名 + "主题设置/管理"
+          finalLabel = t("theme.manage_with_name", {
             name: currentTheme === "default" ? "" : currentTheme,
           });
+        }
         const icon: string = cfg.icon || "Palette"; // fallback icon
         const item: ExtendedMenuItem = {
-          labelKey: rawLabel,
-          rawLabel,
+          labelKey: finalLabel,
+          rawLabel: finalLabel,
           path: itemPath,
           icon,
           reloadDocument: cfgType === THEME_CONFIGURATION_REDIRECT,
