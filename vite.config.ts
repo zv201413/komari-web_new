@@ -92,8 +92,9 @@ export default defineConfig(({ mode }) => {
           ],
         },
         workbox: {
-          globPatterns: ["**/*.{js,css,html,ico,png,svg}"],
-          navigateFallbackDenylist: [/^\/database-recovery(?:\/|$)/],
+          // 页面 HTML 由后端按主题和站点设置生成，导航必须访问服务端。
+          globPatterns: ["**/*.{js,css,ico,png,svg}"],
+          navigateFallback: null,
           runtimeCaching: [
             {
               urlPattern: /^https:\/\/api\./i,

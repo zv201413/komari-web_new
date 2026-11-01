@@ -8,7 +8,7 @@ import { SettingCardLabel } from "@/components/admin/SettingCard";
 
 /**
  * IP 白名单管理。白名单内的 IP 登录时免输 2FA 动态码，
- * 但增删白名单本身强制 2FA（后端 RequireSensitive2FA 中间件）。
+ * 新增白名单需 2FA；删除只需管理员登录并确认。
  * 终端仍走 sudo_token，不受白名单影响。
  */
 export default function TrustedIPs() {
@@ -18,7 +18,7 @@ export default function TrustedIPs() {
   const [loading, setLoading] = React.useState(true);
   const [saving, setSaving] = React.useState(false);
 
-  // 2FA 弹窗：add / remove 共用，pendingIP 为空表示走 add 分支
+  // 新增收集动态码；删除只确认目标 IP。
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [mode, setMode] = React.useState<"add" | "remove">("add");
   const [pendingIP, setPendingIP] = React.useState("");
@@ -26,6 +26,7 @@ export default function TrustedIPs() {
   const [newIP, setNewIP] = React.useState("");
 
   const twoFAEnabled = Boolean(account?.["2fa_enabled"]);
+  const requiresOTP = mode === "add" && twoFAEnabled;
 
   const loadIPs = React.useCallback(() => {
     setLoading(true);
@@ -46,8 +47,9 @@ export default function TrustedIPs() {
     loadIPs();
   }, [loadIPs]);
 
-  // 未启用 2FA 时后端直接放行，无需弹窗收集动态码
+  // 只有新增白名单需要携带动态码。
   const submit = (targetMode: "add" | "remove", ip: string, code: string) => {
+    if (saving || (targetMode === "add" && twoFAEnabled && !code.trim())) return;
     if (!ip) {
       toast.error(t("settings.trusted_ips.ip_required"));
       return;
@@ -56,7 +58,7 @@ export default function TrustedIPs() {
     fetch(`/api/admin/trusted-ips/${targetMode}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ip, "2fa_code": code }),
+      body: JSON.stringify({ ip, ...(targetMode === "add" ? { "2fa_code": code } : {}) }),
     })
       .then(async (res) => {
         const data = await res.json();
@@ -82,9 +84,10 @@ export default function TrustedIPs() {
   };
 
   const request = (targetMode: "add" | "remove", ip: string) => {
-    if (twoFAEnabled) {
+    if (targetMode === "remove" || twoFAEnabled) {
       setMode(targetMode);
       setPendingIP(ip);
+      setOtp("");
       setDialogOpen(true);
       return;
     }
@@ -136,6 +139,7 @@ export default function TrustedIPs() {
                 variant="soft"
                 color="red"
                 disabled={saving}
+                aria-label={`${t("settings.trusted_ips.remove")} ${ip}`}
                 onClick={() => request("remove", ip)}
               >
                 <Trash2 size={16} />
@@ -152,13 +156,17 @@ export default function TrustedIPs() {
               ? t("settings.trusted_ips.add")
               : t("settings.trusted_ips.remove")}
           </Dialog.Title>
+          <form onSubmit={(event) => {
+            event.preventDefault();
+            submit(mode, pendingIP, requiresOTP ? otp : "");
+          }}>
           <Flex direction="column" gap="3">
             <Text size="2">
               {t("settings.trusted_ips.confirm_target", {
-                ip: mode === "add" ? newIP.trim() : pendingIP,
+                ip: pendingIP,
               })}
             </Text>
-            <label>
+            {requiresOTP && <label>
               <Text size="2" mb="1" as="div">
                 {t("account.2fa_otp_input_prompt")}
               </Text>
@@ -167,24 +175,25 @@ export default function TrustedIPs() {
                 onChange={(e) => setOtp(e.target.value)}
                 placeholder="000000"
                 autoComplete="one-time-code"
+                inputMode="numeric"
+                disabled={saving}
               />
-            </label>
+            </label>}
             <Flex gap="2" justify="end">
               <Dialog.Close>
-                <Button variant="soft" color="gray">
+                <Button type="button" variant="soft" color="gray">
                   {t("common.cancel")}
                 </Button>
               </Dialog.Close>
               <Button
-                disabled={saving || !otp}
-                onClick={() =>
-                  submit(mode, mode === "add" ? newIP.trim() : pendingIP, otp)
-                }
+                type="submit"
+                disabled={saving || (requiresOTP && !otp.trim())}
               >
                 {t("common.confirm")}
               </Button>
             </Flex>
           </Flex>
+          </form>
         </Dialog.Content>
       </Dialog.Root>
     </Flex>

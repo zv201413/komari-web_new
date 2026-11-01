@@ -1043,7 +1043,7 @@
     },
     "trusted_ips": {
       "title": "IP 白名單",
-      "description": "白名單內的 IP 登入時免輸 2FA 動態碼。增刪白名單本身強制 2FA 驗證，終端不受白名單影響。",
+      "description": "白名單內的 IP 登入時免輸 2FA 動態碼。新增需要 2FA 驗證；刪除只需登入後確認。終端不受白名單影響。",
       "placeholder": "192.168.1.100",
       "add": "新增",
       "remove": "刪除",

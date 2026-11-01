@@ -454,18 +454,25 @@ const ExecContent = () => {
                         )}
                     </div>
 
+                    <form onSubmit={(event) => {
+                        event.preventDefault();
+                        if (!executing) void executeCommand();
+                    }}>
                     <Flex justify="end" gap="2">
                         {twoFaEnabled ? (
                             <TextField.Root
                                 className="w-32"
                                 type="number"
                                 placeholder="2FA"
+                                autoComplete="one-time-code"
+                                inputMode="numeric"
+                                disabled={executing}
                                 value={twoFaCode}
                                 onChange={(e) => setTwoFaCode((e.target as HTMLInputElement).value)}
                             />
                         ) : null}
                         <Button
-                            onClick={executeCommand}
+                            type="submit"
                             disabled={executing || !command.trim() || selectedNodes.length === 0 || (twoFaEnabled && !twoFaCode.trim())}
                         >
                             {executing ? (
@@ -481,6 +488,7 @@ const ExecContent = () => {
                             )}
                         </Button>
                     </Flex>
+                    </form>
                 </Flex>
             </Card>
 

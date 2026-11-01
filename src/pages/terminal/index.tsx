@@ -105,7 +105,7 @@ const SudoAuthDialog: React.FC<SudoAuthDialogProps> = ({
   const [error, setError] = useState("");
 
   const handleVerify = async () => {
-    if (code.length < 6) return;
+    if (verifying || code.length !== 6) return;
     setVerifying(true);
     setError("");
     try {
@@ -149,6 +149,10 @@ const SudoAuthDialog: React.FC<SudoAuthDialogProps> = ({
             "打开终端前需要验证您的二步验证身份。"
           )}
         </AlertDialog.Description>
+        <form onSubmit={(event) => {
+          event.preventDefault();
+          void handleVerify();
+        }}>
         <Flex direction="column" gap="3" mt="3">
           <TextField.Root
             placeholder={t(
@@ -156,6 +160,9 @@ const SudoAuthDialog: React.FC<SudoAuthDialogProps> = ({
               "6 位验证码"
             )}
             maxLength={6}
+            autoComplete="one-time-code"
+            inputMode="numeric"
+            disabled={verifying}
             value={code}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
               setCode(e.target.value.replace(/\s/g, ""))
@@ -179,19 +186,21 @@ const SudoAuthDialog: React.FC<SudoAuthDialogProps> = ({
         </Flex>
         <Flex gap="3" mt="4" justify="end">
           <AlertDialog.Cancel>
-            <Button variant="soft" color="gray">
+            <Button type="button" variant="soft" color="gray">
               {t("cancel")}
             </Button>
           </AlertDialog.Cancel>
           <Button
             variant="solid"
             color="violet"
-            onClick={handleVerify}
+            type="submit"
+            disabled={verifying || code.length !== 6}
             loading={verifying}
           >
             {t("terminal.sudo_verify_button", "验证")}
           </Button>
         </Flex>
+        </form>
       </AlertDialog.Content>
     </AlertDialog.Root>
   );
@@ -731,7 +740,9 @@ const TerminalPage = () => {
             >
               <Flex direction="column" gap="3">
                 <TextField.Root
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
                   autoFocus
                   value={otpInput}
                   placeholder="123456"

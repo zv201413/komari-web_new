@@ -1046,7 +1046,7 @@
     },
     "trusted_ips": {
       "title": "Trusted IPs",
-      "description": "IPs in the whitelist skip 2FA when logging in. Adding/removing requires 2FA. Terminal access is unaffected.",
+      "description": "IPs in the whitelist skip 2FA when logging in. Adding requires 2FA; removing only requires login and confirmation. Terminal access is unaffected.",
       "placeholder": "192.168.1.100",
       "add": "Add",
       "remove": "Remove",

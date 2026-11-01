@@ -1044,7 +1044,7 @@
     },
     "trusted_ips": {
       "title": "IP Terpercaya",
-      "description": "IP dalam daftar putih melewati 2FA saat login. Menambah/menghapus memerlukan 2FA. Terminal tidak terpengaruh.",
+      "description": "IP dalam daftar putih melewati 2FA saat login. Menambah memerlukan 2FA; menghapus hanya memerlukan login dan konfirmasi. Terminal tidak terpengaruh.",
       "placeholder": "192.168.1.100",
       "add": "Tambah",
       "remove": "Hapus",

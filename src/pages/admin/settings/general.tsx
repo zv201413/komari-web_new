@@ -36,6 +36,32 @@ export default function GeneralSettings() {
     return <Text color="red">{error}</Text>;
   }
 
+  const handleDisableSudo = async () => {
+    if (verifying || sudoDisableCode.length !== 6) return;
+    setVerifying(true);
+    try {
+      const res = await fetch("/api/admin/settings", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-2FA-Code": sudoDisableCode,
+        },
+        body: JSON.stringify({ sudo_2fa_required: false }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || data.error || "Failed to save");
+      toast.success(t("settings.settings_saved", "保存成功"));
+      if (disablePromise) disablePromise.resolve();
+      setShowDisableDialog(false);
+      setSudoDisableCode("");
+      setDisablePromise(null);
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : "Failed to save");
+    } finally {
+      setVerifying(false);
+    }
+  };
+
   return (
     <>
       <SettingCardLabel>
@@ -152,15 +178,22 @@ export default function GeneralSettings() {
           <Dialog.Description>
             {t("settings.sudo_2fa.disable_desc", "为了安全起见，关闭此功能需要验证您的 6 位身份验证器动态码。")}
           </Dialog.Description>
+          <form onSubmit={(event) => {
+            event.preventDefault();
+            void handleDisableSudo();
+          }}>
           <Flex direction="column" gap="3" mt="4">
             <TextField.Root
               placeholder="000000"
               value={sudoDisableCode}
               onChange={(e) => setSudoDisableCode(e.target.value)}
               maxLength={6}
+              autoComplete="one-time-code"
+              inputMode="numeric"
+              disabled={verifying}
             />
             <Flex gap="3" justify="end">
-              <Button variant="soft" color="gray" onClick={() => {
+              <Button type="button" variant="soft" color="gray" onClick={() => {
                 if (disablePromise) disablePromise.reject();
                 setShowDisableDialog(false);
                 setSudoDisableCode("");
@@ -168,34 +201,12 @@ export default function GeneralSettings() {
               }}>
                 {t("common.cancel", "取消")}
               </Button>
-              <Button disabled={verifying || sudoDisableCode.length !== 6} onClick={async () => {
-                setVerifying(true);
-                try {
-                  const res = await fetch("/api/admin/settings", {
-                    method: "POST",
-                    headers: {
-                      "Content-Type": "application/json",
-                      "X-2FA-Code": sudoDisableCode
-                    },
-                    body: JSON.stringify({ sudo_2fa_required: false })
-                  });
-                  const data = await res.json();
-                  if (!res.ok) throw new Error(data.message || data.error || "Failed to save");
-                  toast.success(t("settings.settings_saved", "保存成功"));
-                  if (disablePromise) disablePromise.resolve();
-                  setShowDisableDialog(false);
-                  setSudoDisableCode("");
-                  setDisablePromise(null);
-                } catch (e: any) {
-                  toast.error(e.message);
-                } finally {
-                  setVerifying(false);
-                }
-              }}>
+              <Button type="submit" disabled={verifying || sudoDisableCode.length !== 6}>
                 {t("common.confirm", "确认")}
               </Button>
             </Flex>
           </Flex>
+          </form>
         </Dialog.Content>
       </Dialog.Root>
     </>

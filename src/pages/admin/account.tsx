@@ -62,6 +62,7 @@ const AccountContent = () => {
   }
   function changePassword(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (passwordSaving) return;
     const form = event.currentTarget as HTMLFormElement;
     const password = form.password.value;
     const password_repeat = form.password_repeat.value;
@@ -377,6 +378,7 @@ const TwoFactorDisabled = () => {
 
   const handleEnable2fa = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (saving) return;
     if (!code) {
       toast.error(t("account.otp_empty_error"));
       return;
@@ -428,6 +430,9 @@ const TwoFactorDisabled = () => {
               <TextField.Root
                 type="number"
                 name="code"
+                autoComplete="one-time-code"
+                inputMode="numeric"
+                disabled={saving}
                 placeholder="000000"
                 value={code}
                 onChange={(e) => setCode((e.target as HTMLInputElement).value)}
@@ -450,6 +455,7 @@ const TwoFactorEnabled = () => {
   const [code, setCode] = React.useState("");
   const { refresh } = useAccount();
   const disable2fa = () => {
+    if (saving) return;
     if (!code) {
       toast.error(t("account.otp_empty_error"));
       return;
@@ -493,26 +499,34 @@ const TwoFactorEnabled = () => {
             <Dialog.Description>
               {t("account.disable_2fa_confirmation")}
             </Dialog.Description>
+            <form onSubmit={(event) => {
+              event.preventDefault();
+              disable2fa();
+            }}>
             <Flex direction="column" gap="2" className="mt-4">
               <label htmlFor="disable_2fa_code">
                 {t("account.2fa_otp_input_prompt")}
               </label>
               <TextField.Root
                 id="disable_2fa_code"
-                type="number"
+                type="text"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                disabled={saving}
                 placeholder="000000"
                 value={code}
                 onChange={(e) => setCode((e.target as HTMLInputElement).value)}
               />
             </Flex>
             <Flex gap="2" justify="end" className="mt-4">
-              <Button variant="soft" onClick={() => setIsOpen(false)}>
+              <Button type="button" variant="soft" onClick={() => setIsOpen(false)}>
                 {t("common.cancel")}
               </Button>
-              <Button disabled={saving} color="red" onClick={disable2fa}>
+              <Button type="submit" disabled={saving || !code.trim()} color="red">
                 {t("common.confirm")}
               </Button>
             </Flex>
+            </form>
           </Dialog.Content>
         </Dialog.Root>
       </div>

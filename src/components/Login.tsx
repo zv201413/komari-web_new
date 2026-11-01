@@ -5,7 +5,6 @@ import {
   Text,
   TextField,
   Button,
-  Box,
   IconButton,
   Checkbox,
 } from "@radix-ui/themes";
@@ -35,6 +34,7 @@ const LoginDialog = ({ trigger, autoOpen = false, showSettings = true, info, onL
     const [isLoading, setIsLoading] = React.useState(false);
     const [require2FA, setRequire2FA] = React.useState(false);
     const [open, setOpen] = React.useState(autoOpen || false);
+    const fieldId = React.useId().replace(/:/g, "");
     const {publicInfo} = usePublicInfo();
   // 是否启用密码登录
   const passwordLoginEnabled = !publicInfo?.disable_password_login;
@@ -50,6 +50,7 @@ const LoginDialog = ({ trigger, autoOpen = false, showSettings = true, info, onL
     }, [autoOpen]);
     // Handle login
     const handleLogin = async () => {
+      if (isLoading) return;
       if (!isFormValid) {
         setErrorMsg("Username and password are required");
         return;
@@ -91,14 +92,6 @@ const LoginDialog = ({ trigger, autoOpen = false, showSettings = true, info, onL
         console.error(err);
       } finally {
         setIsLoading(false);
-      }
-    };
-
-    // Handle Enter key press
-    const handleKeyDown = (e: React.KeyboardEvent) => {
-      if (e.key === "Enter" && !isLoading && isFormValid) {
-        e.preventDefault(); // Prevent form submission issues
-        handleLogin();
       }
     };
 
@@ -166,7 +159,7 @@ const LoginDialog = ({ trigger, autoOpen = false, showSettings = true, info, onL
             </div>
 
           </Dialog.Description>
-          <Box
+          <form
             onSubmit={(e) => {
               e.preventDefault(); // Prevent native form submission
               if (isFormValid && !isLoading) {
@@ -184,7 +177,9 @@ const LoginDialog = ({ trigger, autoOpen = false, showSettings = true, info, onL
                     <TextField.Root
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
-                      onKeyDown={handleKeyDown}
+                      id={`login-username-${fieldId}`}
+                      name="username"
+                      autoComplete="username"
                       placeholder="admin"
                       disabled={isLoading}
                       autoFocus
@@ -197,7 +192,9 @@ const LoginDialog = ({ trigger, autoOpen = false, showSettings = true, info, onL
                     <TextField.Root
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      onKeyDown={handleKeyDown}
+                      id={`login-password-${fieldId}`}
+                      name="password"
+                      autoComplete="current-password"
                       type="password"
                       placeholder={t("login.password_placeholder")}
                       disabled={isLoading}
@@ -232,7 +229,10 @@ const LoginDialog = ({ trigger, autoOpen = false, showSettings = true, info, onL
                     <TextField.Root
                       value={twoFac}
                       onChange={(e) => setTwoFac(e.target.value)}
-                      onKeyDown={handleKeyDown}
+                      id={`login-2fa-code-${fieldId}`}
+                      name="2fa_code"
+                      autoComplete="one-time-code"
+                      inputMode="numeric"
                       type="text"
                       placeholder="000000"
                       disabled={isLoading}
@@ -247,7 +247,6 @@ const LoginDialog = ({ trigger, autoOpen = false, showSettings = true, info, onL
                     type="submit"
                     disabled={isLoading || !isFormValid}
                     style={{ opacity: isLoading || !isFormValid ? 0.6 : 1 }}
-                    onClick={handleLogin}
                   >
                     {isLoading ? "Logging in..." : t("login.title")}
                   </Button>
@@ -275,7 +274,7 @@ const LoginDialog = ({ trigger, autoOpen = false, showSettings = true, info, onL
                 </Button>
               )}
             </Flex>
-          </Box>
+          </form>
         </Dialog.Content>
       </Dialog.Root>
     );
