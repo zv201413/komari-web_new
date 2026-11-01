@@ -156,6 +156,11 @@
       "interval": "采集间隔（秒）",
       "invalidPrice": "价格无效",
       "ipAddress": "IP 地址",
+      "ipTrustDisableWarning": "关闭后将暂停所有节点的自动 IP 信任，保留各节点选择。已开启的节点仍可单独关闭，但不能开启节点。",
+      "ipTrustMaster": "节点 IP 信任总阀门",
+      "ipTrustMasterTip": "总阀门默认关闭。验证后可逐台开启；关闭总阀门后，节点只能关闭、不能开启，原有选择保留且自动 IP 信任暂停。",
+      "ipTrustUnlock": "验证并解锁调整",
+      "ipTrustUnlocked": "本次登录已验证，可逐台开启或关闭",
       "loading": "加载中...",
       "memoryModeAvailable": "包含缓冲区内存",
       "memoryModeAvailable_tip": "Agent 默认监测并上报已用内存，勾选此选项将上报已用内存+缓冲区内存。",
@@ -187,12 +192,7 @@
       "trustLoginIP": "信任 IP",
       "trustLoginIPLabel": "信任 {{name}} 的来源 IP",
       "trustLoginIPTip": "仅对该在线探针的公网来源 IP 免除登录验证码；账号密码、终端及敏感操作仍需验证。",
-      "trustLoginIPWarning": "启用总阀门后，本次登录会话可逐台设置 IP 信任，无需反复输入验证码。只有选中的在线探针公网来源 IP 可免登录 2FA，仍需账号密码，终端另行验证。共享 NAT／代理出口的其他设备也会获得同样待遇；探针被入侵或令牌泄露可能扩大风险。",
-      "ipTrustMaster": "节点 IP 信任总阀门",
-      "ipTrustUnlock": "验证并解锁调整",
-      "ipTrustUnlocked": "本次登录已验证，可逐台开启或关闭",
-      "ipTrustMasterTip": "总阀门默认关闭。验证后可逐台开启；关闭总阀门后，节点只能关闭、不能开启，原有选择保留且自动 IP 信任暂停。",
-      "ipTrustDisableWarning": "关闭后将暂停所有节点的自动 IP 信任，保留各节点选择。已开启的节点仍可单独关闭，但不能开启节点。"
+      "trustLoginIPWarning": "启用总阀门后，本次登录会话可逐台设置 IP 信任，无需反复输入验证码。只有选中的在线探针公网来源 IP 可免登录 2FA，仍需账号密码，终端另行验证。共享 NAT／代理出口的其他设备也会获得同样待遇；探针被入侵或令牌泄露可能扩大风险。"
     },
     "notification": {
       "expire_enable": "是否启用过期提醒",
