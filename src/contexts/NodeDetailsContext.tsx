@@ -12,6 +12,7 @@ export type NodeDetail = {
   gpu_name: string;
   ipv4: string;
   ipv6: string;
+  trust_login_ip?: boolean;
   region: string;
   mem_total: number;
   swap_total: number;

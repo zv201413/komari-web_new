@@ -88,12 +88,14 @@ const SudoDurations: Record<string, string> = {
 };
 
 interface SudoAuthDialogProps {
+  nodeUUID: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onVerified: () => void;
 }
 
 const SudoAuthDialog: React.FC<SudoAuthDialogProps> = ({
+  nodeUUID,
   open,
   onOpenChange,
   onVerified,
@@ -112,7 +114,7 @@ const SudoAuthDialog: React.FC<SudoAuthDialogProps> = ({
       const res = await fetch("/api/admin/sudo-auth", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ "2fa_code": code, duration }),
+        body: JSON.stringify({ "2fa_code": code, duration, uuid: nodeUUID }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -373,19 +375,25 @@ const TerminalPage = () => {
       });
   }, [t, uuid]);
 
-  // Sudo preflight（fork 特性）：登录时验过 2FA 的用户凭 sudo_token 免重输；
-  // 无有效 token 时弹出 SudoAuthDialog，替代上游"每次打开终端都要 OTP"的流程
+  // Sudo preflight checks a grant for this exact node and browser login session.
+  // Each server has an independent cookie path and trust period.
   useEffect(() => {
-    fetch("/api/admin/sudo-check", { cache: "no-store" })
+    if (uuid === null) return;
+    setSudoVerified(false);
+    setShowSudoDialog(false);
+    let active = true;
+    fetch(`/api/admin/client/${encodeURIComponent(uuid)}/sudo-check`, { cache: "no-store" })
       .then((r) => {
+        if (!active) return;
         if (r.ok) {
           setSudoVerified(true);
         } else {
           setShowSudoDialog(true);
         }
       })
-      .catch(() => setShowSudoDialog(true));
-  }, []);
+      .catch(() => { if (active) setShowSudoDialog(true); });
+    return () => { active = false; };
+  }, [uuid]);
 
   // Connection effect - waits for OTP if 2FA is enabled
   useEffect(() => {
@@ -768,6 +776,7 @@ const TerminalPage = () => {
           </Dialog.Content>
         </Dialog.Root>
         <SudoAuthDialog
+          nodeUUID={uuid ?? ""}
           open={showSudoDialog}
           onOpenChange={setShowSudoDialog}
           onVerified={() => setSudoVerified(true)}

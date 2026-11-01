@@ -88,12 +88,15 @@ import {
 } from "@/components/admin/SettingCard";
 import { useSettings } from "@/lib/api";
 import { SelectOrInput } from "@/components/ui/select-or-input";
+import { TrustLoginIPCell } from "@/components/admin/NodeTable/TrustLoginIPCell";
+import { NodeIPTrustControl } from "@/components/admin/NodeIPTrustControl";
+import { NodeIPTrustProvider } from "@/contexts/NodeIPTrustContext";
 
 
 const NodeDetailsPage = () => {
   return (
     <NodeDetailsProvider>
-      <Layout />
+      <NodeIPTrustProvider><Layout /></NodeIPTrustProvider>
     </NodeDetailsProvider>
   );
 };
@@ -131,6 +134,7 @@ const Layout = () => {
         settingsLoading={settingsLoading}
       />
 
+      <NodeIPTrustControl />
       {isEmpty ? (
         <EmptyNodesGuide />
       ) : (
@@ -1182,6 +1186,9 @@ const SortableRow = ({
         />
       </TableCell>
       <TableCell>
+        <TrustLoginIPCell node={node} />
+      </TableCell>
+      <TableCell>
         <ActionButtons node={node} settings={settings} />
       </TableCell>
     </TableRow>
@@ -1307,6 +1314,7 @@ const NodeTable = ({
               <TableHead>{t("common.group")}</TableHead>
               <TableHead>{t("admin.nodeEdit.remark")}</TableHead>
               <TableHead>{t("admin.nodeTable.billing")}</TableHead>
+              <TableHead>{t("admin.nodeTable.trustLoginIP")}</TableHead>
               <TableHead></TableHead>
             </TableRow>
           </TableHeader>

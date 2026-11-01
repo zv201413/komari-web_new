@@ -169,7 +169,16 @@
       "serviceName_placeholder": "サービス名、空の場合はデフォルト名（komari-agent）を使用",
       "setToLongTerm": "長期に設定",
       "submit": "送信",
-      "submitting": "待機中"
+      "submitting": "待機中",
+      "trustLoginIP": "IP を信頼",
+      "trustLoginIPLabel": "{{name}} の接続元 IP を信頼",
+      "trustLoginIPTip": "オンラインのエージェントの公開接続元 IP に限りログイン OTP を省略します。パスワード、端末と機密操作の認証は引き続き必要です。",
+      "trustLoginIPWarning": "一度認証すると現在のログインセッションでノードごとに設定できます。選択したオンラインエージェントの公開接続元 IP のみログイン 2FA を省略します。パスワードと端末認証は必要です。同じ NAT やプロキシ出口を共有する端末にも適用されます。エージェント侵害やトークン漏洩でリスクが広がります。",
+      "ipTrustMaster": "ノード IP 信頼のマスターバルブ",
+      "ipTrustUnlock": "認証して編集を解除",
+      "ipTrustUnlocked": "このログインで認証済み。ノードごとに変更可能",
+      "ipTrustMasterTip": "既定は無効です。一度認証するとノードを個別に有効化できます。閉じている間は無効化のみ可能で、選択を保持して自動 IP 信頼を停止します。",
+      "ipTrustDisableWarning": "すべての自動 IP 信頼を停止し、ノードの選択を保持します。有効なノードは個別に無効化できますが、有効化はできません。"
     },
     "notification": {
       "expire_enable": "期限切れ通知を有効にしますか",
@@ -1061,7 +1070,10 @@
   "terminal": {
     "disconnect": "接続が切断されました",
     "no_active_connection": "アクティブな接続はありません",
-    "title": "ターミナル"
+    "title": "ターミナル",
+    "sudo_description": "認証はこのサーバーの端末のみを許可します。信頼期間は現在のブラウザーのログインセッションでこのサーバーにのみ適用されます。",
+    "sudo_duration_1h": "このサーバーを 1 時間信頼",
+    "sudo_duration_24h": "このサーバーを 24 時間信頼"
   },
   "market": {
     "add_source": "ソースを追加",

@@ -169,7 +169,16 @@
       "serviceName_placeholder": "Nama layanan, biarkan kosong untuk menggunakan nama default (komari-agent)",
       "setToLongTerm": "Atur ke Jangka Panjang",
       "submit": "Kirim",
-      "submitting": "Menunggu..."
+      "submitting": "Menunggu...",
+      "trustLoginIP": "Percayai IP",
+      "trustLoginIPLabel": "Percayai IP sumber {{name}}",
+      "trustLoginIPTip": "Lewati OTP login hanya untuk IP sumber publik agen yang online. Kata sandi, verifikasi terminal, dan tindakan sensitif tetap diperlukan.",
+      "trustLoginIPWarning": "Verifikasi katup utama sekali untuk mengatur tiap node dalam sesi login ini. Hanya IP sumber publik agen online yang dipilih dapat melewati 2FA login; kata sandi dan verifikasi terminal tetap diperlukan. Perangkat dengan NAT atau jalur keluar proksi yang sama mendapat pengecualian ini. Agen yang diretas atau token bocor dapat memperluas risiko.",
+      "ipTrustMaster": "Katup utama kepercayaan IP node",
+      "ipTrustUnlock": "Verifikasi untuk membuka pengaturan",
+      "ipTrustUnlocked": "Terverifikasi untuk login ini; atur tiap node",
+      "ipTrustMasterTip": "Nonaktif secara bawaan. Verifikasi sekali untuk mengaktifkan tiap node. Saat katup ditutup, node hanya dapat dinonaktifkan; pilihan disimpan dan kepercayaan IP otomatis ditangguhkan.",
+      "ipTrustDisableWarning": "Menutup menangguhkan kepercayaan IP otomatis semua node tanpa menghapus pilihan. Node yang sudah dipilih masih dapat dinonaktifkan, tetapi tidak dapat diaktifkan."
     },
     "notification": {
       "expire_enable": "Aktifkan Pengingat Kedaluwarsa",
@@ -1060,7 +1069,10 @@
   "terminal": {
     "disconnect": "Terputus",
     "no_active_connection": "Tidak ada koneksi aktif",
-    "title": "Terminal"
+    "title": "Terminal",
+    "sudo_description": "Verifikasi hanya mengizinkan terminal server ini. Masa kepercayaan berlaku untuk server ini dalam sesi login browser saat ini.",
+    "sudo_duration_1h": "Percayai server ini selama 1 jam",
+    "sudo_duration_24h": "Percayai server ini selama 24 jam"
   },
   "market": {
     "add_source": "Tambah sumber",

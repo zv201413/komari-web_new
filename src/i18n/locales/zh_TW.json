@@ -169,7 +169,16 @@
       "serviceName_placeholder": "服務名稱，為空則使用默認名稱(komari-agent)",
       "setToLongTerm": "設置為長期",
       "submit": "提交",
-      "submitting": "等待"
+      "submitting": "等待",
+      "trustLoginIP": "信任 IP",
+      "trustLoginIPLabel": "信任 {{name}} 的來源 IP",
+      "trustLoginIPTip": "僅對此線上探針的公網來源 IP 免除登入驗證碼；帳號密碼、終端及敏感操作仍需驗證。",
+      "trustLoginIPWarning": "驗證總閥門一次後，本次登入工作階段可逐台設定 IP 信任，無需重複輸入驗證碼。僅選中的線上探針公網來源 IP 可免登入 2FA，仍需帳號密碼，終端另行驗證。共用 NAT／代理出口的裝置也會獲得此待遇；探針入侵或權杖外洩可能擴大風險。",
+      "ipTrustMaster": "節點 IP 信任總閥門",
+      "ipTrustUnlock": "驗證並解鎖調整",
+      "ipTrustUnlocked": "本次登入已驗證，可逐台開啟或關閉",
+      "ipTrustMasterTip": "總閥門預設關閉。驗證後可逐台開啟；關閉後節點只能關閉、不能開啟，保留原有選擇並暫停自動 IP 信任。",
+      "ipTrustDisableWarning": "關閉後暫停所有節點的自動 IP 信任，保留各節點選擇。已開啟的節點仍可單獨關閉，但不能開啟節點。"
     },
     "notification": {
       "expire_enable": "是否啟用過期提醒",
@@ -1059,7 +1068,10 @@
   "terminal": {
     "disconnect": "連接已斷開",
     "no_active_connection": "沒有活動連接",
-    "title": "終端"
+    "title": "終端",
+    "sudo_description": "驗證碼僅授權目前伺服器的終端，信任時間僅在本次瀏覽器登入工作階段對此伺服器生效。",
+    "sudo_duration_1h": "信任目前伺服器 1 小時",
+    "sudo_duration_24h": "信任目前伺服器 24 小時"
   },
   "market": {
     "add_source": "新增來源",
