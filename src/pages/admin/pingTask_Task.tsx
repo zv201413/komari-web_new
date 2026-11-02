@@ -420,7 +420,7 @@ const Row = ({
                     {t("common.cancel")}
                   </Button>
                 </Dialog.Close>
-                <Button variant="solid" type="submit" disabled={editSaving}>
+                <Button data-enter-submit variant="solid" type="submit" disabled={editSaving}>
                   {t("common.save")}
                 </Button>
               </Flex>
@@ -447,7 +447,7 @@ const Row = ({
                   {t("common.cancel")}
                 </Button>
               </Dialog.Close>
-              <Button
+              <Button data-enter-submit
                 variant="solid"
                 color="red"
                 onClick={handleDelete}

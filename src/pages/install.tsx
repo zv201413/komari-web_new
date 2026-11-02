@@ -400,7 +400,7 @@ export default function Install() {
                 </Button>
               </Flex>
             ) : (
-              <Button type="submit" disabled={busy || ready === null}>
+              <Button data-enter-submit type="submit" disabled={busy || ready === null}>
                 {busy ? (
                   <LoaderCircle size={16} className="animate-spin" />
                 ) : (

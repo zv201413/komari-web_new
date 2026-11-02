@@ -1,4 +1,5 @@
 import * as React from "react";
+import { NodeConnectionInfo } from "./NodeConnectionInfo";
 import {
   DndContext,
   KeyboardSensor,
@@ -137,6 +138,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
               </IconButton>
             </div>
           )}
+          <NodeConnectionInfo node={row.original} />
         </div>
       );
     },
@@ -353,7 +355,7 @@ export function DataTable() {
               />
             </div>
             <Flex justify="end" gap="2" className="mt-4">
-              <Button onClick={handleAddNode} disabled={isAddingNode}>
+              <Button data-enter-submit onClick={handleAddNode} disabled={isAddingNode}>
                 {isAddingNode ? (
                   <span className="flex items-center gap-1">
                     <LoadingIcon className="animate-spin size-4" />

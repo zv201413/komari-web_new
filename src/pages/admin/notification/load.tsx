@@ -298,7 +298,7 @@ const Row = ({ alert }: { alert: LoadAlert }) => {
                     {t("common.cancel")}
                   </Button>
                 </Dialog.Close>
-                <Button variant="solid" type="submit" disabled={editSaving}>
+                <Button data-enter-submit variant="solid" type="submit" disabled={editSaving}>
                   {t("common.save")}
                 </Button>
               </Flex>
@@ -325,7 +325,7 @@ const Row = ({ alert }: { alert: LoadAlert }) => {
                   {t("common.cancel")}
                 </Button>
               </Dialog.Close>
-              <Button
+              <Button data-enter-submit
                 variant="solid"
                 color="red"
                 onClick={handleDelete}
@@ -462,7 +462,7 @@ const AddButton: React.FC = () => {
               <Dialog.Close>
                 <Button variant="soft">{t("common.close")}</Button>
               </Dialog.Close>
-              <Button disabled={saving} type="submit">
+              <Button data-enter-submit disabled={saving} type="submit">
                 {t("common.add")}
               </Button>
             </div>

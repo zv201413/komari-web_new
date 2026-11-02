@@ -370,7 +370,7 @@ export default function SiteSettings() {
                     <Button variant="soft">{t("common.cancel", "取消")}</Button>
                   </Dialog.Close>
                   <Dialog.Trigger>
-                    <Button
+                    <Button data-enter-submit
                       color="red"
                       onClick={async () => {
                         fetch("/api/admin/update/favicon", {

@@ -191,7 +191,7 @@ const ServerRow: React.FC<{
                     {t("common.cancel")}
                   </Button>
                 </Dialog.Close>
-                <Button onClick={handleSave} disabled={saving}>
+                <Button data-enter-submit onClick={handleSave} disabled={saving}>
                   {t("common.save")}
                 </Button>
               </Flex>

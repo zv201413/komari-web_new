@@ -192,7 +192,7 @@ const SudoAuthDialog: React.FC<SudoAuthDialogProps> = ({
               {t("cancel")}
             </Button>
           </AlertDialog.Cancel>
-          <Button
+          <Button data-enter-submit
             variant="solid"
             color="violet"
             type="submit"
@@ -767,7 +767,7 @@ const TerminalPage = () => {
                   >
                     {t("common.cancel")}
                   </Button>
-                  <Button type="submit" disabled={!otpInput}>
+                  <Button data-enter-submit type="submit" disabled={!otpInput}>
                     {t("common.confirm")}
                   </Button>
                 </Flex>

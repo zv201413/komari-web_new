@@ -1,3 +1,5 @@
+import { Nat64Option } from "@/components/admin/Nat64Option";
+import { nat64InstallArgs } from "@/utils/nat64";
 import {
   quotePowerShellArg,
   quoteShellArg,
@@ -88,6 +90,7 @@ import {
 } from "@/components/admin/SettingCard";
 import { useSettings } from "@/lib/api";
 import { SelectOrInput } from "@/components/ui/select-or-input";
+import { NodeConnectionInfo } from "@/components/admin/NodeConnectionInfo";
 import { TrustLoginIPCell } from "@/components/admin/NodeTable/TrustLoginIPCell";
 import { NodeIPTrustControl } from "@/components/admin/NodeIPTrustControl";
 import { NodeIPTrustProvider } from "@/contexts/NodeIPTrustContext";
@@ -183,6 +186,7 @@ const EmptyNodesGuide = () => {
 };
 
 type AutoDiscoveryInstallOptions = {
+  nat64: boolean;
   disableWebSsh: boolean;
   disableAutoUpdate: boolean;
   ignoreUnsafeCert: boolean;
@@ -215,6 +219,7 @@ const AutoDiscoverySection = ({
   const [showOptions, setShowOptions] = React.useState(false);
   const [installOptions, setInstallOptions] =
     React.useState<AutoDiscoveryInstallOptions>({
+      nat64: true,
       disableWebSsh: false,
       disableAutoUpdate: false,
       ignoreUnsafeCert: false,
@@ -253,6 +258,7 @@ const AutoDiscoverySection = ({
       return `http://${settings.script_domain.replace(/\/+$/, "")}`;
     })();
     const args: string[] = ["-e", host, "--auto-discovery", adKey];
+    args.push(...nat64InstallArgs(installOptions.nat64, selectedPlatform));
     if (installOptions.disableWebSsh) {
       args.push("--disable-web-ssh");
     }
@@ -950,6 +956,7 @@ const AutoDiscoverySection = ({
         <label className="text-sm font-bold">
           {t("admin.nodeTable.generatedCommand", "指令")}
         </label>
+        <Nat64Option enabled={installOptions.nat64} onChange={(nat64) => setInstallOptions((prev) => ({ ...prev, nat64 }))} />
         <TextArea
           disabled
           className="w-full"
@@ -1037,7 +1044,7 @@ const Header = ({
               placeholder={t("admin.nodeTable.nameOptional")}
             />
             <Flex justify="end" gap="2" mt="4">
-              <Button
+              <Button data-enter-submit
                 onClick={() => handleAddNode(inputRef.current?.value)}
                 disabled={loading}
               >
@@ -1141,6 +1148,7 @@ const SortableRow = ({
               </IconButton>
             </Text>
           )}
+          <NodeConnectionInfo node={node} />
         </Flex>
       </TableCell>
       <TableCell>{node.version}</TableCell>
@@ -1402,7 +1410,7 @@ function DeleteButton({ node }: { node: NodeDetail }) {
           <Dialog.Close>
             <Button variant="soft">{t("admin.nodeTable.cancel")}</Button>
           </Dialog.Close>
-          <Button disabled={deleting} color="red" onClick={handleDelete}>
+          <Button data-enter-submit disabled={deleting} color="red" onClick={handleDelete}>
             {t("admin.nodeTable.confirmDelete")}
           </Button>
         </Flex>
@@ -1480,7 +1488,7 @@ function SignInButton({ node }: { node: NodeDetail }) {
               {t("cancel")}
             </Button>
           </AlertDialog.Cancel>
-          <Button
+          <Button data-enter-submit
             variant="solid"
             color="violet"
             onClick={handleSignIn}
@@ -1495,6 +1503,7 @@ function SignInButton({ node }: { node: NodeDetail }) {
 }
 
 type InstallOptions = {
+  nat64: boolean;
   disableWebSsh: boolean;
   disableAutoUpdate: boolean;
   ignoreUnsafeCert: boolean;
@@ -1515,6 +1524,7 @@ function GenerateCommandButton({ node, settings }: { node: NodeDetail, settings:
   const [selectedPlatform, setSelectedPlatform] =
     React.useState<Platform>("linux");
   const [installOptions, setInstallOptions] = React.useState<InstallOptions>({
+    nat64: true,
     disableWebSsh: false,
     disableAutoUpdate: false,
     ignoreUnsafeCert: false,
@@ -1566,6 +1576,7 @@ function GenerateCommandButton({ node, settings }: { node: NodeDetail, settings:
     const token = node.token || "";
     let args = ["-e", host, "-t", token];
     // 根据安装选项生成参数
+    args.push(...nat64InstallArgs(installOptions.nat64, selectedPlatform));
     if (installOptions.disableWebSsh) {
       args.push("--disable-web-ssh");
     }
@@ -2327,6 +2338,7 @@ function GenerateCommandButton({ node, settings }: { node: NodeDetail, settings:
               {t("admin.nodeTable.generatedCommand", "生成的指令")}
             </label>
             <div className="relative">
+              <Nat64Option enabled={installOptions.nat64} onChange={(nat64) => setInstallOptions((prev) => ({ ...prev, nat64 }))} />
               <TextArea
                 disabled
                 className="w-full"
@@ -2599,7 +2611,7 @@ function EditButton({ node }: { node: NodeDetail }) {
           </SettingCardCollapse>
         </div>
         <Flex gap="2" justify={"end"} className="mt-4">
-          <Button
+          <Button data-enter-submit
             type="submit"
             className="w-full"
             disabled={saving}
@@ -2682,6 +2694,7 @@ function DetailView({ node }: { node: NodeDetail }) {
                       </IconButton>
                     </div>
                   )}
+                  <NodeConnectionInfo node={node} />
                 </div>
               </div>
               <div className="flex flex-col gap-3">
@@ -2842,7 +2855,7 @@ function DetailView({ node }: { node: NodeDetail }) {
         </div>
         <DrawerFooter>
           <DrawerClose asChild>
-            <Button>{t("admin.nodeDetail.done", "完成")}</Button>
+            <Button data-enter-submit>{t("admin.nodeDetail.done", "完成")}</Button>
           </DrawerClose>
         </DrawerFooter>
       </DrawerContent>
@@ -3233,7 +3246,7 @@ function BillingButton({ node }: { node: NodeDetail }) {
               )}
             </div>
 
-            <Button type="submit" disabled={saving}>
+            <Button data-enter-submit type="submit" disabled={saving}>
               {t("save")}
             </Button>
           </Flex>

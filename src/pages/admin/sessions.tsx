@@ -124,7 +124,7 @@ export default function Sessions() {
                 <Button variant="soft">{t("sessions.cancel")}</Button>
               </Dialog.Trigger>
               <Dialog.Trigger>
-                <Button color="red" onClick={deleteAllSessions}>
+                <Button data-enter-submit color="red" onClick={deleteAllSessions}>
                   {t("delete")}
                 </Button>
               </Dialog.Trigger>
@@ -256,7 +256,7 @@ export default function Sessions() {
                             </Button>
                           </Dialog.Trigger>
                           <Dialog.Trigger>
-                            <Button
+                            <Button data-enter-submit
                               color="red"
                               onClick={() => deleteSession(s.session)}
                             >

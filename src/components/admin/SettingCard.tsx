@@ -20,6 +20,7 @@ interface SettingCardProps {
   bordless?: boolean;
   direction?: "row" | "column" | "row-reverse" | "column-reverse";
   onHeaderClick?: () => void;
+  enterScope?: boolean;
 }
 
 export function SettingCard({
@@ -30,6 +31,7 @@ export function SettingCard({
   direction = "column",
   bordless = false,
   onHeaderClick = () => { },
+  enterScope = false,
 }: SettingCardProps) {
   const actionChild = React.Children.toArray(children).find(
     (child) => React.isValidElement(child) && child.type === Action
@@ -41,6 +43,7 @@ export function SettingCard({
 
   return (
     <Flex
+      data-enter-scope={enterScope ? "" : undefined}
       direction={direction}
       justify="between"
       align="center"
@@ -155,6 +158,7 @@ export function SettingCardButton({
   children,
   onClick,
   autoDisabled = true,
+  enterSubmit = false,
   ...props
 }: SettingCardProps & {
   label?: string;
@@ -162,6 +166,7 @@ export function SettingCardButton({
   children?: React.ReactNode;
   onClick?: (buttonElement: HTMLButtonElement) => void;
   autoDisabled?: boolean;
+  enterSubmit?: boolean;
 }) {
   const [disabled, setDisabled] = React.useState(false);
   const resolvedLabel = label;
@@ -183,7 +188,7 @@ export function SettingCardButton({
         <Flex>
           <Flex direction="row" gap="2" align="center">
             <label>{resolvedLabel}</label>
-            <Button onClick={handleClick} variant={variant} disabled={disabled}>
+            <Button data-enter-submit={enterSubmit ? "" : undefined} onClick={handleClick} variant={variant} disabled={disabled}>
               {children}
             </Button>
           </Flex>
@@ -379,17 +384,6 @@ export function SettingCardShortTextInput({
     onChange?.(e);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    // 按 Enter 键时触发保存
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleSave();
-    }
-
-    // 调用外部传入的 onKeyDown 回调
-    onKeyDown?.(e);
-  };
-
   const showFooterDescription =
     descriptionPlacement === "footer" &&
     description !== undefined &&
@@ -408,6 +402,7 @@ export function SettingCardShortTextInput({
       title={title}
       description={descriptionPlacement === "footer" ? undefined : description}
       bordless={bordless}
+      enterScope={showSaveButton}
     >
       <Flex direction="column" className="w-full mt-1" gap="2" align="start">
         <TextField.Root
@@ -428,7 +423,7 @@ export function SettingCardShortTextInput({
           name={name}
           id={id}
           onChange={handleInputChange}
-          onKeyDown={handleKeyDown}
+          onKeyDown={onKeyDown}
           ref={inputRef}
         >
         </TextField.Root>
@@ -447,7 +442,7 @@ export function SettingCardShortTextInput({
                   {description}
                 </label>
               ) : null}
-              <Button
+              <Button data-enter-submit
                 ref={buttonRef}
                 onClick={handleSave}
                 variant="solid"
@@ -458,7 +453,7 @@ export function SettingCardShortTextInput({
               </Button>
             </Flex>
           ) : showHiddenFooterSaveButton ? (
-            <Button
+            <Button data-enter-submit
               ref={buttonRef}
               onClick={handleSave}
               variant="solid"
@@ -469,7 +464,7 @@ export function SettingCardShortTextInput({
             </Button>
           ) : null
         ) : (
-          <Button
+          <Button data-enter-submit
             ref={buttonRef}
             onClick={handleSave}
             variant="solid"
@@ -583,7 +578,7 @@ export function SettingCardLongTextInput({
                 </label>
               ) : null}
               {showSaveButton ? (
-                <Button
+                <Button data-enter-submit
                   ref={buttonRef}
                   onClick={handleSave}
                   variant="solid"
@@ -595,7 +590,7 @@ export function SettingCardLongTextInput({
             </Flex>
           ) : null
         ) : showSaveButton ? (
-          <Button
+          <Button data-enter-submit
             ref={buttonRef}
             onClick={handleSave}
             variant="solid"

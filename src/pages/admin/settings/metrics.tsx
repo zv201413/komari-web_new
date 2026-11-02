@@ -546,7 +546,7 @@ function MetricRetentionTable({
                   >
                     {t("cancel")}
                   </Button>
-                  <Button
+                  <Button data-enter-submit
                     disabled={saving || batchMetricNames.length === 0}
                     onClick={() => void handleBatchSave()}
                   >
@@ -655,7 +655,7 @@ function MetricRetentionTable({
           </Table>
         </div>
         <Flex justify="end">
-          <Button
+          <Button data-enter-submit
             disabled={loading || saving || !hasDraftChanges}
             onClick={() => void handleSaveAll()}
           >

@@ -571,7 +571,7 @@ export default function ThemeMarketPage() {
             <TextField.Root value={sourceForm.url} onChange={(event) => setSourceForm((current) => ({ ...current, url: event.target.value }))} placeholder="https://raw.githubusercontent.com/owner/repo/main/v1.json" />
             <Flex justify="between" align="center">
               <Flex align="center" gap="2"><Switch checked={sourceForm.enabled} onCheckedChange={(enabled) => setSourceForm((current) => ({ ...current, enabled }))} /><Text size="2">{t("market.enabled", "Enabled")}</Text></Flex>
-              <Button onClick={saveSource} disabled={savingSource || !sourceForm.name.trim() || !sourceForm.url.trim()}>
+              <Button data-enter-submit onClick={saveSource} disabled={savingSource || !sourceForm.name.trim() || !sourceForm.url.trim()}>
                 {savingSource && <RefreshCw size={15} className="animate-spin" />}
                 {editingID ? t("common.save", "Save") : t("common.add", "Add")}
               </Button>
@@ -589,7 +589,7 @@ export default function ThemeMarketPage() {
           </Dialog.Description>
           <Flex justify="end" gap="2" mt="4">
             <Dialog.Close><Button variant="soft" color="gray">{t("common.cancel", "Cancel")}</Button></Dialog.Close>
-            <Button
+            <Button data-enter-submit
               color="red"
               disabled={!themeToUninstall || deletingTheme === themeToUninstall.short}
               onClick={async () => {
@@ -616,6 +616,7 @@ export default function ThemeMarketPage() {
             <Button
               color="red"
               disabled={!sourceToDelete}
+              data-enter-submit
               onClick={async () => {
                 if (!sourceToDelete) return;
                 await deleteSource(sourceToDelete);

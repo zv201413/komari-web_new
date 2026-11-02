@@ -46,6 +46,9 @@ npm run build
 
 ## 主题相关
 
+保存、确认和确定操作的回车行为及组件接入约定见
+[回车保存与确认](./docs/keyboard-submit.md)。
+
 如果你需要基于本项目进行二次开发，可以参考以下步骤：
 
 1. 完成开发环境配置
@@ -75,3 +78,10 @@ npm run build
 7. 将 `my-theme` 文件夹打包为 ZIP 文件。
 
 8. 在 Komari 的主题管理页面上传并应用你的自定义主题。
+
+## DNS64/NAT64 and connection source
+
+Agent installation commands enable the third-party nat64.net DNS64 option by default.
+Uncheck it beside the generated command to disable it. Node admin views show reported IPs
+and the verified connection source separately; unlisted relay exits cannot grant node login IP trust.
+The backend must be updated together with the frontend. See [IP trust policy](https://github.com/zv201413/komari_new/blob/main/docs/node-ip-trust.md).

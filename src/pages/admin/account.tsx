@@ -208,7 +208,7 @@ const AccountContent = () => {
               defaultValue={account?.username}
             ></TextField.Root>
             <div>
-              <Button disabled={usernameSaving} type="submit">
+              <Button data-enter-submit disabled={usernameSaving} type="submit">
                 {t("account.change_username_button")}
               </Button>
             </div>
@@ -252,7 +252,7 @@ const AccountContent = () => {
               </>
             ) : null}
             <div>
-              <Button disabled={passwordSaving} type="submit">
+              <Button data-enter-submit disabled={passwordSaving} type="submit">
                 {t("account.change_password_button")}
               </Button>
             </div>
@@ -321,7 +321,7 @@ const AccountContent = () => {
                                 {t("account_settings.cancel")}
                               </Button>
                             </Dialog.Close>
-                            <Button color="red" onClick={handleSSOAuth}>
+                            <Button data-enter-submit color="red" onClick={handleSSOAuth}>
                               {t("account_settings.confirm_unbind")}
                             </Button>
                           </Flex>
@@ -437,7 +437,7 @@ const TwoFactorDisabled = () => {
                 value={code}
                 onChange={(e) => setCode((e.target as HTMLInputElement).value)}
               />
-              <Button disabled={saving} type="submit">
+              <Button data-enter-submit disabled={saving} type="submit">
                 {t("account.enable_2fa")}
               </Button>
             </form>
@@ -522,7 +522,7 @@ const TwoFactorEnabled = () => {
               <Button type="button" variant="soft" onClick={() => setIsOpen(false)}>
                 {t("common.cancel")}
               </Button>
-              <Button type="submit" disabled={saving || !code.trim()} color="red">
+              <Button data-enter-submit type="submit" disabled={saving || !code.trim()} color="red">
                 {t("common.confirm")}
               </Button>
             </Flex>

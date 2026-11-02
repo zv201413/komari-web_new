@@ -55,7 +55,7 @@ export function NodeIPTrustControl() {
               </label>}
               <Flex justify="end" gap="2">
                 <Dialog.Close><Button type="button" variant="soft" disabled={saving}>{t("common.cancel")}</Button></Dialog.Close>
-                <Button type="submit" disabled={saving || (needsOTP && !code.trim())}>{t("common.confirm")}</Button>
+                <Button data-enter-submit type="submit" disabled={saving || (needsOTP && !code.trim())}>{t("common.confirm")}</Button>
               </Flex>
             </Flex>
           </form>

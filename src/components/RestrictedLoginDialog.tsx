@@ -128,7 +128,7 @@ export default function RestrictedLoginDialog({
                 {error}
               </Text>
             )}
-            <Button
+            <Button data-enter-submit
               type="submit"
               className="w-full"
               disabled={busy || !username.trim() || !password}

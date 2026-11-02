@@ -1536,7 +1536,7 @@ const LoadChart = ({ data = [], onRealtimeActiveChange }: LoadChartProps) => {
           </div>
           <div className="flex max-w-full flex-wrap items-center justify-end gap-2">
             {account?.logged_in && (
-              <Button
+              <Button data-enter-submit
                 type="button"
                 variant="outline"
                 size="sm"

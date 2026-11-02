@@ -725,6 +725,7 @@ const ThemePage = () => {
             </Dialog.Close>
             <Button
               color="red"
+              data-enter-submit
               onClick={async () => {
                 if (themeToDelete) {
                   await deleteTheme(themeToDelete.short);
@@ -810,7 +811,10 @@ const ThemePage = () => {
                   value={importUrl}
                   onChange={(e) => setImportUrl(e.target.value)}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter" && !importChecking) {
+                    if (e.key === "Enter" && !e.nativeEvent.isComposing && e.nativeEvent.keyCode !== 229 &&
+                      !e.repeat && !e.ctrlKey && !e.altKey && !e.metaKey && !e.shiftKey &&
+                      !importChecking && !importInstalling && importUrl.trim()) {
+                      e.preventDefault();
                       previewImportTheme();
                     }
                   }}
@@ -906,7 +910,7 @@ const ThemePage = () => {
               </Button>
             </Dialog.Close>
             {importPreview && (
-              <Button
+              <Button data-enter-submit
                 onClick={confirmImportTheme}
                 disabled={importInstalling}
                 className="gap-2"

@@ -1,3 +1,5 @@
+import { Nat64Option } from "@/components/admin/Nat64Option";
+import { nat64InstallArgs } from "@/utils/nat64";
 import * as React from "react";
 import { z } from "zod";
 import { schema } from "@/components/admin/NodeTable/schema/node";
@@ -28,6 +30,7 @@ async function removeClient(uuid: string) {
 }
 
 type InstallOptions = {
+  nat64: boolean;
   disableWebSsh: boolean;
   disableAutoUpdate: boolean;
   ignoreUnsafeCert: boolean;
@@ -45,6 +48,7 @@ export function ActionsCell({ row }: { row: Row<z.infer<typeof schema>> }) {
   const [selectedPlatform, setSelectedPlatform] =
     React.useState<Platform>("linux");
   const [installOptions, setInstallOptions] = React.useState<InstallOptions>({
+    nat64: true,
     disableWebSsh: false,
     disableAutoUpdate: false,
     ignoreUnsafeCert: false,
@@ -65,6 +69,7 @@ export function ActionsCell({ row }: { row: Row<z.infer<typeof schema>> }) {
     const token = row.original.token ?? "";
     const args: string[] = ["-e", host, "-t", token];
     // 根据安装选项生成参数
+    args.push(...nat64InstallArgs(installOptions.nat64, selectedPlatform));
     if (installOptions.disableWebSsh) {
       args.push("--disable-web-ssh");
     }
@@ -375,6 +380,7 @@ export function ActionsCell({ row }: { row: Row<z.infer<typeof schema>> }) {
                 {t("admin.nodeTable.generatedCommand", "生成的指令")}
               </label>
               <div className="relative">
+                <Nat64Option enabled={installOptions.nat64} onChange={(nat64) => setInstallOptions((prev) => ({ ...prev, nat64 }))} />
                 <TextArea
                   disabled
                   className="w-full"
@@ -437,6 +443,7 @@ export function ActionsCell({ row }: { row: Row<z.infer<typeof schema>> }) {
             <Dialog.Close>
               <Button
                 disabled={removing}
+                data-enter-submit
                 color="red"
                 onClick={async () => {
                   setRemoving(true);

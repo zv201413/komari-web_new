@@ -103,7 +103,7 @@ const NodeSelectorDialog: React.FC<NodeSelectorDialogProps> = ({
             <Dialog.Close>
               <Button variant="soft">{t("common.cancel")}</Button>
             </Dialog.Close>
-            <Button onClick={handleOk}>{t("common.done")}</Button>
+            <Button data-enter-submit onClick={handleOk}>{t("common.done")}</Button>
           </Flex>
         </Flex>
       </Dialog.Content>

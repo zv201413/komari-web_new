@@ -201,7 +201,7 @@ export default function GeneralSettings() {
               }}>
                 {t("common.cancel", "取消")}
               </Button>
-              <Button type="submit" disabled={verifying || sudoDisableCode.length !== 6}>
+              <Button data-enter-submit type="submit" disabled={verifying || sudoDisableCode.length !== 6}>
                 {t("common.confirm", "确认")}
               </Button>
             </Flex>

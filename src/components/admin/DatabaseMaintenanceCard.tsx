@@ -355,7 +355,7 @@ export function DatabaseMaintenanceCard() {
                       {t("common.cancel")}
                     </Button>
                   </Dialog.Close>
-                  <Button
+                  <Button data-enter-submit
                     variant="solid"
                     color="orange"
                     onClick={() => void handleMaintenance()}

@@ -191,8 +191,17 @@
       "submitting": "等待",
       "trustLoginIP": "信任 IP",
       "trustLoginIPLabel": "信任 {{name}} 的来源 IP",
-      "trustLoginIPTip": "仅对该在线探针的公网来源 IP 免除登录验证码；账号密码、终端及敏感操作仍需验证。",
-      "trustLoginIPWarning": "启用总阀门后，本次登录会话可逐台设置 IP 信任，无需反复输入验证码。只有选中的在线探针公网来源 IP 可免登录 2FA，仍需账号密码，终端另行验证。共享 NAT／代理出口的其他设备也会获得同样待遇；探针被入侵或令牌泄露可能扩大风险。"
+      "trustLoginIPTip": "仅当列表中的节点 IP 与在线连接来源一致时免除登录验证码；账号密码、终端及敏感操作仍需验证。",
+      "trustLoginIPWarning": "验证后可逐台设置 IP 信任。只有列表中可见且与在线连接来源一致的公网 IP 可免登录 2FA；未显示的 NAT64／代理出口不会被信任。仍需账号密码，终端另行验证。",
+      "connectionSource": "连接来源",
+      "relaySource": "中转出口",
+      "copyConnectionSource": "复制连接来源 IP",
+      "connectionSourceTip": "连接来源 {{ip}} 与列表中的节点 IP 一致。",
+      "connectionMismatchTip": "连接来源 {{ip}} 与节点上报地址不同，可能经过 NAT64 或代理中转。此出口不参与节点 IP 信任。",
+      "connectionUnverifiedTip": "尚无在线连接来源可验证，暂不能开启节点 IP 信任。",
+      "trustSuspended": "信任暂停",
+      "nat64Option": "第三方 DNS64/NAT64 兼容（默认开启）",
+      "nat64OptionTip": "使用 nat64.net 的 {{dns}}，帮助 IPv6-only 节点连接 IPv4 面板；取消勾选即关闭，不修改系统 DNS。"
     },
     "notification": {
       "expire_enable": "是否启用过期提醒",

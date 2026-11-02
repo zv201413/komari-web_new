@@ -221,7 +221,7 @@ const SettingsPanel = ({ isOpen, onClose }: SettingsPanelProps) => {
             : t("setting.togglePreview.off")}
         </Button>
         <Button onClick={handleReset}>{t("setting.reset")}</Button>
-        <Button onClick={handleSave} className="bg-green-500">
+        <Button data-enter-submit onClick={handleSave} className="bg-green-500">
           {t("setting.save")}
         </Button>
       </div>

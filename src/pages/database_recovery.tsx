@@ -296,7 +296,7 @@ export default function DatabaseRecovery() {
               )}
 
               <Flex justify="end">
-                <Button
+                <Button data-enter-submit
                   size="3"
                   disabled={!canEdit || !dsn.trim()}
                   onClick={() => void save()}

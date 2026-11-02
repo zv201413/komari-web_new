@@ -194,7 +194,7 @@ const AddButton: React.FC = () => {
               <Dialog.Close>
                 <Button variant="soft">{t("common.close")}</Button>
               </Dialog.Close>
-              <Button disabled={saving} type="submit">
+              <Button data-enter-submit disabled={saving} type="submit">
                 {t("common.add")}
               </Button>
             </div>

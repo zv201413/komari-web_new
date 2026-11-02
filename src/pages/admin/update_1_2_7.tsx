@@ -575,7 +575,7 @@ const Upgrade127 = () => {
                 {t("cancel")}
               </Button>
             </Dialog.Close>
-            <Button color="red" disabled={busy} onClick={() => void cleanup()}>
+            <Button data-enter-submit color="red" disabled={busy} onClick={() => void cleanup()}>
               {busy && <LoaderCircle size={16} className="animate-spin" />}
               {t(`${I18N_PREFIX}.confirm_cleanup`)}
             </Button>
@@ -652,7 +652,7 @@ const Upgrade127 = () => {
                 {t("cancel")}
               </Button>
             </Dialog.Close>
-            <Button
+            <Button data-enter-submit
               disabled={
                 busy ||
                 (sqliteRisk && !confirmSQLite) ||

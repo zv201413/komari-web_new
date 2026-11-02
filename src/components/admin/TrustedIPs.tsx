@@ -185,7 +185,7 @@ export default function TrustedIPs() {
                   {t("common.cancel")}
                 </Button>
               </Dialog.Close>
-              <Button
+              <Button data-enter-submit
                 type="submit"
                 disabled={saving || (requiresOTP && !otp.trim())}
               >

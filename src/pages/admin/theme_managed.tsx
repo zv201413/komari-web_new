@@ -194,7 +194,7 @@ const ThemeManaged: React.FC = () => {
             : t("theme.manage")}
         </Heading>
         {fields.length > 0 && (
-          <Button onClick={saveAll} disabled={saving}>
+          <Button data-enter-submit="theme-settings" onClick={saveAll} disabled={saving}>
             {t("common.save")}
           </Button>
         )}
@@ -508,7 +508,7 @@ const ThemeManaged: React.FC = () => {
       </Flex>
       {fields.length > 0 && (
         <Flex>
-          <Button onClick={saveAll} disabled={saving}>
+          <Button data-enter-submit="theme-settings" onClick={saveAll} disabled={saving}>
             {t("common.save")}
           </Button>
         </Flex>

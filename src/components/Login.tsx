@@ -243,7 +243,7 @@ const LoginDialog = ({ trigger, autoOpen = false, showSettings = true, info, onL
                       {errorMsg}
                     </Text>
                   )}
-                  <Button
+                  <Button data-enter-submit
                     type="submit"
                     disabled={isLoading || !isFormValid}
                     style={{ opacity: isLoading || !isFormValid ? 0.6 : 1 }}

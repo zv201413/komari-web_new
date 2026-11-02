@@ -15,6 +15,7 @@ import { PWAInstallPrompt } from "./components/PWAInstallPrompt";
 import { PWAUpdatePrompt } from "./components/PWAUpdatePrompt";
 import { OfflineIndicator } from "./components/OfflineIndicator";
 import { AppearanceRuntime } from "./components/AppearanceRuntime";
+import { installDefaultEnterAction } from "./utils/defaultEnter";
 import { RPC2Provider } from "./contexts/RPC2Context";
 import { ConfigProvider } from "./config";
 import { ThemeProvider } from "./contexts/ThemeContext";
@@ -24,6 +25,7 @@ import { Theme } from "@radix-ui/themes";
 import { Toaster } from "./components/ui/sonner";
 
 const App = () => {
+	React.useEffect(() => installDefaultEnterAction(document), []);
 	const isUpgradeRoute = window.location.pathname.replace(/\/$/, "") === "/admin/update/1.2.7";
 	const isRestrictedGuideRoute = isUpgradeRoute || window.location.pathname.replace(/\/$/, "") === "/install" || window.location.pathname.replace(/\/$/, "") === "/database-recovery";
   React.useEffect(() => {

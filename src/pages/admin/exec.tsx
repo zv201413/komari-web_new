@@ -471,7 +471,7 @@ const ExecContent = () => {
                                 onChange={(e) => setTwoFaCode((e.target as HTMLInputElement).value)}
                             />
                         ) : null}
-                        <Button
+                        <Button data-enter-submit
                             type="submit"
                             disabled={executing || !command.trim() || selectedNodes.length === 0 || (twoFaEnabled && !twoFaCode.trim())}
                         >

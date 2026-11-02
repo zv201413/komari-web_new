@@ -12,9 +12,10 @@ export function TrustLoginIPCell({ node }: { node: NodeDetail }) {
   const [enabled, setEnabled] = useState(node.trust_login_ip ?? false);
   const [saving, setSaving] = useState(false);
   const inFlight = useRef(false);
+  const eligible = node.ip_trust_eligible === true;
   useEffect(() => setEnabled(node.trust_login_ip ?? false), [node.trust_login_ip]);
   async function save(next: boolean) {
-    if (inFlight.current || (next && (!policy.enabled || !policy.unlocked))) return;
+    if (inFlight.current || (next && (!eligible || !policy.enabled || !policy.unlocked))) return;
     inFlight.current = true; setSaving(true);
     try {
       const response = await fetch(`/api/admin/client/${encodeURIComponent(node.uuid)}/trust-login-ip`, {
@@ -31,10 +32,11 @@ export function TrustLoginIPCell({ node }: { node: NodeDetail }) {
     } finally { inFlight.current = false; setSaving(false); }
   }
   return (
-    <Tooltip content={t("admin.nodeTable.trustLoginIPTip")}>
-      <span className="inline-flex">
-        <Switch checked={enabled} disabled={saving || policy.loading || (!enabled && (!policy.enabled || !policy.unlocked))}
+    <Tooltip content={t(eligible ? "admin.nodeTable.trustLoginIPTip" : node.connection_source_ip ? "admin.nodeTable.connectionMismatchTip" : "admin.nodeTable.connectionUnverifiedTip", { ip: node.connection_source_ip })}>
+      <span className="inline-flex flex-col gap-1">
+        <Switch checked={enabled} disabled={saving || policy.loading || (!enabled && (!eligible || !policy.enabled || !policy.unlocked))}
           aria-label={t("admin.nodeTable.trustLoginIPLabel", { name: node.name })} onCheckedChange={(next) => { void save(next); }} />
+        {enabled && !eligible && <span className="text-xs text-amber-600 dark:text-amber-400">{t("admin.nodeTable.trustSuspended")}</span>}
       </span>
     </Tooltip>
   );

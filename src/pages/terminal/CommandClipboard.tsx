@@ -119,7 +119,7 @@ const AddButton = () => {
               id="weight"
               name="weight"
             />
-            <Button type="submit" variant="solid" disabled={adding}>
+            <Button data-enter-submit type="submit" variant="solid" disabled={adding}>
               {t("common.add")}
             </Button>
           </Flex>
@@ -161,7 +161,7 @@ const DeleteButton = ({ id }: { id: number }) => {
           <Dialog.Close>
             <Button variant="soft">{t("common.cancel")}</Button>
           </Dialog.Close>
-          <Button onClick={handleDelete} disabled={deleting} color="red">
+          <Button data-enter-submit onClick={handleDelete} disabled={deleting} color="red">
             {t("common.delete")}
           </Button>
         </Flex>
@@ -229,7 +229,7 @@ const EditButton = ({ id, name, text, remark, weight }: CommandClipboard) => {
               <Dialog.Close>
                 <Button variant="soft">{t("common.cancel")}</Button>
               </Dialog.Close>
-              <Button type="submit" disabled={updating}>
+              <Button data-enter-submit type="submit" disabled={updating}>
                 {t("common.update")}
               </Button>
             </Flex>

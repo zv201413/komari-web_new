@@ -109,7 +109,7 @@ const NotificationEditForm = ({
             </Button>
           </Dialog.Close>
         )}
-        <Button variant="solid" type="submit" disabled={loading}>
+        <Button data-enter-submit variant="solid" type="submit" disabled={loading}>
           {t("common.save")}
         </Button>
       </Flex>
