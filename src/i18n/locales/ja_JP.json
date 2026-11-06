@@ -187,7 +187,7 @@
       "connectionUnverifiedTip": "検証できるオンライン接続元がないため、IP 信頼を有効にできません。",
       "trustSuspended": "信頼を一時停止",
       "nat64Option": "外部 DNS64/NAT64 互換機能（既定で有効）",
-      "nat64OptionTip": "nat64.net の {{dns}} を使い IPv6-only ノードから IPv4 ダッシュボードへ接続します。チェックを外すと無効になります。システム DNS は変更しません。"
+      "nat64OptionTip": "システム DNS を優先し、名前解決または接続に失敗した場合のみ nat64.net の {{dns}} を試します。IPv6-only ノードから IPv4 パネルへの接続を補助します。チェックを外すとフォールバックを無効にします。システム DNS は変更しません。"
     },
     "notification": {
       "expire_enable": "期限切れ通知を有効にしますか",

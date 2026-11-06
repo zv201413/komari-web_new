@@ -187,7 +187,7 @@
       "connectionUnverifiedTip": "尚無線上連線來源可驗證，暫不能開啟節點 IP 信任。",
       "trustSuspended": "信任暫停",
       "nat64Option": "第三方 DNS64/NAT64 相容（預設開啟）",
-      "nat64OptionTip": "使用 nat64.net 的 {{dns}}，協助 IPv6-only 節點連線至 IPv4 面板；取消勾選即關閉，不修改系統 DNS。"
+      "nat64OptionTip": "優先使用系統 DNS；解析或連線失敗後嘗試 nat64.net 的 {{dns}}，協助 IPv6-only 節點連接 IPv4 面板。取消勾選即關閉備用路徑，不修改系統 DNS。"
     },
     "notification": {
       "expire_enable": "是否啟用過期提醒",

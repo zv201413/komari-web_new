@@ -187,7 +187,7 @@
       "connectionUnverifiedTip": "Belum ada sumber koneksi aktif untuk diverifikasi. Kepercayaan IP belum dapat diaktifkan.",
       "trustSuspended": "Kepercayaan ditangguhkan",
       "nat64Option": "Kompatibilitas DNS64/NAT64 pihak ketiga (aktif secara bawaan)",
-      "nat64OptionTip": "Menggunakan {{dns}} dari nat64.net untuk menghubungkan node IPv6-only ke dasbor IPv4. Hapus centang untuk menonaktifkan; DNS sistem tidak diubah."
+      "nat64OptionTip": "Gunakan DNS sistem terlebih dahulu; coba nat64.net {{dns}} hanya setelah resolusi atau koneksi gagal agar node IPv6-only dapat mengakses panel IPv4. Hapus centang untuk menonaktifkan cadangan; DNS sistem tidak diubah."
     },
     "notification": {
       "expire_enable": "Aktifkan Pengingat Kedaluwarsa",
